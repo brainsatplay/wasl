@@ -15,7 +15,7 @@ The location of the associated code
 - Default: [key].wasl
 
 #### src
-A `wasl`-compatible endpoint to offload this code to
+A wasl-compatible endpoint to offload this code to
 - Default: false 
 - "https://example.com"
 - "worker"
@@ -43,7 +43,7 @@ The communication protocol to use to send events
     "edges": {
         "test": {
             "second" :{
-                "protocol": "none" // The communication protocol to use to send events (e.g. "websocket" or "webrtc")
+                "protocol": "none"
             }
         } 
     }
