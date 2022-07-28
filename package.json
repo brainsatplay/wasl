@@ -1,7 +1,7 @@
 {
-  "name": "wasl",
+  "name": "WASL",
   "version": "0.0.0",
-  "description": "The web application specification language",
+  "description": "The Web Application Specification Language (WASL)",
   "main": "index.js",
   "repository": "https://github.com/brainsatplay/wasl",
   "author": "Garrett Flynn <garrettmflynn@gmail.com>",

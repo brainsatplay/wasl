@@ -1,0 +1,19 @@
+{
+    "name": "Plugin",
+    "graph": {
+        "nodes": {
+            "add": {
+                "src": "add.js"
+            },
+            "multiply": {
+                "src": "multiply.js"
+            }
+        },
+    
+        "edges": {
+            "add": {
+                "multiply": {}
+            }
+        }
+    }
+}
