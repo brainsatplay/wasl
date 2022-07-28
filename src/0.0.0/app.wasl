@@ -1,0 +1,26 @@
+{
+    "name": "app",
+    "description": "A basic wasl application",
+    "author": "Garrett Flynn <garrettmflynn@gmail.com>",
+    "type": "module",
+    "main": "index.js",
+
+    "graph": {
+        "nodes": {
+            "first": {
+                "code": "./first.js"
+            },
+            "second": {
+                "code": "./second.js"
+            }
+        },
+    
+        "edges": {
+            "first": {
+                "second": {
+                    "protocol": "websocket"
+                }
+            }
+        }
+    }
+}
