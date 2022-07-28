@@ -8,23 +8,36 @@ It inherits heavily from the `package.json` file from Node.js, though includes a
 
 > **Note:** Before we develop a [VSCode Language Server extension](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide), you'll need to [manually associate](https://code.visualstudio.com/docs/languages/overview) `.wasl` files with `.json` format.
 
-## Basic WASL Syntax
+##  WASL Syntax
 ### nodes
+#### src
+The location of the associated code
+- Default: [key].wasl
+
+#### src
+A `wasl`-compatible endpoint to offload this code to
+- Default: false 
+- "https://example.com"
+- "worker"
+
 ```json
 {
     "nodes": {
         "first": {
-            "src": "first.wasl", // The location of the associated code
-            "offload": false // The location to offload this code to (e.g. "https://..." or "worker")
+            "src": "first.wasl",
+            "offload": false
         } ,
-        "second": {
-            // ...
-        } 
+        "second": {} 
     }
 }
 ```
 
 ### edges
+#### protocol
+The communication protocol to use to send events
+- "websocket"
+ - "webrtc"
+
 ```json
 {
     "edges": {
