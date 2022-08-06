@@ -19,13 +19,20 @@ A wasl-compatible endpoint to offload this code to
 - Default: false 
 - "https://example.com"
 - "worker"
+- a nested list of nodes
 
 ```json
 {
     "nodes": {
         "first": {
             "src": "first.wasl",
-            "offload": false
+            "offload": false,
+            "extensions": {
+                "arbitrary": {
+                    "x": 1080,
+                    "y": 720
+                }
+            }
         } ,
         "second": {} 
     }
