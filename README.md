@@ -11,15 +11,15 @@ It inherits heavily from the `package.json` file from Node.js, though includes a
 ##  WASL Syntax
 ### nodes
 #### src
-The location of the associated code
-- Default: [key].wasl
+The associated code for this node
+- Default: "[key].wasl"
+- A nested wasl file
 
 #### src
 A wasl-compatible endpoint to offload this code to
 - Default: false 
 - "https://example.com"
 - "worker"
-- a nested list of nodes
 
 ```json
 {
