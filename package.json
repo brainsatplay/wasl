@@ -1,10 +1,21 @@
 {
-  "name": "WASL",
-  "version": "0.0.0",
+  "name": "wasl",
+  "version": "0.0.1",
   "description": "The Web Application Specification Language (WASL)",
-  "main": "index.js",
+  "main": "./src/index.js",
   "repository": "https://github.com/brainsatplay/wasl",
   "author": "Garrett Flynn <garrettmflynn@gmail.com>",
   "license": "AGPL-3.0-or-later",
-  "private": false
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "start": "node test.js",
+    "types": "node types.js"
+  },
+  "dependencies": {
+    "ajv": "^8.11.0",
+    "ajv-formats": "^2.1.1",
+    "json-schema-to-typescript": "^11.0.2",
+    "tinybuild": "^0.3.172"
+  }
 }

@@ -3,7 +3,7 @@
     "graph": {
         "nodes": {
             "plugin": {
-                "src": "plugin",
+                "src": "plugin.wasl.json",
                 "offload": true
             },
             "log": {

@@ -2,60 +2,42 @@
  The Web Application Specification Language (WASL)
 
 ## What is WASL?
-`wasl` is a specification language for defining web applications.
+`wasl` is a specification language for defining web applications. 
 
-It inherits heavily from the `package.json` file from Node.js, though includes a new `graph` key/value pair to declare application logic and associations with other code files.
+`wasl` is written in [JSON Schema](https://json-schema.org/) and validated using [Ajv](https://ajv.js.org/). Typescript types are generaged using [json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript). It inherits heavily from the `package.json` file from Node.js, though includes a new `graph` key/value pair to declare application logic and associations with other code files.
 
-> **Note:** Before we develop a [VSCode Language Server extension](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide), you'll need to [manually associate](https://code.visualstudio.com/docs/languages/overview) `.wasl` files with `.json` format.
+Each version of `wasl` is archived in the `versions` folder of this repository.
 
-##  WASL Syntax
-### nodes
-#### src
-The associated code for this node
-- Default: "[key].wasl"
-- A nested wasl file
-
-#### src
-A wasl-compatible endpoint to offload this code to
-- Default: false 
-- "https://example.com"
-- "worker"
-
+##  WASL Example Syntax
 ```json
 {
-    "nodes": {
-        "first": {
-            "src": "first.wasl",
-            "offload": false,
-            "extensions": {
-                "arbitrary": {
-                    "x": 1080,
-                    "y": 720
+    "graph": {
+        "nodes": {
+            "first": {
+                "src": "first.wasl.json",
+                "offload": false,
+                "extensions": {
+                    "arbitrary": {
+                        "x": 1080,
+                        "y": 720
+                    }
                 }
-            }
-        } ,
-        "second": {} 
+            } ,
+            "second": {} 
+        },
+        "edges": {
+            "first": {
+                "second" :{
+                    "protocol": "none"
+                }
+            } 
+        }
     }
 }
 ```
 
-### edges
-#### protocol
-The communication protocol to use to send events
-- "websocket"
- - "webrtc"
-
-```json
-{
-    "edges": {
-        "test": {
-            "second" :{
-                "protocol": "none"
-            }
-        } 
-    }
-}
-```
+## Contributing
+ > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests
 
 ## Acknowledgments
 `wasl` was developed for [brainsatplay], along with [graphscript] and [visualscript], to construct interactive, high-performance web applications as directed acyclic graphs (DAGs).
