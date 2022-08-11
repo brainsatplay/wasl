@@ -1,6 +1,7 @@
 {
-"$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/edges.schema.json",
-"title": "Edges",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/edges.schema.json",
+  "title": "Edges",
   "description": "The way that nodes are connected",
   "type": "object",
   "patternProperties": {

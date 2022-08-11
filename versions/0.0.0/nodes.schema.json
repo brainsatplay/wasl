@@ -1,114 +1,114 @@
 {
-    "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/nodes.schema.json",
-    "title": "Nodes",
-    "description": "The composable units of the graph",
-    "type": "object",
-    "patternProperties": {
-      "^(.+)$": {
-        "type": "object",
-        "properties": {
-          "src": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uri-reference"
-              },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/nodes.schema.json",
+  "title": "Nodes",
+  "description": "The composable units of the graph",
+  "type": "object",
+  "patternProperties": {
+    "^(.+)$": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri-reference"
+            },
 
-              {
-                "type": "object",
-                "$ref": "#"
-              },
+            {
+              "type": "object",
+              "$ref": "#"
+            },
 
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "text": {
-                    "type": "string"
-                  }
+            {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string"
                 },
-                "additionalProperties": false
+                "text": {
+                  "type": "string"
+                }
               },
+              "additionalProperties": false
+            },
 
-              {
-                "type": "object",
-                "properties": {
+            {
+              "type": "object",
+              "properties": {
+                "default": {
+                  "description": "The stateless function that this node uses to handle upstream information in the graph",
+                  "type": "string"
+                },
 
-                  "default": {
-                    "description": "The stateless function that this node uses to handle upstream information in the graph",
-                    "type": "string"
-                  },
+                "tagName": {
+                  "type": "string"
+                },
+                "innerHTML": {
+                  "type": "string"
+                },
+                "innerText": {
+                  "type": "string"
+                },
+                "style": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uri-reference"
+                    },
 
-                  "tagName": {
-                    "type": "string"
-                  },
-                  "innerHTML": {
-                    "type": "string"
-                  },
-                  "innerText": {
-                    "type": "string"
-                  },
-                  "style": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "format": "uri-reference"
-                      },
-
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "attributes": {
-                    "type": "object",
-                    "description": "A set of HTML Element events for the node to listen to",
-                    "patternProperties": {
-                      "^on(.+)$": {
-                        "description": "A stringified function to handle an event",
-                        "type": "string"
-                      }
+                    {
+                      "type": "object"
                     }
+                  ]
                 },
-                    "onrender": {
-                      "description": "A stringified function that responds to when this node's information is rendered as an HTML element",
+                "attributes": {
+                  "type": "object",
+                  "description": "A set of HTML Element events for the node to listen to",
+                  "patternProperties": {
+                    "^on(.+)$": {
+                      "description": "A stringified function to handle an event",
                       "type": "string"
                     }
+                  }
                 },
-                "required": ["default"]
-              }
-            ]
-          },
-          "offload": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^(worker|(\b(https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]))$"
+                "onrender": {
+                  "description": "A stringified function that responds to when this node's information is rendered as an HTML element",
+                  "type": "string"
+                }
               },
-              {
-                "type": "boolean"
-              }
-            ]
-          },
-          "extensions": {
-            "type": "object",
-            "patternProperties": {
-              "^.*$": {
-                "type": "object",
-                "patternProperties": {
-                  "^.*$": {}
-                },
-                "additionalProperties": false
-              }
-            },
-            "additionalProperties": false
-          }
+              "required": ["default"]
+            }
+          ]
         },
-        "additionalProperties": false,
-        "required": ["src"]
-      }
-    },
-    "additionalProperties": false
-  }
+        "offload": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^(worker|(\b(https?|ftp|file)://[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|]))$"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "extensions": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": ["src"]
+    }
+  },
+  "additionalProperties": false
+}
