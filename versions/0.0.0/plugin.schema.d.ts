@@ -8,60 +8,6 @@
 /**
  * A plugin for the Web Application Specification Language
  */
-export type Plugin1 = Plugin2 & Plugin3;
-export type Plugin3 =
-  | string
-  | {
-      name?: string;
-      description?: string;
-      version?: string;
-      author?: string;
-      main?: string;
-      repository?: string;
-      /**
-       * The logic of the application to assemble.
-       */
-      graph: {
-        /**
-         * The composable units of the graph
-         */
-        nodes: {
-          /**
-           * This interface was referenced by `undefined`'s JSON-Schema definition
-           * via the `patternProperty` "^([^_]+)(_[0-9])?$".
-           */
-          [k: string]: {
-            src?: Plugin1;
-            offload?: string | boolean;
-            extensions?: {
-              /**
-               * This interface was referenced by `undefined`'s JSON-Schema definition
-               * via the `patternProperty` "^.*$".
-               */
-              [k: string]: {
-                /**
-                 * This interface was referenced by `undefined`'s JSON-Schema definition
-                 * via the `patternProperty` "^.*$".
-                 */
-                [k: string]: unknown;
-              };
-            };
-          };
-        };
-        /**
-         * The way that nodes are connected
-         */
-        edges: {
-          [k: string]: unknown;
-        };
-        [k: string]: unknown;
-      };
-      [k: string]: unknown;
-    };
-
-/**
- * A plugin for the Web Application Specification Language
- */
 export interface Plugin {
   name?: string;
   description?: string;
@@ -82,7 +28,7 @@ export interface Plugin {
        * via the `patternProperty` "^([^_]+)(_[0-9])?$".
        */
       [k: string]: {
-        src?: Plugin1;
+        src?: string | Plugin1;
         offload?: string | boolean;
         extensions?: {
           /**
@@ -109,7 +55,10 @@ export interface Plugin {
   };
   [k: string]: unknown;
 }
-export interface Plugin2 {
+/**
+ * A plugin for the Web Application Specification Language
+ */
+export interface Plugin1 {
   name?: string;
   description?: string;
   version?: string;
@@ -129,7 +78,7 @@ export interface Plugin2 {
        * via the `patternProperty` "^([^_]+)(_[0-9])?$".
        */
       [k: string]: {
-        src?: Plugin1;
+        src?: string | Plugin1;
         offload?: string | boolean;
         extensions?: {
           /**

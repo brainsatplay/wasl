@@ -3,11 +3,11 @@
     "graph": {
         "nodes": {
             "plugin": {
-                "src": "plugin.wasl.json",
+                "src": "../../plugins/plugin/index.wasl.json",
                 "offload": true
             },
             "log": {
-                "src": "log.js"
+                "src": "../../plugins/log.js"
             }
         },
     

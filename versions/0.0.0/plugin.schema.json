@@ -1,12 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/wasl.schema.json",
+  "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/plugin.schema.json",
   "title": "Plugin",
   "description": "A plugin for the Web Application Specification Language",
   "type": "object",
   "properties": {
-
-
     "name": {
       "type": "string"
     },
@@ -28,86 +26,22 @@
       "type": "string",
       "format": "uri"
     },
-    
 
     "graph": {
       "description": "The logic of the application to assemble.",
       "type": "object",
       "properties": {
         "nodes": {
-          "description": "The composable units of the graph",
-          "type": "object",
-          "patternProperties": {
-            "^([^_]+)(_[0-9])?$": {
-              "type": "object",
-              "properties": {
-                "src": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "uri-reference"
-                    },
-                    {
-                      "type": "object",
-                      "$ref": "#"
-                    }
-                  ]
-                },
-                "offload": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^(worker|(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))$"
-                    },
-                    {
-                      "type": "boolean"
-                    }
-                  ]
-                },
-                "extensions": {
-                  "type": "object",
-                  "patternProperties": {
-                    "^.*$": {
-                      "type": "object",
-                      "patternProperties": {
-                        "^.*$": {}
-                      },
-                      "additionalProperties": false
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "additionalProperties": false
+          "$ref": "nodes.schema.json"
         },
         "edges": {
-          "description": "The way that nodes are connected",
-          "type": "object",
-          "patternProperties": {
-            "^([^.]+)(.[^.]+)*?$": {
-              "type": "object",
-              "patternProperties": {
-                "^([^.]+)(.[^.]+)*?$": {
-                  "type": "object",
-                  "properties": {
-                    "protocol": {
-                      "type": "string",
-                      "pattern": "^(http|websockets|webrtc)$"
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "additionalProperties": false
-              }
-            },
-            "additionalProperties": false
-          }
+          "$ref": "edges.schema.json"
+        },
+        "ports": {
+          "$ref": "ports.schema.json"
         }
       },
-      "required": ["nodes", "edges"]
+      "required": ["nodes"]
     }
   },
   "required": ["graph"]

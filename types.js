@@ -1,5 +1,5 @@
 import { compileFromFile } from 'json-schema-to-typescript'
-import { getBasePath } from './utils/get.js'
+import { getBasePath } from './src/utils/get.js/index.js'
 import fs from 'fs'
 import version from './utils/latest.js'
 
