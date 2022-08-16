@@ -24,6 +24,8 @@ const validate = async (urlOrObject, options:Options={}) => {
     let valid;
     let data = urlOrObject
 
+    console.log('URL', urlOrObject)
+
     // Check Input
     const inputErrors = check.valid(urlOrObject, options, 'validate')
     const inputIsValid = inputErrors.length === 0
@@ -56,7 +58,7 @@ const validate = async (urlOrObject, options:Options={}) => {
         await load(urlOrObject, clone)
     }
 
-    return valid || clone.errors
+    return valid
 
 }
 

@@ -1,4 +1,4 @@
-import { Plugin } from '../../versions/0.0.0/plugin.schema'
+import { Plugin } from '../../versions/0.0.0/component.schema'
 
 export type LatestWASL = Plugin
 

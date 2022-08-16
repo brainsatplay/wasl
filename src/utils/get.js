@@ -1,5 +1,6 @@
 import version from "./latest.js"
-import registry from "./registry.js"
+import registry from "./schema.registry.js"
+import keywords from "./keywords.registry.js"
 
 const schemaCache = {}
 export const getSchema = async (v=version) => {
@@ -23,7 +24,7 @@ export const getSchema = async (v=version) => {
     return schemaCache[v]
 }
 
-export const getSchemas = async (v=version, name="plugin.schema.json") => {
+export const getSchemas = async (v=version, name="component.schema.json") => {
     const o = {main: null, other: []}
     const schemas = await getSchema(v)
     const keys = Object.keys(schemas)
@@ -39,12 +40,30 @@ export const getSchemas = async (v=version, name="plugin.schema.json") => {
     return o
 }
 
+export const getNodeKeywords = (v=version) => {
+    return keywords[v].nodes
+}
+
+export const getEdgeKeywords = (v=version) => {
+    return keywords[v].edges
+}
+
+export const getKeywords = (v=version) => {
+    const nodes = getNodeKeywords(v)
+    const edges = getEdgeKeywords(v)
+
+    return {
+        nodes,
+        edges
+    }
+}
+
 export const getBasePath = (path) => {
     return path //.split('/').slice(-1)[0]
     .split('.').slice(0, -1).join('.')
 }
 
-export const getSchemaPath = (v=version, name="plugin.schema.json") => {
+export const getSchemaPath = (v=version, name="component.schema.json") => {
     return `../../versions/${v}/${name}`
 }
 

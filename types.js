@@ -4,7 +4,7 @@ import fs from 'fs'
 import version from './utils/latest.js'
 
 // compile from file
-const path =  `versions/${version}/plugin.schema.json`
+const path =  `versions/${version}/component.schema.json`
 const base = getBasePath(path)
 
 compileFromFile(path)

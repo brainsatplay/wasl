@@ -48,5 +48,5 @@
       "**/__test__/**",
       "**/dist/**",
   ],
-  "include": ["src", "stories"],
+  "include": ["src", "versions/0.0.0/keywords.ts"],
 }

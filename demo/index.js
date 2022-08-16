@@ -496,38 +496,38 @@
         }
       };
       var ParentNode = class extends Node {
-        constructor(nodes2 = []) {
+        constructor(nodes = []) {
           super();
-          this.nodes = nodes2;
+          this.nodes = nodes;
         }
         render(opts) {
           return this.nodes.reduce((code, n) => code + n.render(opts), "");
         }
         optimizeNodes() {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i].optimizeNodes();
+            const n = nodes[i].optimizeNodes();
             if (Array.isArray(n))
-              nodes2.splice(i, 1, ...n);
+              nodes.splice(i, 1, ...n);
             else if (n)
-              nodes2[i] = n;
+              nodes[i] = n;
             else
-              nodes2.splice(i, 1);
+              nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         optimizeNames(names, constants) {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i];
+            const n = nodes[i];
             if (n.optimizeNames(names, constants))
               continue;
             subtractNames(names, n.names);
-            nodes2.splice(i, 1);
+            nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         get names() {
           return this.nodes.reduce((names, n) => addNames(names, n.names), {});
@@ -544,8 +544,8 @@
       };
       Else.kind = "else";
       var If = class extends BlockNode {
-        constructor(condition, nodes2) {
-          super(nodes2);
+        constructor(condition, nodes) {
+          super(nodes);
           this.condition = condition;
         }
         render(opts) {
@@ -3057,7 +3057,7 @@
         typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global.URI = global.URI || {});
       })(exports, function(exports2) {
         "use strict";
-        function merge2() {
+        function merge() {
           for (var _len = arguments.length, sets = Array(_len), _key = 0; _key < _len; _key++) {
             sets[_key] = arguments[_key];
           }
@@ -3095,18 +3095,18 @@
           return obj;
         }
         function buildExps(isIRI2) {
-          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge2(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge2(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge2(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge2(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge2("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
+          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
           return {
-            NOT_SCHEME: new RegExp(merge2("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
-            NOT_USERINFO: new RegExp(merge2("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_HOST: new RegExp(merge2("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH: new RegExp(merge2("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH_NOSCHEME: new RegExp(merge2("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_QUERY: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
-            NOT_FRAGMENT: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
-            ESCAPE: new RegExp(merge2("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_SCHEME: new RegExp(merge("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
+            NOT_USERINFO: new RegExp(merge("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_HOST: new RegExp(merge("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH: new RegExp(merge("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH_NOSCHEME: new RegExp(merge("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_QUERY: new RegExp(merge("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
+            NOT_FRAGMENT: new RegExp(merge("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
+            ESCAPE: new RegExp(merge("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
             UNRESERVED: new RegExp(UNRESERVED$$2, "g"),
-            OTHER_CHARS: new RegExp(merge2("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
+            OTHER_CHARS: new RegExp(merge("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
             PCT_ENCODED: new RegExp(PCT_ENCODED$2, "g"),
             IPV4ADDRESS: new RegExp("^(" + IPV4ADDRESS$ + ")$"),
             IPV6ADDRESS: new RegExp("^\\[?(" + IPV6ADDRESS$ + ")" + subexp(subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + "(" + ZONEID$ + ")") + "?\\]?$")
@@ -3560,11 +3560,11 @@
         var URI_PARSE = /^(?:([^:\/?#]+):)?(?:\/\/((?:([^\/?#@]*)@)?(\[[^\/?#\]]+\]|[^\/?#:]*)(?:\:(\d*))?))?([^?#]*)(?:\?([^#]*))?(?:#((?:.|\n|\r)*))?/i;
         var NO_MATCH_IS_UNDEFINED = "".match(/(){0}/)[1] === void 0;
         function parse(uriString) {
-          var options3 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+          var options2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
           var components = {};
-          var protocol = options3.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
-          if (options3.reference === "suffix")
-            uriString = (options3.scheme ? options3.scheme + ":" : "") + "//" + uriString;
+          var protocol = options2.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
+          if (options2.reference === "suffix")
+            uriString = (options2.scheme ? options2.scheme + ":" : "") + "//" + uriString;
           var matches = uriString.match(URI_PARSE);
           if (matches) {
             if (NO_MATCH_IS_UNDEFINED) {
@@ -3602,12 +3602,12 @@
             } else {
               components.reference = "uri";
             }
-            if (options3.reference && options3.reference !== "suffix" && options3.reference !== components.reference) {
-              components.error = components.error || "URI is not a " + options3.reference + " reference.";
+            if (options2.reference && options2.reference !== "suffix" && options2.reference !== components.reference) {
+              components.error = components.error || "URI is not a " + options2.reference + " reference.";
             }
-            var schemeHandler = SCHEMES[(options3.scheme || components.scheme || "").toLowerCase()];
-            if (!options3.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
-              if (components.host && (options3.domainHost || schemeHandler && schemeHandler.domainHost)) {
+            var schemeHandler = SCHEMES[(options2.scheme || components.scheme || "").toLowerCase()];
+            if (!options2.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
+              if (components.host && (options2.domainHost || schemeHandler && schemeHandler.domainHost)) {
                 try {
                   components.host = punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase());
                 } catch (e) {
@@ -3619,15 +3619,15 @@
               _normalizeComponentEncoding(components, protocol);
             }
             if (schemeHandler && schemeHandler.parse) {
-              schemeHandler.parse(components, options3);
+              schemeHandler.parse(components, options2);
             }
           } else {
             components.error = components.error || "URI can not be parsed.";
           }
           return components;
         }
-        function _recomposeAuthority(components, options3) {
-          var protocol = options3.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
+        function _recomposeAuthority(components, options2) {
+          var protocol = options2.iri !== false ? IRI_PROTOCOL : URI_PROTOCOL;
           var uriTokens = [];
           if (components.userinfo !== void 0) {
             uriTokens.push(components.userinfo);
@@ -3674,30 +3674,30 @@
           return output.join("");
         }
         function serialize(components) {
-          var options3 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-          var protocol = options3.iri ? IRI_PROTOCOL : URI_PROTOCOL;
+          var options2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+          var protocol = options2.iri ? IRI_PROTOCOL : URI_PROTOCOL;
           var uriTokens = [];
-          var schemeHandler = SCHEMES[(options3.scheme || components.scheme || "").toLowerCase()];
+          var schemeHandler = SCHEMES[(options2.scheme || components.scheme || "").toLowerCase()];
           if (schemeHandler && schemeHandler.serialize)
-            schemeHandler.serialize(components, options3);
+            schemeHandler.serialize(components, options2);
           if (components.host) {
             if (protocol.IPV6ADDRESS.test(components.host)) {
-            } else if (options3.domainHost || schemeHandler && schemeHandler.domainHost) {
+            } else if (options2.domainHost || schemeHandler && schemeHandler.domainHost) {
               try {
-                components.host = !options3.iri ? punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase()) : punycode.toUnicode(components.host);
+                components.host = !options2.iri ? punycode.toASCII(components.host.replace(protocol.PCT_ENCODED, pctDecChars).toLowerCase()) : punycode.toUnicode(components.host);
               } catch (e) {
-                components.error = components.error || "Host's domain name can not be converted to " + (!options3.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
+                components.error = components.error || "Host's domain name can not be converted to " + (!options2.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
               }
             }
           }
           _normalizeComponentEncoding(components, protocol);
-          if (options3.reference !== "suffix" && components.scheme) {
+          if (options2.reference !== "suffix" && components.scheme) {
             uriTokens.push(components.scheme);
             uriTokens.push(":");
           }
-          var authority = _recomposeAuthority(components, options3);
+          var authority = _recomposeAuthority(components, options2);
           if (authority !== void 0) {
-            if (options3.reference !== "suffix") {
+            if (options2.reference !== "suffix") {
               uriTokens.push("//");
             }
             uriTokens.push(authority);
@@ -3707,7 +3707,7 @@
           }
           if (components.path !== void 0) {
             var s = components.path;
-            if (!options3.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
+            if (!options2.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
               s = removeDotSegments(s);
             }
             if (authority === void 0) {
@@ -3726,15 +3726,15 @@
           return uriTokens.join("");
         }
         function resolveComponents(base2, relative) {
-          var options3 = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+          var options2 = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
           var skipNormalization = arguments[3];
           var target = {};
           if (!skipNormalization) {
-            base2 = parse(serialize(base2, options3), options3);
-            relative = parse(serialize(relative, options3), options3);
+            base2 = parse(serialize(base2, options2), options2);
+            relative = parse(serialize(relative, options2), options2);
           }
-          options3 = options3 || {};
-          if (!options3.tolerant && relative.scheme) {
+          options2 = options2 || {};
+          if (!options2.tolerant && relative.scheme) {
             target.scheme = relative.scheme;
             target.userinfo = relative.userinfo;
             target.host = relative.host;
@@ -3780,47 +3780,47 @@
           target.fragment = relative.fragment;
           return target;
         }
-        function resolve(baseURI, relativeURI, options3) {
-          var schemelessOptions = assign({ scheme: "null" }, options3);
+        function resolve(baseURI, relativeURI, options2) {
+          var schemelessOptions = assign({ scheme: "null" }, options2);
           return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
         }
-        function normalize(uri, options3) {
+        function normalize(uri, options2) {
           if (typeof uri === "string") {
-            uri = serialize(parse(uri, options3), options3);
+            uri = serialize(parse(uri, options2), options2);
           } else if (typeOf(uri) === "object") {
-            uri = parse(serialize(uri, options3), options3);
+            uri = parse(serialize(uri, options2), options2);
           }
           return uri;
         }
-        function equal(uriA, uriB, options3) {
+        function equal(uriA, uriB, options2) {
           if (typeof uriA === "string") {
-            uriA = serialize(parse(uriA, options3), options3);
+            uriA = serialize(parse(uriA, options2), options2);
           } else if (typeOf(uriA) === "object") {
-            uriA = serialize(uriA, options3);
+            uriA = serialize(uriA, options2);
           }
           if (typeof uriB === "string") {
-            uriB = serialize(parse(uriB, options3), options3);
+            uriB = serialize(parse(uriB, options2), options2);
           } else if (typeOf(uriB) === "object") {
-            uriB = serialize(uriB, options3);
+            uriB = serialize(uriB, options2);
           }
           return uriA === uriB;
         }
-        function escapeComponent(str, options3) {
-          return str && str.toString().replace(!options3 || !options3.iri ? URI_PROTOCOL.ESCAPE : IRI_PROTOCOL.ESCAPE, pctEncChar);
+        function escapeComponent(str, options2) {
+          return str && str.toString().replace(!options2 || !options2.iri ? URI_PROTOCOL.ESCAPE : IRI_PROTOCOL.ESCAPE, pctEncChar);
         }
-        function unescapeComponent(str, options3) {
-          return str && str.toString().replace(!options3 || !options3.iri ? URI_PROTOCOL.PCT_ENCODED : IRI_PROTOCOL.PCT_ENCODED, pctDecChars);
+        function unescapeComponent(str, options2) {
+          return str && str.toString().replace(!options2 || !options2.iri ? URI_PROTOCOL.PCT_ENCODED : IRI_PROTOCOL.PCT_ENCODED, pctDecChars);
         }
         var handler = {
           scheme: "http",
           domainHost: true,
-          parse: function parse2(components, options3) {
+          parse: function parse2(components, options2) {
             if (!components.host) {
               components.error = components.error || "HTTP URIs must have a host.";
             }
             return components;
           },
-          serialize: function serialize2(components, options3) {
+          serialize: function serialize2(components, options2) {
             var secure = String(components.scheme).toLowerCase() === "https";
             if (components.port === (secure ? 443 : 80) || components.port === "") {
               components.port = void 0;
@@ -3843,7 +3843,7 @@
         var handler$2 = {
           scheme: "ws",
           domainHost: true,
-          parse: function parse2(components, options3) {
+          parse: function parse2(components, options2) {
             var wsComponents = components;
             wsComponents.secure = isSecure(wsComponents);
             wsComponents.resourceName = (wsComponents.path || "/") + (wsComponents.query ? "?" + wsComponents.query : "");
@@ -3851,7 +3851,7 @@
             wsComponents.query = void 0;
             return wsComponents;
           },
-          serialize: function serialize2(wsComponents, options3) {
+          serialize: function serialize2(wsComponents, options2) {
             if (wsComponents.port === (isSecure(wsComponents) ? 443 : 80) || wsComponents.port === "") {
               wsComponents.port = void 0;
             }
@@ -3882,12 +3882,12 @@
         var PCT_ENCODED$ = subexp(subexp("%[EFef]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%" + HEXDIG$$ + HEXDIG$$));
         var ATEXT$$ = "[A-Za-z0-9\\!\\$\\%\\'\\*\\+\\-\\^\\_\\`\\{\\|\\}\\~]";
         var QTEXT$$ = "[\\!\\$\\%\\'\\(\\)\\*\\+\\,\\-\\.0-9\\<\\>A-Z\\x5E-\\x7E]";
-        var VCHAR$$ = merge2(QTEXT$$, '[\\"\\\\]');
+        var VCHAR$$ = merge(QTEXT$$, '[\\"\\\\]');
         var SOME_DELIMS$$ = "[\\!\\$\\'\\(\\)\\*\\+\\,\\;\\:\\@]";
         var UNRESERVED = new RegExp(UNRESERVED$$, "g");
         var PCT_ENCODED = new RegExp(PCT_ENCODED$, "g");
-        var NOT_LOCAL_PART = new RegExp(merge2("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
-        var NOT_HFNAME = new RegExp(merge2("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
+        var NOT_LOCAL_PART = new RegExp(merge("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
+        var NOT_HFNAME = new RegExp(merge("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
         var NOT_HFVALUE = NOT_HFNAME;
         function decodeUnreserved(str) {
           var decStr = pctDecChars(str);
@@ -3895,7 +3895,7 @@
         }
         var handler$4 = {
           scheme: "mailto",
-          parse: function parse$$1(components, options3) {
+          parse: function parse$$1(components, options2) {
             var mailtoComponents = components;
             var to = mailtoComponents.to = mailtoComponents.path ? mailtoComponents.path.split(",") : [];
             mailtoComponents.path = void 0;
@@ -3913,14 +3913,14 @@
                     }
                     break;
                   case "subject":
-                    mailtoComponents.subject = unescapeComponent(hfield[1], options3);
+                    mailtoComponents.subject = unescapeComponent(hfield[1], options2);
                     break;
                   case "body":
-                    mailtoComponents.body = unescapeComponent(hfield[1], options3);
+                    mailtoComponents.body = unescapeComponent(hfield[1], options2);
                     break;
                   default:
                     unknownHeaders = true;
-                    headers[unescapeComponent(hfield[0], options3)] = unescapeComponent(hfield[1], options3);
+                    headers[unescapeComponent(hfield[0], options2)] = unescapeComponent(hfield[1], options2);
                     break;
                 }
               }
@@ -3931,20 +3931,20 @@
             for (var _x2 = 0, _xl2 = to.length; _x2 < _xl2; ++_x2) {
               var addr = to[_x2].split("@");
               addr[0] = unescapeComponent(addr[0]);
-              if (!options3.unicodeSupport) {
+              if (!options2.unicodeSupport) {
                 try {
-                  addr[1] = punycode.toASCII(unescapeComponent(addr[1], options3).toLowerCase());
+                  addr[1] = punycode.toASCII(unescapeComponent(addr[1], options2).toLowerCase());
                 } catch (e) {
                   mailtoComponents.error = mailtoComponents.error || "Email address's domain name can not be converted to ASCII via punycode: " + e;
                 }
               } else {
-                addr[1] = unescapeComponent(addr[1], options3).toLowerCase();
+                addr[1] = unescapeComponent(addr[1], options2).toLowerCase();
               }
               to[_x2] = addr.join("@");
             }
             return mailtoComponents;
           },
-          serialize: function serialize$$1(mailtoComponents, options3) {
+          serialize: function serialize$$1(mailtoComponents, options2) {
             var components = mailtoComponents;
             var to = toArray(mailtoComponents.to);
             if (to) {
@@ -3954,9 +3954,9 @@
                 var localPart = toAddr.slice(0, atIdx).replace(PCT_ENCODED, decodeUnreserved).replace(PCT_ENCODED, toUpperCase).replace(NOT_LOCAL_PART, pctEncChar);
                 var domain = toAddr.slice(atIdx + 1);
                 try {
-                  domain = !options3.iri ? punycode.toASCII(unescapeComponent(domain, options3).toLowerCase()) : punycode.toUnicode(domain);
+                  domain = !options2.iri ? punycode.toASCII(unescapeComponent(domain, options2).toLowerCase()) : punycode.toUnicode(domain);
                 } catch (e) {
-                  components.error = components.error || "Email address's domain name can not be converted to " + (!options3.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
+                  components.error = components.error || "Email address's domain name can not be converted to " + (!options2.iri ? "ASCII" : "Unicode") + " via punycode: " + e;
                 }
                 to[x] = localPart + "@" + domain;
               }
@@ -3982,53 +3982,53 @@
         var URN_PARSE = /^([^\:]+)\:(.*)/;
         var handler$5 = {
           scheme: "urn",
-          parse: function parse$$1(components, options3) {
+          parse: function parse$$1(components, options2) {
             var matches = components.path && components.path.match(URN_PARSE);
             var urnComponents = components;
             if (matches) {
-              var scheme = options3.scheme || urnComponents.scheme || "urn";
+              var scheme = options2.scheme || urnComponents.scheme || "urn";
               var nid = matches[1].toLowerCase();
               var nss = matches[2];
-              var urnScheme = scheme + ":" + (options3.nid || nid);
+              var urnScheme = scheme + ":" + (options2.nid || nid);
               var schemeHandler = SCHEMES[urnScheme];
               urnComponents.nid = nid;
               urnComponents.nss = nss;
               urnComponents.path = void 0;
               if (schemeHandler) {
-                urnComponents = schemeHandler.parse(urnComponents, options3);
+                urnComponents = schemeHandler.parse(urnComponents, options2);
               }
             } else {
               urnComponents.error = urnComponents.error || "URN can not be parsed.";
             }
             return urnComponents;
           },
-          serialize: function serialize$$1(urnComponents, options3) {
-            var scheme = options3.scheme || urnComponents.scheme || "urn";
+          serialize: function serialize$$1(urnComponents, options2) {
+            var scheme = options2.scheme || urnComponents.scheme || "urn";
             var nid = urnComponents.nid;
-            var urnScheme = scheme + ":" + (options3.nid || nid);
+            var urnScheme = scheme + ":" + (options2.nid || nid);
             var schemeHandler = SCHEMES[urnScheme];
             if (schemeHandler) {
-              urnComponents = schemeHandler.serialize(urnComponents, options3);
+              urnComponents = schemeHandler.serialize(urnComponents, options2);
             }
             var uriComponents = urnComponents;
             var nss = urnComponents.nss;
-            uriComponents.path = (nid || options3.nid) + ":" + nss;
+            uriComponents.path = (nid || options2.nid) + ":" + nss;
             return uriComponents;
           }
         };
         var UUID = /^[0-9A-Fa-f]{8}(?:\-[0-9A-Fa-f]{4}){3}\-[0-9A-Fa-f]{12}$/;
         var handler$6 = {
           scheme: "urn:uuid",
-          parse: function parse2(urnComponents, options3) {
+          parse: function parse2(urnComponents, options2) {
             var uuidComponents = urnComponents;
             uuidComponents.uuid = uuidComponents.nss;
             uuidComponents.nss = void 0;
-            if (!options3.tolerant && (!uuidComponents.uuid || !uuidComponents.uuid.match(UUID))) {
+            if (!options2.tolerant && (!uuidComponents.uuid || !uuidComponents.uuid.match(UUID))) {
               uuidComponents.error = uuidComponents.error || "UUID is not valid.";
             }
             return uuidComponents;
           },
-          serialize: function serialize2(uuidComponents, options3) {
+          serialize: function serialize2(uuidComponents, options2) {
             var urnComponents = uuidComponents;
             urnComponents.nss = (uuidComponents.uuid || "").toLowerCase();
             return urnComponents;
@@ -4537,10 +4537,10 @@
       exports.default = Ajv2;
       Ajv2.ValidationError = validation_error_1.default;
       Ajv2.MissingRefError = ref_error_1.default;
-      function checkOptions(checkOpts, options3, msg, log = "error") {
+      function checkOptions(checkOpts, options2, msg, log = "error") {
         for (const key in checkOpts) {
           const opt = key;
-          if (opt in options3)
+          if (opt in options2)
             this.logger[log](`${msg}: option ${key}. ${checkOpts[opt]}`);
         }
       }
@@ -6935,10 +6935,10 @@
   var version = "0.0.0";
   var latest_default = version;
 
-  // versions/0.0.0/plugin.schema.json
-  var plugin_schema_default = {
+  // versions/0.0.0/component.schema.json
+  var component_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/plugin.schema.json",
+    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/component.schema.json",
     title: "Plugin",
     description: "A plugin for the Web Application Specification Language",
     type: "object",
@@ -6965,23 +6965,31 @@
         format: "uri"
       },
       graph: {
-        description: "The logic of the application to assemble.",
-        type: "object",
-        properties: {
-          nodes: {
-            $ref: "nodes.schema.json"
-          },
-          edges: {
-            $ref: "edges.schema.json"
-          },
-          ports: {
-            $ref: "ports.schema.json"
-          }
-        },
-        required: ["nodes"]
+        $ref: "graph.schema.json"
       }
     },
     required: ["graph"]
+  };
+
+  // versions/0.0.0/graph.schema.json
+  var graph_schema_default = {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/graph.schema.json",
+    title: "Graph",
+    description: "The logic of the application to assemble.",
+    type: "object",
+    properties: {
+      nodes: {
+        $ref: "nodes.schema.json"
+      },
+      edges: {
+        $ref: "edges.schema.json"
+      },
+      ports: {
+        $ref: "ports.schema.json"
+      }
+    },
+    required: ["nodes"]
   };
 
   // versions/0.0.0/edges.schema.json
@@ -7161,12 +7169,13 @@
     ]
   };
 
-  // src/utils/registry.js
-  var registry_default = {
+  // src/utils/schema.registry.js
+  var schema_registry_default = {
     ["0.0.0"]: {
+      "graph.schema.json": graph_schema_default,
       "nodes.schema.json": nodes_schema_default,
       "edges.schema.json": edges_schema_default,
-      "plugin.schema.json": plugin_schema_default,
+      "component.schema.json": component_schema_default,
       "ports.schema.json": ports_schema_default,
       "port.schema.json": port_schema_default
     }
@@ -7177,7 +7186,7 @@
   var getSchema = async (v = latest_default) => {
     if (!schemaCache[v]) {
       schemaCache[v] = {};
-      const og = registry_default[v];
+      const og = schema_registry_default[v];
       if (!og) {
         console.error("Schema not properly linked in the wasl library", v, name);
       }
@@ -7189,7 +7198,7 @@
     }
     return schemaCache[v];
   };
-  var getSchemas = async (v = latest_default, name2 = "plugin.schema.json") => {
+  var getSchemas = async (v = latest_default, name2 = "component.schema.json") => {
     const o = { main: null, other: [] };
     const schemas = await getSchema(v);
     const keys = Object.keys(schemas);
@@ -7288,17 +7297,30 @@
   var get_default = get2;
 
   // src/utils/check.ts
-  var valid = (input, options3, location) => {
+  var import_meta = {};
+  var valid = (input, options2, location) => {
     const errors = [];
-    const isUndefined = options3?.relativeTo === void 0;
+    const isUndefined = options2?.relativeTo === void 0;
     const isString = typeof input === "string";
     const isObject = typeof input === "object";
-    if (isString && !(!isUndefined && "relativeTo" in options3)) {
-      errors.push({ message: "Not a valid relativeTo key (required) in options", file: input });
-      console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`);
+    let error;
+    if (isString) {
+      if (!(!isUndefined && "relativeTo" in options2)) {
+        if (import_meta.url) {
+          error = { message: "Not a valid relativeTo key (required) in options", file: input };
+          console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`);
+        } else {
+          error = { message: "import.meta.url is not supported", file: input };
+          console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`);
+        }
+      }
     } else if (!isObject) {
-      errors.push({ message: "Not a valid object passed in the first argument", file: null });
+      error = { message: "Not a valid object passed in the first argument", file: null };
       console.warn(`[wasl-${location}] Direct Mode Error: Please pass a valid object in the first argument and pass file object references via the options.filesystem field.`);
+    }
+    if (error) {
+      error.function = location;
+      errors.push(error);
     }
     return errors;
   };
@@ -7307,9 +7329,9 @@
   var js = ["js", "mjs", "cjs", "javascript"];
 
   // src/load.ts
-  var checkFiles = (key, filesystem) => {
+  var checkFiles = (key, filesystem2) => {
     const isJSON = suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
+    const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
     return output;
   };
   var remove = (original, search = original, key = original, o) => {
@@ -7317,16 +7339,17 @@
     if (o)
       delete o[key];
   };
-  var load = async (urlOrObject, options3 = {}) => {
-    const clonedOptions = Object.assign({}, options3);
+  var load = async (urlOrObject, options2 = {}) => {
+    const clonedOptions = Object.assign({}, options2);
     let {
       relativeTo,
-      filesystem,
-      errors = []
+      filesystem: filesystem2,
+      errors = [],
+      version: version2
     } = clonedOptions;
     const isString = typeof urlOrObject === "string";
     const relativePathMode = isString && "relativeTo" in clonedOptions;
-    errors.push(...valid(urlOrObject, options3, "load"));
+    errors.push(...valid(urlOrObject, options2, "load"));
     const relativeToResolved = clonedOptions._internal || relativePathMode ? relativeTo : "";
     let pkg, o = Object.assign({}, urlOrObject);
     const basePkgPath = "./package.json";
@@ -7338,9 +7361,9 @@
       pkg = await get_default(pkgUrl, relativeToResolved).catch(onError);
       if (pkg)
         o = Object.assign(pkg, main);
-    } else if (filesystem) {
+    } else if (filesystem2) {
       const pkgPath = get(basePkgPath, relativeToResolved);
-      pkg = checkFiles(pkgPath, filesystem);
+      pkg = checkFiles(pkgPath, filesystem2);
       if (pkg)
         o = Object.assign(pkg, isString ? {} : o);
       else
@@ -7353,9 +7376,9 @@
       }
     }
     if (errors.length === 0) {
-      const nodes2 = o.graph.nodes;
-      for (let name2 in nodes2) {
-        const node = nodes2[name2];
+      const nodes = o.graph.nodes;
+      for (let name2 in nodes) {
+        const node = nodes[name2];
         const ogSrc = node.src ?? "";
         if (typeof ogSrc === "string") {
           node.src = null;
@@ -7366,8 +7389,8 @@
             passToNested = get(ogSrc, urlOrObject, true);
           }
           if (!node.src) {
-            if (filesystem) {
-              const res = checkFiles(fullPath, filesystem);
+            if (filesystem2) {
+              const res = checkFiles(fullPath, filesystem2);
               if (res)
                 node.src = passToNested = res;
               else
@@ -7382,7 +7405,7 @@
           if (node.src && typeof (node.src.default ?? node.src) !== "function")
             node.src = await load(passToNested, {
               relativeTo: relativePathMode ? relativeToResolved : ogSrc,
-              filesystem,
+              filesystem: filesystem2,
               _internal: true
             });
         } else {
@@ -7430,6 +7453,57 @@
               }
             } else {
               console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
+              onError({
+                message: `Source is in ${language}. Currently only JavaScript is supported.`,
+                file: ogSrc
+              });
+            }
+          }
+        }
+      }
+      if ("graph" in o) {
+        for (let name2 in o.graph.nodes) {
+          const node = o.graph.nodes[name2];
+          if (typeof node.src === "object") {
+            if (node.src.graph) {
+              if (node.components) {
+                for (let nestedName in node.components) {
+                  const nestedNode = node.src.graph.nodes[nestedName];
+                  if (nestedNode) {
+                    for (let key in node.components[nestedName]) {
+                      nestedNode[key] = Object.assign(nestedNode[key] ?? {}, node.components[nestedName][key]);
+                    }
+                  } else {
+                    onError({
+                      message: `Component target '${nestedName}' does not exist`,
+                      node: name2
+                    });
+                  }
+                }
+              }
+            } else {
+              if (!("default" in node.src)) {
+                onError({
+                  message: "No default export.",
+                  node: name2
+                });
+              }
+            }
+          }
+        }
+        for (let output in o.graph.edges) {
+          if (!o.graph.nodes[output]) {
+            onError({
+              message: `Node '${output}' does not exist to create an edge.`,
+              file: urlOrObject
+            });
+          }
+          for (let input in o.graph.edges[output]) {
+            if (!o.graph.nodes[input]) {
+              onError({
+                message: `Node '${input}' does not exist to create an edge.`,
+                file: urlOrObject
+              });
             }
           }
         }
@@ -7443,14 +7517,15 @@
   var activeVersion = null;
   var ajv = new import_ajv.default({ allErrors: true });
   (0, import_ajv_formats.default)(ajv);
-  var validate = async (urlOrObject, options3 = {}) => {
-    const clone = Object.assign({ errors: [] }, options3);
+  var validate = async (urlOrObject, options2 = {}) => {
+    const clone = Object.assign({ errors: [] }, options2);
     let { version: version2, relativeTo } = clone;
     if (!version2)
       version2 = latest_default;
     let valid2;
     let data = urlOrObject;
-    const inputErrors = valid(urlOrObject, options3, "validate");
+    console.log("URL", urlOrObject);
+    const inputErrors = valid(urlOrObject, options2, "validate");
     const inputIsValid = inputErrors.length === 0;
     clone.errors.push(...inputErrors);
     if (typeof urlOrObject === "string")
@@ -7475,288 +7550,130 @@
     if (inputIsValid) {
       await load_default(urlOrObject, clone);
     }
-    return valid2 || clone.errors;
+    return valid2;
   };
   var validate_default = validate;
 
-  // ../phaser/index.wasl.json
+  // tests/0/0.0/0.0.0/index.wasl.json
   var index_wasl_default = {
+    name: "App",
     graph: {
       nodes: {
-        phaser: {
-          src: "src/index.wasl.json",
-          config: {
-            src: "components/config/index.js",
-            info: {
-              physics: {
-                default: "arcade",
-                arcade: {
-                  gravity: {
-                    y: 200
-                  }
-                }
-              }
-            },
-            options: {
-              baseURI: "https://raw.githubusercontent.com/htil/mci-emg-2022/master/assets/"
-            }
-          }
-        }
-      },
-      edges: {}
-    }
-  };
-
-  // ../phaser/src/index.wasl.json
-  var index_wasl_default2 = {
-    graph: {
-      nodes: {
-        phaser: {
-          src: "components/phaser/index.js"
+        plugin: {
+          src: "../../plugins/plugin/index.wasl.json",
+          offload: true
         },
-        config: {
-          src: "components/config/index.js"
-        },
-        game: {
-          src: "components/game/index.js"
+        log: {
+          src: "../../plugins/log.js"
         }
       },
       edges: {
-        phaser: {
-          config: {}
-        },
-        config: {
-          game: {}
+        plugin: {
+          log: {
+            protocol: "websockets"
+          }
         }
       }
     }
   };
 
-  // ../phaser/package.json
+  // tests/0/0.0/0.0.0/package.json
   var package_default = {
-    name: "phaser",
-    type: "module"
+    name: "app",
+    description: "A basic WASL application",
+    author: "Garrett Flynn <garrettmflynn@gmail.com>",
+    type: "module",
+    main: "index.js"
   };
 
-  // ../phaser/src/package.json
+  // tests/0/plugins/plugin/package.json
   var package_default2 = {
-    name: "phaser",
-    type: "module"
+    name: "plugin",
+    description: "A basic WASL plugin",
+    author: "Garrett Flynn <garrettmflynn@gmail.com>",
+    type: "module",
+    main: "index.js"
   };
 
-  // ../phaser/src/components/phaser/index.js
-  var phaser_exports = {};
-  __export(phaser_exports, {
-    default: () => phaser_default,
-    oncreate: () => oncreate
-  });
-  var script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
-  document.head.appendChild(script);
-  var nodes = {};
-  var onResolve = null;
-  script.onload = function() {
-    if (onResolve instanceof Function)
-      onResolve(window.Phaser);
-    for (let tag in nodes)
-      nodes[tag].run();
-  };
-  var oncreate = (node) => {
-    if (window.Phaser)
-      node.run();
-    else {
-      nodes[node.tag] = node;
-    }
-  };
-  var phaser_default = () => {
-    if (window.Phaser)
-      return window.Phaser;
-    else
-      return new Promise((resolve) => onResolve = resolve);
-  };
-
-  // ../phaser/src/components/config/index.js
-  var config_exports = {};
-  __export(config_exports, {
-    content: () => content,
-    default: () => config_default,
-    options: () => options
-  });
-
-  // ../phaser/src/components/config/merge.js
-  var merge = (base, newObj) => {
-    const copy = Object.assign({}, base);
-    const copyKeys = Object.keys(copy);
-    const newKeys = Object.keys(newObj).filter((key) => !copyKeys.includes(key));
-    copyKeys.forEach((k) => {
-      if (typeof newObj[k] === "object")
-        merge(base[k], newObj[k]);
-      else if (newObj[k])
-        base[k] = newObj[k];
-    });
-    newKeys.forEach((k) => copy[k] = newObj[k]);
-    return copy;
-  };
-  var merge_default = merge;
-
-  // ../phaser/src/components/config/phaser.config.js
-  var defaultConfig = (options3) => {
-    var map;
-    var player;
-    var cursors;
-    var groundLayer, coinLayer;
-    var text;
-    var score = 0;
-    var jumpAction = false;
-    var wrapping = true;
-    function create() {
-      map = this.make.tilemap({ key: "map" });
-      var groundTiles = map.addTilesetImage("tiles");
-      groundLayer = map.createDynamicLayer("World", groundTiles, 0, 0);
-      groundLayer.setCollisionByExclusion([-1]);
-      var coinTiles = map.addTilesetImage("coin");
-      coinLayer = map.createDynamicLayer("Coins", coinTiles, 0, 0);
-      this.physics.world.bounds.width = groundLayer.width;
-      this.physics.world.bounds.height = groundLayer.height;
-      player = this.physics.add.sprite(200, 200, "player");
-      player.setBounce(0.2);
-      player.setCollideWorldBounds(false);
-      player.body.setSize(player.width, player.height - 8);
-      this.physics.add.collider(groundLayer, player);
-      coinLayer.setTileIndexCallback(17, collectCoin, this);
-      this.physics.add.overlap(player, coinLayer);
-      window.player = player;
-      this.anims.create({
-        key: "walk",
-        frames: this.anims.generateFrameNames("player", {
-          prefix: "p1_walk",
-          start: 1,
-          end: 11,
-          zeroPad: 2
-        }),
-        frameRate: 10,
-        repeat: -1
-      });
-      this.anims.create({
-        key: "idle",
-        frames: [{ key: "player", frame: "p1_stand" }],
-        frameRate: 10
-      });
-      cursors = this.input.keyboard.createCursorKeys();
-      this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-      this.cameras.main.startFollow(player);
-      this.cameras.main.setBackgroundColor("#ccccff");
-      text = this.add.text(20, 570, "0", {
-        fontSize: "20px",
-        fill: "#ffffff"
-      });
-      text.setScrollFactor(0);
-    }
-    function collectCoin(sprite, tile) {
-      coinLayer.removeTileAt(tile.x, tile.y);
-      score++;
-      text.setText(score);
-      return false;
-    }
-    function update(time, delta) {
-      if (cursors.left.isDown) {
-        player.body.setVelocityX(-200);
-        player.anims.play("walk", true);
-        player.flipX = true;
-      } else if (cursors.right.isDown) {
-        console.log(player.x);
-        player.body.setVelocityX(200);
-        player.anims.play("walk", true);
-        player.flipX = false;
-      } else {
-        player.body.setVelocityX(0);
-        player.anims.play("idle", true);
-      }
-    }
-    function preload() {
-      this.load.setBaseURL(options3.baseURI);
-      this.load.tilemapTiledJSON("map", "map.json");
-      this.load.spritesheet("tiles", "tiles.png", {
-        frameWidth: 70,
-        frameHeight: 70
-      });
-      this.load.image("coin", "coinGold.png");
-      this.load.atlas(
-        "player",
-        "player.png",
-        "player.json"
-      );
-    }
-    const config = {
-      type: window.Phaser.AUTO,
-      width: "100",
-      height: "100",
-      physics: {
-        default: "arcade",
-        arcade: {
-          gravity: { y: 500 },
-          debug: false
+  // tests/0/plugins/plugin/index.wasl.json
+  var index_wasl_default2 = {
+    name: "Plugin",
+    graph: {
+      nodes: {
+        add: {
+          src: "../add.js"
+        },
+        multiply: {
+          src: "../multiply.js"
         }
       },
-      scene: {
-        key: "main",
-        preload,
-        create,
-        update
+      edges: {
+        add: {
+          multiply: {}
+        }
       }
-    };
-    return config;
-  };
-  var phaser_config_default = defaultConfig;
-
-  // ../phaser/src/components/config/index.js
-  var content = {};
-  var options = {};
-  var config_default = (node) => {
-    if (window.Phaser) {
-      options.baseURI = options.baseURI ?? "http://labs.phaser.io";
-      let config = typeof node.content === "function" ? node.content(options) : node.content;
-      const dflt = phaser_config_default(options);
-      config = merge_default(dflt, config);
-      config.parent = node.graph.parentNode;
-      return config;
     }
   };
 
-  // ../phaser/src/components/game/index.js
-  var game_exports = {};
-  __export(game_exports, {
-    default: () => game_default
+  // tests/0/plugins/log.js
+  var log_exports = {};
+  __export(log_exports, {
+    default: () => log_default
   });
-  var game_default = (config) => new Phaser.Game(config);
+  var log_default = (input) => console.log(input);
 
-  // demos/phaser.js
-  var import_meta = {};
-  var path = "../../phaser/index.wasl.json";
-  var options2 = {
-    relativeTo: import_meta.url,
-    filesystem: {
-      "package.json": package_default,
-      "src/package.json": package_default2,
-      "src/index.wasl.json": index_wasl_default2,
-      "src/components/phaser/index.js": phaser_exports,
-      "src/components/config/index.js": config_exports,
-      "src/components/game/index.js": game_exports
-    }
+  // tests/0/plugins/add.js
+  var add_exports = {};
+  __export(add_exports, {
+    default: () => add_default
+  });
+  var add_default = (input) => input + 1;
+
+  // tests/0/plugins/multiply.js
+  var multiply_default = (input) => 10 * input;
+
+  // demos/0.0.0.js
+  var import_meta2 = {};
+  var path = "../tests/0/0.0/0.0.0/index.wasl.json";
+  var filesystem = {
+    ["package.json"]: package_default,
+    ["plugins/plugin/index.wasl.json"]: index_wasl_default2,
+    ["plugins/log.js"]: log_exports,
+    ["plugins/add.js"]: add_exports,
+    ["plugins/multiply.js"]: multiply_default,
+    ["plugins/plugin/package.json"]: package_default2
+  };
+  var options = {
+    relativeTo: import_meta2.url,
+    version: "0.0.0",
+    filesystem
   };
 
   // index.js
+  var printErrors = (arr, type) => {
+    arr.forEach((e) => {
+      console.log(`Error (${type})`, e);
+    });
+  };
   var start = async () => {
     console.log("------------------ IMPORT MODE ------------------");
-    const res = await validate_default(path, options2);
+    const importOptions = Object.assign({ errors: [] }, options);
+    const res = await validate_default(path, importOptions);
     console.log("wasl.validate (import)", res);
-    const o = await load_default(path, options2);
-    console.log("wasl.load (import)", o);
+    if (res) {
+      const o = await load_default(path, importOptions);
+      console.log("wasl.load (import)", o);
+    }
+    printErrors(importOptions.errors, "import");
     console.log("------------------ DIRECT MODE ------------------");
-    const resDirect = await validate_default(index_wasl_default, options2);
+    const directOptions = Object.assign({ errors: [] }, options);
+    const resDirect = await validate_default(index_wasl_default, directOptions);
     console.log("wasl.validate (direct)", resDirect);
-    const oDirect = await load_default(index_wasl_default, options2);
-    console.log("wasl.load (direct)", oDirect);
+    if (resDirect) {
+      const oDirect = await load_default(index_wasl_default, directOptions);
+      console.log("wasl.load (direct)", oDirect);
+    }
+    printErrors(directOptions.errors, "direct");
   };
   start();
 })();

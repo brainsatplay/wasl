@@ -28,7 +28,8 @@ const load = async (
     let { 
         relativeTo, 
         filesystem, 
-        errors = []
+        errors = [],
+        version
     } = clonedOptions
 
     const isString = typeof urlOrObject === 'string'
@@ -160,8 +161,77 @@ const load = async (
         // Option #4: Allow downstream application to parse non-JS text
         else {
             console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
+            onError({
+                message: `Source is in ${language}. Currently only JavaScript is supported.`,
+                file: ogSrc
+            })
         }
     }
+        }
+    }
+
+    if ('graph' in o) {
+
+        for (let name in o.graph.nodes){
+            const node = o.graph.nodes[name]
+
+            // MULTIPURPOSE: Merge and validate components
+            if 
+            (
+                typeof node.src === 'object' // Successfully loaded
+            ) {
+
+                // Merge node.components info with the actual node (i.e. instance) information
+                if (node.src.graph) {
+                    if (node.components) {
+                        for (let nestedName in node.components){
+                            const nestedNode = node.src.graph.nodes[nestedName]
+                            if (nestedNode) {
+                                for (let key in node.components[nestedName]){
+                                    nestedNode[key] = Object.assign(nestedNode[key] ?? {}, node.components[nestedName][key])
+                                }
+                            } else {
+                                onError({
+                                    message: `Component target '${nestedName}' does not exist`,
+                                    node: name
+                                })
+                            }
+                        }
+                    }
+
+
+                } else {
+
+                    // VALIDATE: Source files must have a default export
+                    if (!('default' in node.src)){
+                        onError({
+                            message: 'No default export.',
+                            node: name
+                        })
+                    }
+                }
+
+
+            }
+        }
+
+        // VALIDATE: Check that all edges point to valid nodes
+        for (let output in o.graph.edges){
+            if (!o.graph.nodes[output]) {
+                onError({
+                    message: `Node '${output}' does not exist to create an edge.`,
+                    file: urlOrObject,
+                })
+            }
+
+            for (let input in o.graph.edges[output]){
+                if (!o.graph.nodes[input]) {
+                    onError({
+                        message: `Node '${input}' does not exist to create an edge.`,
+                        file: urlOrObject,
+                    })
+                }
+            }
         }
     }
 

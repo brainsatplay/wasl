@@ -1,4 +1,5 @@
-import v000PluginSchema from '../../versions/0.0.0/plugin.schema.json' assert {type: 'json'}
+import v000ComponentSchema from '../../versions/0.0.0/component.schema.json' assert {type: 'json'}
+import v000GraphSchema from '../../versions/0.0.0/graph.schema.json' assert {type: 'json'}
 import v000EdgesSchema from '../../versions/0.0.0/edges.schema.json' assert {type: 'json'}
 import v000NodesSchema from '../../versions/0.0.0/nodes.schema.json' assert {type: 'json'}
 import v000PortsSchema from '../../versions/0.0.0/ports.schema.json' assert {type: 'json'}
@@ -7,9 +8,10 @@ import v000PortSchema from '../../versions/0.0.0/port.schema.json' assert {type:
 
 export default {
     ['0.0.0']: {
+        'graph.schema.json': v000GraphSchema,
         'nodes.schema.json': v000NodesSchema,
         'edges.schema.json': v000EdgesSchema,
-        'plugin.schema.json': v000PluginSchema,
+        'component.schema.json': v000ComponentSchema,
         'ports.schema.json': v000PortsSchema,
         'port.schema.json': v000PortSchema
     }
