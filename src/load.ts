@@ -24,12 +24,13 @@ const load = async (
     options: Options = {}
 ) => {
 
-    const clonedOptions = Object.assign({}, options)
+    const clonedOptions = Object.assign({errors: [], warnings: []}, options)
+
     let { 
         relativeTo, 
         filesystem, 
-        errors = [],
-        version
+        errors,
+        warnings
     } = clonedOptions
 
     const isString = typeof urlOrObject === 'string'
@@ -44,7 +45,15 @@ const load = async (
 
     const mainPath = (relativePathMode) ? await path.get(urlOrObject, relativeToResolved) : '' // maintain a reference to the main path (already resolved)
 
-    const onError = e => errors.push({message: e.message, file: basePkgPath})
+    const onError = (e) => {
+        const item = {
+            message: e.message, 
+            file: e.file ?? basePkgPath,
+            node: e.node,
+        }
+        if (e.type === 'warning') warnings.push(item)
+        else errors.push(item)
+    }
 
     if (relativePathMode) {
         const main = await get(mainPath) as LatestWASL
@@ -114,6 +123,8 @@ const load = async (
             if (node.src && typeof (node.src.default ?? node.src) !== 'function') node.src = await load(passToNested, {
                 relativeTo: (relativePathMode) ? relativeToResolved : ogSrc,
                 filesystem,
+                errors,
+                warnings,
                 _internal: true
             }) 
 
@@ -194,6 +205,19 @@ const load = async (
                 node.src && 
                 typeof node.src === 'object' // Successfully loaded
             ) {
+
+                // Check if stateless
+                if (node.src.default){
+                    const fnString = node.src.default.toString()
+                    const keyword = 'function'
+                    if (fnString.slice(0, keyword.length) === keyword){
+                        onError({
+                            type: 'warning',
+                            message: `Default export may be stateful.`,
+                            node: name
+                        })
+                    }
+                }
 
                 // Merge node.components info with the actual node (i.e. instance) information
                 if (node.src.graph) {

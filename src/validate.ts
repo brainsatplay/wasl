@@ -20,26 +20,32 @@ addFormats(ajv)
 //     - Provide a file object (any)
 
 const validate = async (urlOrObject, options:Options={}) => {
-    const clone = Object.assign({errors: []}, options)
-    let {version, relativeTo} = clone
+
+    const clone = Object.assign({errors: [], warnings: []}, options)
+    
+    let {version, relativeTo, errors} = clone
     if (!version) version = latest
 
-    let valid = true;
+    let schemaValid;
     let data = urlOrObject
 
     // Check Input
     const inputErrors = check.valid(urlOrObject, options, 'validate')
     const inputIsValid = inputErrors.length === 0
-    clone.errors.push(...inputErrors)
+    errors.push(...inputErrors)
 
     // Check First Path
-    if (typeof urlOrObject === 'string')  data = await get(urlOrObject, relativeTo).catch(e => clone.errors.push({ 
-        message: e.message,
-        file: urlOrObject
-    })) as LatestWASL
+    if (typeof urlOrObject === 'string') {
+        data = await get(urlOrObject, relativeTo).catch(e => {
+            errors.push({ 
+                message: e.message,
+                file: urlOrObject
+            })
+    }) as LatestWASL
+    }
 
     // Schema Validation
-    if (clone.errors.length === 0) {
+    if (errors.length === 0) {
 
         activeVersion = version
         let schemas = await getSchemas(version)
@@ -49,20 +55,21 @@ const validate = async (urlOrObject, options:Options={}) => {
             const schema = ajv.getSchema(s.name)
             if (!schema) ajv.addSchema(s.ref, s.name)
         })
-        const validate = await ajv.compile(schemaCopy)
-        valid = validate(data)
-        if (validate.errors) clone.errors.push(...validate.errors)
-
-    }
+        const ajvValidate = await ajv.compile(schemaCopy)
+        schemaValid = ajvValidate(data)
+        if (ajvValidate.errors) errors.push(...ajvValidate.errors)
 
     // Runtime Validation
     if (inputIsValid && !clone._internal){
         const loaded = await load(data, clone)
-        clone._internal = true
-        valid = await validate(loaded, clone)
+        if (loaded) {
+            clone._internal = true
+            schemaValid = await validate(loaded, clone)
+        }
     }
+}
 
-    return valid
+    return schemaValid && inputIsValid
 
 }
 

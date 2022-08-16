@@ -15,5 +15,6 @@ export type Options = {
     },
 
     errors?: any[],
+    warnings?: any[],
     _internal?: boolean
 }
