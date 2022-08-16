@@ -11,6 +11,7 @@
   "scripts": {
     "start": "node index.js",
     "start:browser": "tinybuild --path tinybuild.demo.js",
+    "build": "tinybuild",
     "types": "node types.js"
   },
   "dependencies": {
