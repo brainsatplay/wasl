@@ -106,6 +106,20 @@
             }
           },
           "additionalProperties": false
+        },
+
+        "components": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": ["src"]
