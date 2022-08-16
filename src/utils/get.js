@@ -25,17 +25,14 @@ export const getSchema = async (v=version) => {
 }
 
 export const getSchemas = async (v=version, name="component.schema.json") => {
-    const o = {main: null, other: []}
+    const o = {main: null, all: []}
     const schemas = await getSchema(v)
     const keys = Object.keys(schemas)
     o.main = schemas[name]
 
     keys.forEach(k => {
-        if (k !== name) {
-            o.other.push({ref: schemas[k], name: k})
-  
-        }
-    })
+            o.all.push({ref: schemas[k], name: k})
+      })
 
     return o
 }

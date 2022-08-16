@@ -17,28 +17,15 @@
 
             {
               "type": "object",
-              "$ref": "#"
+              "$ref": "component.schema.json"
             },
 
             {
               "type": "object",
-              "properties": {
-                "language": {
-                  "type": "string"
-                },
-                "text": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            },
-
-            {
-              "type": "object",
+              "$comment": "The raw JSON",
               "properties": {
                 "default": {
-                  "description": "The stateless function that this node uses to handle upstream information in the graph",
-                  "type": "string"
+                  "description": "The stringified stateless function that this node uses to handle upstream information in the graph"
                 },
 
                 "tagName": {
@@ -68,7 +55,7 @@
                   "patternProperties": {
                     "^on(.+)$": {
                       "description": "A stringified function to handle an event",
-                      "type": "string"
+                      "type": "string"               
                     }
                   }
                 },
@@ -78,6 +65,19 @@
                 }
               },
               "required": ["default"]
+            },
+
+            {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
             }
           ]
         },

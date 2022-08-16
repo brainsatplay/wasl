@@ -10,7 +10,7 @@ import * as check from './utils/check'
 
 const checkFiles = (key, filesystem) => {
     const isJSON = path.suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key]; 
+    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
     return output;
 }
 
@@ -88,7 +88,18 @@ const load = async (
             if (!node.src) {
                 if (filesystem) {
                     const res = checkFiles(fullPath, filesystem)
-                    if (res) node.src = passToNested = res
+                    if (res) {
+                        if (res.default || fullPath.includes('.json')) node.src = passToNested = res
+                        else if (typeof res === 'function')  node.src = passToNested = {default: res}
+                        else {
+                            onError({
+                                type: 'warning',
+                                message: `Node (${name}) at ${fullPath} does not have a default export.`,
+                                file: ogSrc
+                            })
+                            delete o.graph.nodes[name]
+                        }
+                    }
                     else remove(ogSrc, fullPath, name, o.graph.nodes)
 
                 } else {
@@ -119,6 +130,8 @@ const load = async (
                 const esmImport = async (text) => {
                     try {
                         let imported = await import(moduleDataURI(text))
+
+                        // NOTE: getting default may be wrong
                         if (imported.default && Object.keys(imported).length === 1) imported = imported.default
                         return imported
                     } catch (e) {
@@ -178,6 +191,7 @@ const load = async (
             // MULTIPURPOSE: Merge and validate components
             if 
             (
+                node.src && 
                 typeof node.src === 'object' // Successfully loaded
             ) {
 

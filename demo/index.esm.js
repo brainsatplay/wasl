@@ -6938,8 +6938,8 @@ var latest_default = version;
 var component_schema_default = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/component.schema.json",
-  title: "Plugin",
-  description: "A plugin for the Web Application Specification Language",
+  title: "Component",
+  description: "A component for the Web Application Specification Language",
   type: "object",
   properties: {
     name: {
@@ -6958,6 +6958,10 @@ var component_schema_default = {
     main: {
       type: "string",
       format: "uri-reference"
+    },
+    type: {
+      type: "string",
+      pattern: "^(module|commonjs)$"
     },
     repository: {
       type: "string",
@@ -7038,26 +7042,14 @@ var nodes_schema_default = {
             },
             {
               type: "object",
-              $ref: "#"
+              $ref: "component.schema.json"
             },
             {
               type: "object",
-              properties: {
-                language: {
-                  type: "string"
-                },
-                text: {
-                  type: "string"
-                }
-              },
-              additionalProperties: false
-            },
-            {
-              type: "object",
+              $comment: "The raw JSON",
               properties: {
                 default: {
-                  description: "The stateless function that this node uses to handle upstream information in the graph",
-                  type: "string"
+                  description: "The stringified stateless function that this node uses to handle upstream information in the graph"
                 },
                 tagName: {
                   type: "string"
@@ -7095,6 +7087,18 @@ var nodes_schema_default = {
                 }
               },
               required: ["default"]
+            },
+            {
+              type: "object",
+              properties: {
+                language: {
+                  type: "string"
+                },
+                text: {
+                  type: "string"
+                }
+              },
+              additionalProperties: false
             }
           ]
         },
@@ -7110,6 +7114,19 @@ var nodes_schema_default = {
           ]
         },
         extensions: {
+          type: "object",
+          patternProperties: {
+            "^.*$": {
+              type: "object",
+              patternProperties: {
+                "^.*$": {}
+              },
+              additionalProperties: false
+            }
+          },
+          additionalProperties: false
+        },
+        components: {
           type: "object",
           patternProperties: {
             "^.*$": {
@@ -7198,14 +7215,12 @@ var getSchema = async (v = latest_default) => {
   return schemaCache[v];
 };
 var getSchemas = async (v = latest_default, name2 = "component.schema.json") => {
-  const o = { main: null, other: [] };
+  const o = { main: null, all: [] };
   const schemas = await getSchema(v);
   const keys = Object.keys(schemas);
   o.main = schemas[name2];
   keys.forEach((k) => {
-    if (k !== name2) {
-      o.other.push({ ref: schemas[k], name: k });
-    }
+    o.all.push({ ref: schemas[k], name: k });
   });
   return o;
 };
@@ -7389,9 +7404,20 @@ var load = async (urlOrObject, options2 = {}) => {
         if (!node.src) {
           if (filesystem2) {
             const res = checkFiles(fullPath, filesystem2);
-            if (res)
-              node.src = passToNested = res;
-            else
+            if (res) {
+              if (res.default || fullPath.includes(".json"))
+                node.src = passToNested = res;
+              else if (typeof res === "function")
+                node.src = passToNested = { default: res };
+              else {
+                onError({
+                  type: "warning",
+                  message: `Node (${name2}) at ${fullPath} does not have a default export.`,
+                  file: ogSrc
+                });
+                delete o.graph.nodes[name2];
+              }
+            } else
               remove(ogSrc, fullPath, name2, o.graph.nodes);
           } else {
             onError({
@@ -7462,7 +7488,7 @@ var load = async (urlOrObject, options2 = {}) => {
     if ("graph" in o) {
       for (let name2 in o.graph.nodes) {
         const node = o.graph.nodes[name2];
-        if (typeof node.src === "object") {
+        if (node.src && typeof node.src === "object") {
           if (node.src.graph) {
             if (node.components) {
               for (let nestedName in node.components) {
@@ -7513,16 +7539,17 @@ var load_default = load;
 
 // src/validate.ts
 var activeVersion = null;
-var ajv = new import_ajv.default({ allErrors: true });
+var ajv = new import_ajv.default({
+  allErrors: true
+});
 (0, import_ajv_formats.default)(ajv);
 var validate = async (urlOrObject, options2 = {}) => {
   const clone = Object.assign({ errors: [] }, options2);
   let { version: version2, relativeTo } = clone;
   if (!version2)
     version2 = latest_default;
-  let valid2;
+  let valid2 = true;
   let data = urlOrObject;
-  console.log("URL", urlOrObject);
   const inputErrors = valid(urlOrObject, options2, "validate");
   const inputIsValid = inputErrors.length === 0;
   clone.errors.push(...inputErrors);
@@ -7535,7 +7562,7 @@ var validate = async (urlOrObject, options2 = {}) => {
     activeVersion = version2;
     let schemas = await getSchemas(version2);
     const schemaCopy = JSON.parse(JSON.stringify(schemas.main));
-    schemas.other.forEach((s) => {
+    schemas.all.forEach((s) => {
       const schema = ajv.getSchema(s.name);
       if (!schema)
         ajv.addSchema(s.ref, s.name);
@@ -7545,8 +7572,10 @@ var validate = async (urlOrObject, options2 = {}) => {
     if (validate2.errors)
       clone.errors.push(...validate2.errors);
   }
-  if (inputIsValid) {
-    await load_default(urlOrObject, clone);
+  if (inputIsValid && !clone._internal) {
+    const loaded = await load_default(data, clone);
+    clone._internal = true;
+    valid2 = await validate(loaded, clone);
   }
   return valid2;
 };

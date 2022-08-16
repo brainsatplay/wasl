@@ -8,7 +8,10 @@ import * as check from './utils/check'
 import load from "./load.js"
 
 let activeVersion = null
-const ajv = new Ajv({allErrors: true})
+const ajv = new Ajv({
+    allErrors: true,
+    // strictRequired: false //"log"
+})
 addFormats(ajv)
 
 // Validate the data against the registered JSON Schema schema for WASL
@@ -21,10 +24,8 @@ const validate = async (urlOrObject, options:Options={}) => {
     let {version, relativeTo} = clone
     if (!version) version = latest
 
-    let valid;
+    let valid = true;
     let data = urlOrObject
-
-    console.log('URL', urlOrObject)
 
     // Check Input
     const inputErrors = check.valid(urlOrObject, options, 'validate')
@@ -43,7 +44,8 @@ const validate = async (urlOrObject, options:Options={}) => {
         activeVersion = version
         let schemas = await getSchemas(version)
         const schemaCopy = JSON.parse(JSON.stringify(schemas.main))
-        schemas.other.forEach(s => {
+
+        schemas.all.forEach(s => {
             const schema = ajv.getSchema(s.name)
             if (!schema) ajv.addSchema(s.ref, s.name)
         })
@@ -54,8 +56,10 @@ const validate = async (urlOrObject, options:Options={}) => {
     }
 
     // Runtime Validation
-    if (inputIsValid){
-        await load(urlOrObject, clone)
+    if (inputIsValid && !clone._internal){
+        const loaded = await load(data, clone)
+        clone._internal = true
+        valid = await validate(loaded, clone)
     }
 
     return valid

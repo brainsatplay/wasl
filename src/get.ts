@@ -25,7 +25,6 @@ const get = async (relPath, relativeTo="") => {
         else cache[fullPath] = res
     }
 
-
     return (isJSON) ? JSON.parse(JSON.stringify(cache[fullPath])) : cache[fullPath]
 }
 

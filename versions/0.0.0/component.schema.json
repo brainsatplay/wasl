@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/component.schema.json",
-  "title": "Plugin",
-  "description": "A plugin for the Web Application Specification Language",
+  "title": "Component",
+  "description": "A component for the Web Application Specification Language",
   "type": "object",
   "properties": {
     "name": {
@@ -21,6 +21,10 @@
     "main": {
       "type": "string",
       "format": "uri-reference"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^(module|commonjs)$"
     },
     "repository": {
       "type": "string",
