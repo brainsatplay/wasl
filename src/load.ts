@@ -2,10 +2,11 @@ import { LatestWASL, Options } from "./types"
 import * as languages from './utils/languages'
 import * as path from './utils/path'
 import get from './get'
+import * as check from './utils/check'
 
 // Options: 
 //     - Provide a url and a options.relativeTo entry (locally served + Node.js only)
-//     - Provide a file object and options.nested entry (any)
+//     - Provide a file object and options.filesystem entry (any)
 
 const checkFiles = (key, filesystem) => {
     const isJSON = path.suffix(key).slice(-4) === "json" ? true : false;
@@ -14,7 +15,7 @@ const checkFiles = (key, filesystem) => {
 }
 
 var remove = (original, search=original, key=original, o?)=> {
-    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.nested["${search}"]. ` : ''}${o ? `Automatically removing ${key} from the WASL file.` : ''}`);
+    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ''}${o ? `Automatically removing ${key} from the WASL file.` : ''}`);
     if (o) delete o[key];
   }
 
@@ -22,27 +23,47 @@ const load = async (
     urlOrObject: string | LatestWASL, 
     options: Options = {}
 ) => {
-    let { relativeTo, filesystem } = options
 
-    const relativePathMode = typeof urlOrObject === 'string' && relativeTo
+    const clonedOptions = Object.assign({}, options)
+    let { 
+        relativeTo, 
+        filesystem, 
+        errors = []
+    } = clonedOptions
+
+    const isString = typeof urlOrObject === 'string'
+    const relativePathMode = isString && 'relativeTo' in clonedOptions
+
+
+    errors.push(...check.valid(urlOrObject, options, 'load'))
+    const relativeToResolved = (clonedOptions._internal || relativePathMode) ? relativeTo : ''
 
     let pkg, o = Object.assign({}, urlOrObject) as any; // shallow copy to split references but keep functions
-    const basePkgPath = 'package.json'
+    const basePkgPath = './package.json'
+
+    const mainPath = (relativePathMode) ? await path.get(urlOrObject, relativeToResolved) : '' // maintain a reference to the main path (already resolved)
+
+    const onError = e => errors.push({message: e.message, file: basePkgPath})
+
     if (relativePathMode) {
-        pkg = await get(path.get(basePkgPath, urlOrObject), relativeTo) as any
-        o = Object.assign(pkg, await get(urlOrObject, relativeTo) as LatestWASL) as any
+        const main = await get(mainPath) as LatestWASL
+        const pkgUrl = path.get(basePkgPath, urlOrObject, true)
+        pkg = await get(pkgUrl, relativeToResolved).catch(onError) as any
+        if (pkg) o = Object.assign(pkg, main) as any
     } else if (filesystem) {
-        const pkgPath = path.get(basePkgPath, relativeTo)
+        const pkgPath = path.get(basePkgPath, relativeToResolved)
         pkg = checkFiles(pkgPath, filesystem)
-        if (pkg) o = Object.assign(pkg, o) as any
+        if (pkg) o = Object.assign(pkg, isString ? {} : o) as any
         else remove(basePkgPath, pkgPath)
     }
     else {
-        if (relativeTo){
-            pkg = await get(basePkgPath, relativeTo) as any
-            if (pkg) o = Object.assign(pkg, o) as any
+        if (relativeToResolved){
+            pkg = await get(basePkgPath, relativeToResolved).catch(onError) as any
+            if (pkg) o = Object.assign(pkg,  isString ? {} : o) as any
         }
     }
+
+    if (errors.length === 0) {
 
     // replace src with actual source text
     const nodes = o.graph.nodes
@@ -54,12 +75,12 @@ const load = async (
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
             let passToNested = null
-            let fullPath = (relativePathMode) ? path.get(ogSrc, urlOrObject) : path.get(ogSrc, options.relativeTo)
+            let fullPath = (relativePathMode) ? path.get(ogSrc, mainPath) : path.get(ogSrc, relativeToResolved)
             
             // Use Relative Paths
             if (relativePathMode) {
-                node.src = await get(fullPath, relativeTo) as LatestWASL
-                passToNested = fullPath
+                node.src = await get(fullPath) as LatestWASL
+                passToNested = path.get(ogSrc, urlOrObject, true)
             }
             
             // Direct + Fallback for Relative Paths
@@ -69,13 +90,19 @@ const load = async (
                     if (res) node.src = passToNested = res
                     else remove(ogSrc, fullPath, name, o.graph.nodes)
 
-                } else console.warn('No nested files to get JavaScript objects from...', ogSrc)
+                } else {
+                    onError({
+                        message: 'No options.filesystem field to get JavaScript objects',
+                        file: ogSrc
+                    })
+                }
             } 
             
             // drill into nested graphs
             if (node.src && typeof (node.src.default ?? node.src) !== 'function') node.src = await load(passToNested, {
-                relativeTo: (relativePathMode) ? relativeTo : ogSrc,
+                relativeTo: (relativePathMode) ? relativeToResolved : ogSrc,
                 filesystem,
+                _internal: true
             }) 
 
         } else {
@@ -94,7 +121,10 @@ const load = async (
                         if (imported.default && Object.keys(imported).length === 1) imported = imported.default
                         return imported
                     } catch (e) {
-                        console.error(e)
+                        onError({
+                            message:e.message,
+                            file:name // NOTE: Is wrong...
+                        })
                     }
                 }
                 
@@ -102,7 +132,12 @@ const load = async (
                 if (esm) {
                     delete node.src.text
                     node.src = Object.assign(node.src, esm)
-                } else console.warn('could not import this text as ESM')
+                } else {
+                    onError({
+                        message: 'Could not import this text as ESM',
+                        file: node.src
+                    })
+                }
             } 
 
             // Option #3: Activate JS functions in JSON object
@@ -113,7 +148,10 @@ const load = async (
                     try {
                         if (expectedFunctions.includes(key) && typeof node.src[key] === 'string') node.src[key] = (0, eval)(`(${node.src[key]})`)
                     } catch (e) {
-                        console.warn(`Field ${key} could not be parsed for`, node.src[key]);
+                        onError({
+                            message: `Field ${key} could not be parsed`,
+                            file: node.src[key]
+                        })
                     }
                 }
             }  
@@ -128,6 +166,8 @@ const load = async (
     }
 
     return o
+}
+
 }
 
 

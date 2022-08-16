@@ -4,6 +4,8 @@ import addFormats from "ajv-formats"
 import latest from "./utils/latest.js"
 import { LatestWASL, Options } from "./types/index.js"
 import get from "./get.js"
+import * as check from './utils/check'
+import load from "./load.js"
 
 let activeVersion = null
 const ajv = new Ajv({allErrors: true})
@@ -15,25 +17,47 @@ addFormats(ajv)
 //     - Provide a file object (any)
 
 const validate = async (urlOrObject, options:Options={}) => {
-    let {version, relativeTo} = options
+    const clone = Object.assign({errors: []}, options)
+    let {version, relativeTo} = clone
     if (!version) version = latest
 
+    let valid;
     let data = urlOrObject
-    if (typeof data === 'string') data = await get(urlOrObject, relativeTo) as LatestWASL
-    activeVersion = version
-    let schemas = await getSchemas(version)
-    const schemaCopy = JSON.parse(JSON.stringify(schemas.main))
 
-    schemas.other.forEach(s => {
-        const schema = ajv.getSchema(s.name)
-        if (!schema) ajv.addSchema(s.ref, s.name)
-    })
+    // Check Input
+    const inputErrors = check.valid(urlOrObject, options, 'validate')
+    const inputIsValid = inputErrors.length === 0
+    clone.errors.push(...inputErrors)
 
-    // Load schema noted with a $ref key
-    const validate = await ajv.compile(schemaCopy)
-    const valid = validate(data)
+    // Check First Path
+    if (typeof urlOrObject === 'string')  data = await get(urlOrObject, relativeTo).catch(e => clone.errors.push({ 
+        message: e.message,
+        file: urlOrObject
+    })) as LatestWASL
 
-    return valid || validate.errors
+    // Schema Validation
+    if (clone.errors.length === 0) {
+
+        activeVersion = version
+        let schemas = await getSchemas(version)
+        const schemaCopy = JSON.parse(JSON.stringify(schemas.main))
+        schemas.other.forEach(s => {
+            const schema = ajv.getSchema(s.name)
+            if (!schema) ajv.addSchema(s.ref, s.name)
+        })
+        const validate = await ajv.compile(schemaCopy)
+        valid = validate(data)
+        if (validate.errors) clone.errors.push(...validate.errors)
+
+    }
+
+    // Runtime Validation
+    if (inputIsValid){
+        await load(urlOrObject, clone)
+    }
+
+    return valid || clone.errors
+
 }
 
 export default validate

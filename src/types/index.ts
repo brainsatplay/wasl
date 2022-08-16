@@ -13,4 +13,7 @@ export type Options = {
     filesystem?: {
         [x:string]: LatestWASL
     },
+
+    errors?: any[],
+    _internal?: boolean
 }

@@ -81,6 +81,7 @@
             }
           ]
         },
+
         "offload": {
           "anyOf": [
             {
@@ -92,6 +93,7 @@
             }
           ]
         },
+
         "extensions": {
           "type": "object",
           "patternProperties": {
@@ -106,7 +108,6 @@
           "additionalProperties": false
         }
       },
-      "additionalProperties": false,
       "required": ["src"]
     }
   },
