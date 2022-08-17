@@ -1,7 +1,7 @@
 import { compileFromFile } from 'json-schema-to-typescript'
-import { getBasePath } from './src/utils/get.js/index.js'
+import { getBasePath } from './src/utils/get.js'
 import fs from 'fs'
-import version from './utils/latest.js'
+import version from './src/utils/latest.js'
 
 // compile from file
 const path =  `versions/${version}/component.schema.json`

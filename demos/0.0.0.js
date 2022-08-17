@@ -5,7 +5,8 @@ import pluginPkg from '../tests/0/plugins/plugin/package.json' assert {type: "js
 import plugin from '../tests/0/plugins/plugin/index.wasl.json' assert {type: "json"}
 import * as log from "../tests/0/plugins/log.js"
 import * as add from "../tests/0/plugins/add.js"
-import multiply from "../tests/0/plugins/multiply.js"
+import * as multiply from "../tests/0/plugins/multiply.js"
+import number from '../tests/0/0.0/0.0.0/number.js'
 
 const path = '../tests/0/0.0/0.0.0/index.wasl.json'
 const filesystem = {
@@ -15,6 +16,7 @@ const filesystem = {
     ["plugins/add.js"]: add,
     ["plugins/multiply.js"]: multiply,
     ['plugins/plugin/package.json']: pluginPkg,
+    ['number.js']: number
 }
 
 // Specify options

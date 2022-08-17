@@ -61,11 +61,9 @@ const validate = async (urlOrObject, options:Options={}) => {
 
     // Runtime Validation
     if (inputIsValid && !clone._internal){
-        const loaded = await load(data, clone)
-        if (loaded) {
-            clone._internal = true
-            schemaValid = await validate(loaded, clone)
-        }
+        clone._internal = true
+        const loaded = await load(data, clone, (typeof urlOrObject === 'string') ? urlOrObject : undefined)
+        if (loaded)  schemaValid = await validate(loaded, clone)
     }
 }
 

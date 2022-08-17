@@ -18,12 +18,12 @@ const valid = (input, options, location): Options['errors'] => {
                 error = {message: 'import.meta.url is not supported', file: input}
                 console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`)
             }
-            
+
         }
 
     } else if (!isObject) {
         error = {message: 'Not a valid object passed in the first argument', file: null}
-        console.warn(`[wasl-${location}] Direct Mode Error: Please pass a valid object in the first argument and pass file object references via the options.filesystem field.`)
+        console.warn(`[wasl-${location}] Reference Mode Error: Please pass a valid object in the first argument and pass file object references via the options.filesystem field.`)
     } 
     
 

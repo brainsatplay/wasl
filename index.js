@@ -2,8 +2,8 @@ import * as wasl from "./src/index.js"
 
 // import { path, main, options } from './demos/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
-import { path, main, options } from './demos/phaser.js'
-// import { path, main, options } from './demos/signals.js'
+// import { path, main, options } from './demos/phaser.js'
+import { path, main, options } from './demos/signals.js'
 
 const printError = (arr, type, severity='Error') => {
     arr.forEach(e => {
@@ -28,17 +28,17 @@ const start = async () => {
     printError(importOptions.errors, 'import')
     printError(importOptions.warnings, 'import', "Warning")
 
-    // Option #2: Direct Mode
-    console.log('------------------ DIRECT MODE ------------------')
+    // Option #2: Reference Mode
+    console.log('------------------ REFERENCE MODE ------------------')
     const directOptions = Object.assign({errors: [], warnings: []}, options)
     const resDirect = await wasl.validate(main, directOptions)
-    console.log('wasl.validate (direct)', resDirect)
+    console.log('wasl.validate (reference)', resDirect)
     if (resDirect) {
         const oDirect = await wasl.load(main, directOptions)
-        console.log('wasl.load (direct)', oDirect)
+        console.log('wasl.load (reference)', oDirect)
     }
-    printError(directOptions.errors, 'direct')
-    printError(directOptions.warnings, 'direct', 'Warning')
+    printError(directOptions.errors, 'reference')
+    printError(directOptions.warnings, 'reference', 'Warning')
 
 } 
 

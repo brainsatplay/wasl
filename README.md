@@ -8,6 +8,11 @@
 
 Each version of `wasl` is archived in the `versions` folder of this repository.
 
+## Errors vs Warnings
+Errors mean that the WASL file will not run.
+
+Warnings indicate that there is suboptimal syntax in the files themselves. However, these are corrected to load the file and don't impact loaded object format.
+
 ##  WASL Example Syntax
 ```json
 {
@@ -35,6 +40,8 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
     }
 }
 ```
+
+On activation, exports of files linked through "src" keys (throughout the entire WASL file) are flattened to their object.
 
 ## Contributing
  > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests

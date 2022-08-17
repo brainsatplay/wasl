@@ -4,7 +4,14 @@
         "nodes": {
             "plugin": {
                 "src": "../../plugins/plugin/index.wasl.json",
-                "offload": true
+                "offload": true,
+                "components": {
+                    "add": {
+                        "toAdd": {
+                            "src": "number.js"
+                        }
+                    }
+                }
             },
             "log": {
                 "src": "../../plugins/log.js"

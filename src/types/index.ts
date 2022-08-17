@@ -1,6 +1,6 @@
-import { Plugin } from '../../versions/0.0.0/component.schema'
+// import { Plugin } from '../../versions/0.0.0/component.schema'
 
-export type LatestWASL = Plugin
+export type LatestWASL = any //Plugin
 
 export type ActiveSrc = {
     extension: 'string',
@@ -16,5 +16,6 @@ export type Options = {
 
     errors?: any[],
     warnings?: any[],
-    _internal?: boolean
+    _internal?: string | boolean
+    _deleteSrc?: boolean
 }
