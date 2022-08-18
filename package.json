@@ -1,6 +1,6 @@
 {
   "name": "wasl",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/frontend/src/index.d.ts",
@@ -20,7 +20,7 @@
     "build": "tinybuild",
     "types": "node types.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
     "axios": "^0.27.2",
