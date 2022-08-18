@@ -16,6 +16,7 @@ export type Options = {
 
     errors?: any[],
     warnings?: any[],
+    files?: {[x:string]: any},
     _internal?: string | boolean
     _deleteSrc?: boolean
     _remote?: string

@@ -5,6 +5,8 @@ import get from './get'
 import * as check from './utils/check'
 import getFnParamInfo from "./utils/parse"
 
+import * as remoteImport from 'remote-esm'
+
 const isSrc = (str) => {
     return typeof str === 'string' && Object.values(languages).find(arr => arr.includes(str.split('.').slice(-1)[0])) // Has supported extension
 }
@@ -26,7 +28,7 @@ const checkFiles = (key, filesystem) => {
     return output;
 }
 
-var remove = (original, search=original, key=original, o?)=> {
+var remove = (original, search, key=original, o?)=> {
     console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ''}${o ? `Automatically removing ${key} from the WASL file.` : ''}`);
     if (o) delete o[key];
   }
@@ -43,6 +45,17 @@ var remove = (original, search=original, key=original, o?)=> {
       arr.push(item)
   }
 
+  const getWithErrorLog = async (...args) => {
+    const o = args.slice(-1)[0]
+    const path = args[0]
+    args = args.slice(0, -1)
+
+    return await get(...args).catch((e) => onError({
+        message: e.message,
+        file: path
+    }, o))
+  }
+
   let getSrc = async (target, info, options, {nodes = undefined, edges = undefined} = {}) => {
 
     let {
@@ -50,12 +63,12 @@ var remove = (original, search=original, key=original, o?)=> {
         mainPath,
         // object,
         url,
+        onImport,
     } = info
 
     const isImportMode = !!url
 
     relativeToResolved = options._remote ?? relativeToResolved
-
 
     for (let name in target) {
         const node = target[name]
@@ -69,21 +82,22 @@ var remove = (original, search=original, key=original, o?)=> {
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
             let passToNested = null
-            let fullPath = (relativeToResolved) ? path.get(ogSrc, mainPath) : path.get(ogSrc)
+            let fullPath = (relativeToResolved) ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc)
 
-            // Use Relative Paths
+            //Import Mode
             if (isImportMode) {
-                node.src = await get(fullPath) as LatestWASL
-
+                node.src = await getWithErrorLog(fullPath, undefined, onImport, options) as LatestWASL
                 if (options._remote) {
                     const got = (await getSrc([node], info, options))
                     node.src = got[0].src
-                    passToNested = path.get(ogSrc)
-                } else passToNested = path.get(ogSrc, url, true)
-            }
+                    passToNested = remoteImport.resolve(ogSrc)
+                } else passToNested = remoteImport.resolve(ogSrc, url, true)
+
+                if (!node.src) remove(ogSrc, fullPath, name, target)
+            } 
             
-            // Direct + Fallback for Relative Paths
-            if (!node.src) {
+            // Reference Mode
+            else {
                 if (options.filesystem) {
                     const res = checkFiles(fullPath, options.filesystem)
                     if (res) {
@@ -113,6 +127,7 @@ var remove = (original, search=original, key=original, o?)=> {
                 filesystem: options.filesystem,
                 errors: options.errors,
                 warnings: options.warnings,
+                files: options.files,
                 _internal: ogSrc,
                 _deleteSrc: options._deleteSrc,
                 _remote: options._remote,
@@ -122,19 +137,16 @@ var remove = (original, search=original, key=original, o?)=> {
 
             for (let key in node) {
 
-                    if (key === 'src') {
-
-                        console.log('CHECKING', node.src)
+                    if (key === 'src' && node.src) {
 
                         const language = node.src.language
                         if (!language || languages.js.includes(language)){
 
                         // Option #2: Import full ESM text in JSON object
                         if (node.src.text) {
-                            const moduleDataURI = (text, mimeType='text/javascript') => `data:${mimeType};base64,` + btoa(text);
                             const esmImport = async (text) => {
                                 try {
-                                    let imported = await import(moduleDataURI(text))
+                                    let imported = await remoteImport.importFromText(text)
 
                                     // NOTE: getting default may be wrong
                                     if (imported.default && Object.keys(imported).length === 1) imported = imported.default
@@ -151,11 +163,8 @@ var remove = (original, search=original, key=original, o?)=> {
                             const esm = await esmImport(node.src.text)
                             if (esm) {
                                 delete node.src.text
-                                console.log('esm', esm)
-
                                 if (typeof esm === 'object') node.src = {default: Object.assign(node.src, esm)}
                                 else node.src = esm
-                                console.log('New ndoe src', node.src)
                             } else {
                                 onError({
                                     message: 'Could not import this text as ESM',
@@ -192,7 +201,7 @@ var remove = (original, search=original, key=original, o?)=> {
                 } 
                 
                 // Drill other object keys to replace and merge src...
-                else if (typeof node[key] === 'object') {
+                else if (node[key] && typeof node[key] === 'object') {
                     const optsCopy = Object.assign({}, options) as Options
                     optsCopy._deleteSrc = true
                     await getSrc(node[key], info, optsCopy, {nodes: node[key]}) // check for src to merge
@@ -252,19 +261,12 @@ var remove = (original, search=original, key=original, o?)=> {
                                                 }))
                                                 const newVal = newInfoForNode[key]
 
-                                                if (newVal) {
-                                                        const resVal =  newVal.src ?? newVal
-                                                        const bothObj = typeof nestedNode[key] === 'object' && resVal && typeof resVal === 'object' 
-                                                        nestedNode[key] = bothObj ? Object.assign(nestedNode[key] ?? {}, resVal) : resVal
-                                                } else {
+                                                if (newVal) nestedNode[key] = newVal.src ?? newVal // TODO: Might have to merge into the default if an object?
+                                                else {
                                                     onError({
                                                         message: `Could not resolve ${ogSrc}`
                                                     }, options)
                                                 }
-
-                                                // Merge src (component info)
-                                                node.src.graph.nodes[nestedName][key] = merge(nestedNode.src[key], nestedNode[key], true)
-
 
                                             } else console.error('[wasl-load] Component info is not an object...')
                                         }
@@ -291,7 +293,6 @@ var remove = (original, search=original, key=original, o?)=> {
                     // LOAD: Arguments // TODO: Make sure this doesn't conflict with things the user can pass in...
                     else if (edges) {
                         
-                        console.log('Node', node)
                         const args = getFnParamInfo(node.src.default) ?? new Map()
                         
                         if (args.size === 0) args.set("default", {});
@@ -318,7 +319,7 @@ var remove = (original, search=original, key=original, o?)=> {
         // VALIDATE: Check that all edges point to valid nodes
         for (let output in edges){
 
-            const getTarget = (o,str) => o.graph?.nodes?.[str] ?? o[str] ?? o.arguments.get(str)
+            const getTarget = (o,str) => o.graph?.nodes?.[str] ?? o[str] ?? (o.arguments ? o.arguments.get(str) : undefined)
 
             let outTarget = nodes
             output.split('.').forEach((str) => outTarget = getTarget(outTarget,str))
@@ -350,13 +351,17 @@ const load = async (
     urlArg: string = ''
 ) => {
 
-    const clonedOptions = Object.assign({errors: [], warnings: []}, options)
+
+    const clonedOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
 
     let { 
         relativeTo, 
         errors,
         warnings
     } = clonedOptions
+
+    const onImport = (path, info) => clonedOptions.files[path] = info
+
     
 
     const isString = typeof urlOrObject === 'string'
@@ -371,33 +376,32 @@ const load = async (
     } else {
         object = Object.assign({}, urlOrObject) // Rseference Mode
         delete clonedOptions.relativeTo
-        if (typeof clonedOptions._internal === 'string') relativeToResolved = path.get(clonedOptions._internal, clonedOptions.relativeTo)
+        if (typeof clonedOptions._internal === 'string') relativeToResolved = remoteImport.resolve(clonedOptions._internal, clonedOptions.relativeTo)
     }
 
     // Resolve remote URLs
     try {
         new URL(url)
         clonedOptions._remote = url
-        onError({
-            message: 'Remote not supported for import mode.'
-        }, {errors, warnings})
-        return undefined
-        // relativeTo = ''
+        // onError({
+        //     message: 'Remote not supported for import mode.'
+        // }, {errors, warnings})
+        // return undefined
+        relativeToResolved = relativeTo = ''
     } catch {}
 
     let pkg; 
 
 
-    const mainPath = await path.get(url, relativeToResolved) // maintain a reference to the main path (already resolved)
+    const mainPath = await remoteImport.resolve(url, relativeToResolved) // maintain a reference to the main path (already resolved)
 
     // Import Mode
     if (url) {
-        const main = await get(mainPath) as LatestWASL
-        const pkgUrl = path.get(basePkgPath, mainPath, true)
-        pkg = await get(pkgUrl).catch((e) => onError({
-            message: e.message,
-            file: pkgUrl
-        }, {errors, warnings})) as any
+        const main = await getWithErrorLog(mainPath, undefined, onImport, {errors, warnings}) as LatestWASL
+
+        const pkgUrl = remoteImport.resolve(basePkgPath, mainPath, true)
+        pkg = await getWithErrorLog(pkgUrl, undefined, onImport, {errors, warnings})
+
         if (pkg) object = Object.assign(pkg, main) as any
     } 
     
@@ -405,7 +409,7 @@ const load = async (
     else {
 
         if (clonedOptions.filesystem) {
-            const pkgPath = path.get(basePkgPath, relativeToResolved)
+            const pkgPath = remoteImport.resolve(basePkgPath, relativeToResolved)
             pkg = checkFiles(pkgPath, clonedOptions.filesystem)
             if (pkg) object = Object.assign(pkg, isString ? {} : object) as any
             else remove(basePkgPath, pkgPath)
@@ -413,12 +417,9 @@ const load = async (
 
         // Try Loose Import Mode
         else {
-            const pkgPath = path.get(basePkgPath, mainPath)
+            const pkgPath = remoteImport.resolve(basePkgPath, mainPath)
             if (relativeToResolved){
-                pkg = await get(pkgPath).catch((e) => onError({
-                    message: e.message,
-                    file: pkgPath
-                }, {errors, warnings})) as any
+                pkg = await getWithErrorLog(pkgPath, {errors, warnings})
                 if (pkg) object = Object.assign(pkg,  isString ? {} : object) as any
             }
         }
@@ -434,11 +435,11 @@ const load = async (
             relativeToResolved,
             url,
             object,
+            onImport
         }, clonedOptions, object.graph)
 
         return object
     }
-
 }
 
 

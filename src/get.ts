@@ -1,29 +1,21 @@
 import * as path from './utils/path'
+import * as remoteImport from 'remote-esm'
 
 const cache = {}
-
 // ESM File Importer with Cache Support
-const get = async (relPath, relativeTo="") => {
+const get = async (relPath, relativeTo="", onImport?) => {
 
     let type = path.suffix(relPath)
     const isJSON = (!type || type.includes('json'))
 
     // Correct paths for the different locations in the filesystem
-    const fullPath = path.get(relPath, relativeTo)
+    const fullPath = remoteImport.resolve(relPath, relativeTo)
 
     if (!cache[fullPath]){
-        cache[fullPath] = ((isJSON) ? import(fullPath, {assert: {type: 'json'}}) : import(fullPath)).catch(async e => {
-            if (e.message.includes('Failed to fetch')) {
-                console.warn(`Trying to fetch ${fullPath} as text rather than using import()`)
-                const tryAgain = await fetch(fullPath)
-                if (tryAgain) {
-                    if (isJSON) return {default: await tryAgain.json()}
-                    else return {
-                        text: await tryAgain.text()
-                    }
-                } else throw new Error('404')
-            }
-            else console.error(`Error loading ${relPath}`, e, e.name)
+
+        cache[fullPath] = remoteImport.default(fullPath, onImport).catch(e => {
+            if (e.message.includes("Failed to fetch")) throw new Error("404");
+            else throw e
         })
 
         const res = await cache[fullPath]

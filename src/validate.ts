@@ -72,7 +72,6 @@ const validate = async (urlOrObject, options:Options={}) => {
     if (inputIsValid && !clone._internal){
         clone._internal = true
         const loaded = await load(data, clone, (typeof urlOrObject === 'string') ? urlOrObject : undefined)
-        console.log('Loaded', loaded)
         if (loaded)  schemaValid = await validate(loaded, clone)
     }
 }

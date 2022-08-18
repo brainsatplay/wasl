@@ -5,13 +5,13 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __commonJS = (cb, mod) => function __require() {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-  };
-  var __export = (target, all) => {
-    for (var name2 in all)
-      __defProp(target, name2, { get: all[name2], enumerable: true });
-  };
+  var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+    get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+  }) : x)(function(x) {
+    if (typeof require !== "undefined")
+      return require.apply(this, arguments);
+    throw new Error('Dynamic require of "' + x + '" is not supported');
+  });
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
       for (let key of __getOwnPropNames(from))
@@ -25,7 +25,36 @@
     mod
   ));
 
-  // node_modules/ajv/dist/compile/codegen/code.js
+  // dist/index.esm.js
+  var import_meta = {};
+  var __create2 = Object.create;
+  var __defProp2 = Object.defineProperty;
+  var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames2 = Object.getOwnPropertyNames;
+  var __getProtoOf2 = Object.getPrototypeOf;
+  var __hasOwnProp2 = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])(fn = 0)), res;
+  };
+  var __commonJS = (cb, mod) => function __require2() {
+    return mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __export = (target, all) => {
+    for (var name2 in all)
+      __defProp2(target, name2, { get: all[name2], enumerable: true });
+  };
+  var __copyProps2 = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames2(from))
+        if (!__hasOwnProp2.call(to, key) && key !== except)
+          __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
   var require_code = __commonJS({
     "node_modules/ajv/dist/compile/codegen/code.js"(exports) {
       "use strict";
@@ -178,8 +207,6 @@
       exports.regexpCode = regexpCode;
     }
   });
-
-  // node_modules/ajv/dist/compile/codegen/scope.js
   var require_scope = __commonJS({
     "node_modules/ajv/dist/compile/codegen/scope.js"(exports) {
       "use strict";
@@ -323,8 +350,6 @@
       exports.ValueScope = ValueScope;
     }
   });
-
-  // node_modules/ajv/dist/compile/codegen/index.js
   var require_codegen = __commonJS({
     "node_modules/ajv/dist/compile/codegen/index.js"(exports) {
       "use strict";
@@ -496,38 +521,38 @@
         }
       };
       var ParentNode = class extends Node {
-        constructor(nodes2 = []) {
+        constructor(nodes = []) {
           super();
-          this.nodes = nodes2;
+          this.nodes = nodes;
         }
         render(opts) {
           return this.nodes.reduce((code, n) => code + n.render(opts), "");
         }
         optimizeNodes() {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i].optimizeNodes();
+            const n = nodes[i].optimizeNodes();
             if (Array.isArray(n))
-              nodes2.splice(i, 1, ...n);
+              nodes.splice(i, 1, ...n);
             else if (n)
-              nodes2[i] = n;
+              nodes[i] = n;
             else
-              nodes2.splice(i, 1);
+              nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         optimizeNames(names, constants) {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i];
+            const n = nodes[i];
             if (n.optimizeNames(names, constants))
               continue;
             subtractNames(names, n.names);
-            nodes2.splice(i, 1);
+            nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         get names() {
           return this.nodes.reduce((names, n) => addNames(names, n.names), {});
@@ -544,8 +569,8 @@
       };
       Else.kind = "else";
       var If = class extends BlockNode {
-        constructor(condition, nodes2) {
-          super(nodes2);
+        constructor(condition, nodes) {
+          super(nodes);
           this.condition = condition;
         }
         render(opts) {
@@ -1012,8 +1037,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/compile/util.js
   var require_util = __commonJS({
     "node_modules/ajv/dist/compile/util.js"(exports) {
       "use strict";
@@ -1038,12 +1061,12 @@
       }
       exports.alwaysValidSchema = alwaysValidSchema;
       function checkUnknownRules(it, schema = it.schema) {
-        const { opts, self } = it;
+        const { opts, self: self2 } = it;
         if (!opts.strictSchema)
           return;
         if (typeof schema === "boolean")
           return;
-        const rules = self.RULES.keywords;
+        const rules = self2.RULES.keywords;
         for (const key in schema) {
           if (!rules[key])
             checkStrictMode(it, `unknown keyword: "${key}"`);
@@ -1179,8 +1202,6 @@
       exports.checkStrictMode = checkStrictMode;
     }
   });
-
-  // node_modules/ajv/dist/compile/names.js
   var require_names = __commonJS({
     "node_modules/ajv/dist/compile/names.js"(exports) {
       "use strict";
@@ -1207,8 +1228,6 @@
       exports.default = names;
     }
   });
-
-  // node_modules/ajv/dist/compile/errors.js
   var require_errors = __commonJS({
     "node_modules/ajv/dist/compile/errors.js"(exports) {
       "use strict";
@@ -1328,8 +1347,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/boolSchema.js
   var require_boolSchema = __commonJS({
     "node_modules/ajv/dist/compile/validate/boolSchema.js"(exports) {
       "use strict";
@@ -1379,8 +1396,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/compile/rules.js
   var require_rules = __commonJS({
     "node_modules/ajv/dist/compile/rules.js"(exports) {
       "use strict";
@@ -1410,15 +1425,13 @@
       exports.getRules = getRules;
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/applicability.js
   var require_applicability = __commonJS({
     "node_modules/ajv/dist/compile/validate/applicability.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.shouldUseRule = exports.shouldUseGroup = exports.schemaHasRulesForType = void 0;
-      function schemaHasRulesForType({ schema, self }, type) {
-        const group = self.RULES.types[type];
+      function schemaHasRulesForType({ schema, self: self2 }, type) {
+        const group = self2.RULES.types[type];
         return group && group !== true && shouldUseGroup(schema, group);
       }
       exports.schemaHasRulesForType = schemaHasRulesForType;
@@ -1433,8 +1446,6 @@
       exports.shouldUseRule = shouldUseRule;
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/dataType.js
   var require_dataType = __commonJS({
     "node_modules/ajv/dist/compile/validate/dataType.js"(exports) {
       "use strict";
@@ -1617,8 +1628,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/defaults.js
   var require_defaults = __commonJS({
     "node_modules/ajv/dist/compile/validate/defaults.js"(exports) {
       "use strict";
@@ -1654,8 +1663,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/code.js
   var require_code2 = __commonJS({
     "node_modules/ajv/dist/vocabularies/code.js"(exports) {
       "use strict";
@@ -1786,8 +1793,6 @@
       exports.validateUnion = validateUnion;
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/keyword.js
   var require_keyword = __commonJS({
     "node_modules/ajv/dist/compile/validate/keyword.js"(exports) {
       "use strict";
@@ -1882,7 +1887,7 @@
         return !schemaType.length || schemaType.some((st) => st === "array" ? Array.isArray(schema) : st === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st || allowUndefined && typeof schema == "undefined");
       }
       exports.validSchemaType = validSchemaType;
-      function validateKeywordUsage({ schema, opts, self, errSchemaPath }, def, keyword) {
+      function validateKeywordUsage({ schema, opts, self: self2, errSchemaPath }, def, keyword) {
         if (Array.isArray(def.keyword) ? !def.keyword.includes(keyword) : def.keyword !== keyword) {
           throw new Error("ajv implementation error");
         }
@@ -1893,9 +1898,9 @@
         if (def.validateSchema) {
           const valid2 = def.validateSchema(schema[keyword]);
           if (!valid2) {
-            const msg = `keyword "${keyword}" value is invalid at path "${errSchemaPath}": ` + self.errorsText(def.validateSchema.errors);
+            const msg = `keyword "${keyword}" value is invalid at path "${errSchemaPath}": ` + self2.errorsText(def.validateSchema.errors);
             if (opts.validateSchema === "log")
-              self.logger.error(msg);
+              self2.logger.error(msg);
             else
               throw new Error(msg);
           }
@@ -1904,8 +1909,6 @@
       exports.validateKeywordUsage = validateKeywordUsage;
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/subschema.js
   var require_subschema = __commonJS({
     "node_modules/ajv/dist/compile/validate/subschema.js"(exports) {
       "use strict";
@@ -1987,8 +1990,6 @@
       exports.extendSubschemaMode = extendSubschemaMode;
     }
   });
-
-  // node_modules/fast-deep-equal/index.js
   var require_fast_deep_equal = __commonJS({
     "node_modules/fast-deep-equal/index.js"(exports, module) {
       "use strict";
@@ -2032,8 +2033,6 @@
       };
     }
   });
-
-  // node_modules/json-schema-traverse/index.js
   var require_json_schema_traverse = __commonJS({
     "node_modules/json-schema-traverse/index.js"(exports, module) {
       "use strict";
@@ -2120,8 +2119,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/compile/resolve.js
   var require_resolve = __commonJS({
     "node_modules/ajv/dist/compile/resolve.js"(exports) {
       "use strict";
@@ -2276,8 +2273,6 @@
       exports.getSchemaRefs = getSchemaRefs;
     }
   });
-
-  // node_modules/ajv/dist/compile/validate/index.js
   var require_validate = __commonJS({
     "node_modules/ajv/dist/compile/validate/index.js"(exports) {
       "use strict";
@@ -2372,11 +2367,11 @@
         }
         (0, boolSchema_1.boolOrEmptySchema)(it, valid2);
       }
-      function schemaCxtHasRules({ schema, self }) {
+      function schemaCxtHasRules({ schema, self: self2 }) {
         if (typeof schema == "boolean")
           return !schema;
         for (const key in schema)
-          if (self.RULES.all[key])
+          if (self2.RULES.all[key])
             return true;
         return false;
       }
@@ -2405,9 +2400,9 @@
         schemaKeywords(it, types, !checkedTypes, errsCount);
       }
       function checkRefsAndKeywords(it) {
-        const { schema, errSchemaPath, opts, self } = it;
-        if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1.schemaHasRulesButRef)(schema, self.RULES)) {
-          self.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
+        const { schema, errSchemaPath, opts, self: self2 } = it;
+        if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1.schemaHasRulesButRef)(schema, self2.RULES)) {
+          self2.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
         }
       }
       function checkNoDefault(it) {
@@ -2453,8 +2448,8 @@
           gen.assign((0, codegen_1._)`${evaluated}.items`, items);
       }
       function schemaKeywords(it, types, typeErrors, errsCount) {
-        const { gen, schema, data, allErrors, opts, self } = it;
-        const { RULES } = self;
+        const { gen, schema, data, allErrors, opts, self: self2 } = it;
+        const { RULES } = self2;
         if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1.schemaHasRulesButRef)(schema, RULES))) {
           gen.block(() => keywordCode(it, "$ref", RULES.all.$ref.definition));
           return;
@@ -2774,8 +2769,6 @@
       exports.getData = getData;
     }
   });
-
-  // node_modules/ajv/dist/runtime/validation_error.js
   var require_validation_error = __commonJS({
     "node_modules/ajv/dist/runtime/validation_error.js"(exports) {
       "use strict";
@@ -2790,8 +2783,6 @@
       exports.default = ValidationError;
     }
   });
-
-  // node_modules/ajv/dist/compile/ref_error.js
   var require_ref_error = __commonJS({
     "node_modules/ajv/dist/compile/ref_error.js"(exports) {
       "use strict";
@@ -2807,8 +2798,6 @@
       exports.default = MissingRefError;
     }
   });
-
-  // node_modules/ajv/dist/compile/index.js
   var require_compile = __commonJS({
     "node_modules/ajv/dist/compile/index.js"(exports) {
       "use strict";
@@ -2931,7 +2920,7 @@
         const schOrFunc = root.refs[ref];
         if (schOrFunc)
           return schOrFunc;
-        let _sch = resolve.call(this, root, ref);
+        let _sch = resolve2.call(this, root, ref);
         if (_sch === void 0) {
           const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
           const { schemaId } = this.opts;
@@ -2958,7 +2947,7 @@
       function sameSchemaEnv(s1, s2) {
         return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
       }
-      function resolve(root, ref) {
+      function resolve2(root, ref) {
         let sch;
         while (typeof (sch = this.refs[ref]) == "string")
           ref = sch;
@@ -3030,8 +3019,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/refs/data.json
   var require_data = __commonJS({
     "node_modules/ajv/dist/refs/data.json"(exports, module) {
       module.exports = {
@@ -3049,15 +3036,13 @@
       };
     }
   });
-
-  // node_modules/uri-js/dist/es5/uri.all.js
   var require_uri_all = __commonJS({
     "node_modules/uri-js/dist/es5/uri.all.js"(exports, module) {
-      (function(global, factory) {
-        typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global.URI = global.URI || {});
+      (function(global2, factory) {
+        typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global2.URI = global2.URI || {});
       })(exports, function(exports2) {
         "use strict";
-        function merge3() {
+        function merge2() {
           for (var _len = arguments.length, sets = Array(_len), _key = 0; _key < _len; _key++) {
             sets[_key] = arguments[_key];
           }
@@ -3095,18 +3080,18 @@
           return obj;
         }
         function buildExps(isIRI2) {
-          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge3(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge3(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge3(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge3(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge3("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
+          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge2(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge2(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge2(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge2(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge2("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
           return {
-            NOT_SCHEME: new RegExp(merge3("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
-            NOT_USERINFO: new RegExp(merge3("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_HOST: new RegExp(merge3("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH: new RegExp(merge3("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH_NOSCHEME: new RegExp(merge3("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_QUERY: new RegExp(merge3("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
-            NOT_FRAGMENT: new RegExp(merge3("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
-            ESCAPE: new RegExp(merge3("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_SCHEME: new RegExp(merge2("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
+            NOT_USERINFO: new RegExp(merge2("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_HOST: new RegExp(merge2("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH: new RegExp(merge2("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH_NOSCHEME: new RegExp(merge2("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_QUERY: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
+            NOT_FRAGMENT: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
+            ESCAPE: new RegExp(merge2("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
             UNRESERVED: new RegExp(UNRESERVED$$2, "g"),
-            OTHER_CHARS: new RegExp(merge3("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
+            OTHER_CHARS: new RegExp(merge2("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
             PCT_ENCODED: new RegExp(PCT_ENCODED$2, "g"),
             IPV4ADDRESS: new RegExp("^(" + IPV4ADDRESS$ + ")$"),
             IPV6ADDRESS: new RegExp("^\\[?(" + IPV6ADDRESS$ + ")" + subexp(subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + "(" + ZONEID$ + ")") + "?\\]?$")
@@ -3182,7 +3167,7 @@
         function error$1(type) {
           throw new RangeError(errors[type]);
         }
-        function map2(array, fn) {
+        function map(array, fn) {
           var result = [];
           var length = array.length;
           while (length--) {
@@ -3199,7 +3184,7 @@
           }
           string = string.replace(regexSeparators, ".");
           var labels = string.split(".");
-          var encoded = map2(labels, fn).join(".");
+          var encoded = map(labels, fn).join(".");
           return result + encoded;
         }
         function ucs2decode(string) {
@@ -3780,7 +3765,7 @@
           target.fragment = relative.fragment;
           return target;
         }
-        function resolve(baseURI, relativeURI, options2) {
+        function resolve2(baseURI, relativeURI, options2) {
           var schemelessOptions = assign({ scheme: "null" }, options2);
           return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
         }
@@ -3882,12 +3867,12 @@
         var PCT_ENCODED$ = subexp(subexp("%[EFef]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%" + HEXDIG$$ + HEXDIG$$));
         var ATEXT$$ = "[A-Za-z0-9\\!\\$\\%\\'\\*\\+\\-\\^\\_\\`\\{\\|\\}\\~]";
         var QTEXT$$ = "[\\!\\$\\%\\'\\(\\)\\*\\+\\,\\-\\.0-9\\<\\>A-Z\\x5E-\\x7E]";
-        var VCHAR$$ = merge3(QTEXT$$, '[\\"\\\\]');
+        var VCHAR$$ = merge2(QTEXT$$, '[\\"\\\\]');
         var SOME_DELIMS$$ = "[\\!\\$\\'\\(\\)\\*\\+\\,\\;\\:\\@]";
         var UNRESERVED = new RegExp(UNRESERVED$$, "g");
         var PCT_ENCODED = new RegExp(PCT_ENCODED$, "g");
-        var NOT_LOCAL_PART = new RegExp(merge3("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
-        var NOT_HFNAME = new RegExp(merge3("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
+        var NOT_LOCAL_PART = new RegExp(merge2("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
+        var NOT_HFNAME = new RegExp(merge2("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
         var NOT_HFVALUE = NOT_HFNAME;
         function decodeUnreserved(str) {
           var decStr = pctDecChars(str);
@@ -4048,7 +4033,7 @@
         exports2.removeDotSegments = removeDotSegments;
         exports2.serialize = serialize;
         exports2.resolveComponents = resolveComponents;
-        exports2.resolve = resolve;
+        exports2.resolve = resolve2;
         exports2.normalize = normalize;
         exports2.equal = equal;
         exports2.escapeComponent = escapeComponent;
@@ -4057,8 +4042,6 @@
       });
     }
   });
-
-  // node_modules/ajv/dist/runtime/uri.js
   var require_uri = __commonJS({
     "node_modules/ajv/dist/runtime/uri.js"(exports) {
       "use strict";
@@ -4068,8 +4051,6 @@
       exports.default = uri;
     }
   });
-
-  // node_modules/ajv/dist/core.js
   var require_core = __commonJS({
     "node_modules/ajv/dist/core.js"(exports) {
       "use strict";
@@ -4448,7 +4429,7 @@
         errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
           if (!errors || errors.length === 0)
             return "No errors";
-          return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text2, msg) => text2 + separator + msg);
+          return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text, msg) => text + separator + msg);
         }
         $dataMetaSchema(metaSchema, keywordsJsonPointers) {
           const rules = this.RULES.all;
@@ -4666,8 +4647,6 @@
       }
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/core/id.js
   var require_id = __commonJS({
     "node_modules/ajv/dist/vocabularies/core/id.js"(exports) {
       "use strict";
@@ -4681,8 +4660,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/core/ref.js
   var require_ref = __commonJS({
     "node_modules/ajv/dist/vocabularies/core/ref.js"(exports) {
       "use strict";
@@ -4699,11 +4676,11 @@
         schemaType: "string",
         code(cxt) {
           const { gen, schema: $ref, it } = cxt;
-          const { baseId, schemaEnv: env, validateName, opts, self } = it;
+          const { baseId, schemaEnv: env, validateName, opts, self: self2 } = it;
           const { root } = env;
           if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
             return callRootRef();
-          const schOrEnv = compile_1.resolveRef.call(self, root, baseId, $ref);
+          const schOrEnv = compile_1.resolveRef.call(self2, root, baseId, $ref);
           if (schOrEnv === void 0)
             throw new ref_error_1.default(it.opts.uriResolver, baseId, $ref);
           if (schOrEnv instanceof compile_1.SchemaEnv)
@@ -4803,8 +4780,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/core/index.js
   var require_core2 = __commonJS({
     "node_modules/ajv/dist/vocabularies/core/index.js"(exports) {
       "use strict";
@@ -4824,8 +4799,6 @@
       exports.default = core;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/limitNumber.js
   var require_limitNumber = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports) {
       "use strict";
@@ -4856,8 +4829,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/multipleOf.js
   var require_multipleOf = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports) {
       "use strict";
@@ -4884,8 +4855,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/runtime/ucs2length.js
   var require_ucs2length = __commonJS({
     "node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
       "use strict";
@@ -4910,8 +4879,6 @@
       ucs2length.code = 'require("ajv/dist/runtime/ucs2length").default';
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/limitLength.js
   var require_limitLength = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports) {
       "use strict";
@@ -4942,8 +4909,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/pattern.js
   var require_pattern = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports) {
       "use strict";
@@ -4970,8 +4935,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/limitProperties.js
   var require_limitProperties = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports) {
       "use strict";
@@ -4999,8 +4962,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/required.js
   var require_required = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/required.js"(exports) {
       "use strict";
@@ -5081,8 +5042,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/limitItems.js
   var require_limitItems = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports) {
       "use strict";
@@ -5110,8 +5069,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/runtime/equal.js
   var require_equal = __commonJS({
     "node_modules/ajv/dist/runtime/equal.js"(exports) {
       "use strict";
@@ -5121,8 +5078,6 @@
       exports.default = equal;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
   var require_uniqueItems = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports) {
       "use strict";
@@ -5188,8 +5143,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/const.js
   var require_const = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/const.js"(exports) {
       "use strict";
@@ -5217,8 +5170,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/enum.js
   var require_enum = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/enum.js"(exports) {
       "use strict";
@@ -5266,8 +5217,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/validation/index.js
   var require_validation = __commonJS({
     "node_modules/ajv/dist/vocabularies/validation/index.js"(exports) {
       "use strict";
@@ -5299,8 +5248,6 @@
       exports.default = validation;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
   var require_additionalItems = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports) {
       "use strict";
@@ -5352,8 +5299,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/items.js
   var require_items = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/items.js"(exports) {
       "use strict";
@@ -5409,8 +5354,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
   var require_prefixItems = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports) {
       "use strict";
@@ -5426,8 +5369,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/items2020.js
   var require_items2020 = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports) {
       "use strict";
@@ -5461,8 +5402,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/contains.js
   var require_contains = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports) {
       "use strict";
@@ -5555,8 +5494,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/dependencies.js
   var require_dependencies = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports) {
       "use strict";
@@ -5647,8 +5584,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
   var require_propertyNames = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports) {
       "use strict";
@@ -5690,8 +5625,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
   var require_additionalProperties = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports) {
       "use strict";
@@ -5796,8 +5729,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/properties.js
   var require_properties = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports) {
       "use strict";
@@ -5854,8 +5785,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
   var require_patternProperties = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports) {
       "use strict";
@@ -5928,8 +5857,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/not.js
   var require_not = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/not.js"(exports) {
       "use strict";
@@ -5959,8 +5886,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/anyOf.js
   var require_anyOf = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports) {
       "use strict";
@@ -5976,8 +5901,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/oneOf.js
   var require_oneOf = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports) {
       "use strict";
@@ -6034,8 +5957,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/allOf.js
   var require_allOf = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports) {
       "use strict";
@@ -6061,8 +5982,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/if.js
   var require_if = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/if.js"(exports) {
       "use strict";
@@ -6130,8 +6049,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/thenElse.js
   var require_thenElse = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports) {
       "use strict";
@@ -6148,8 +6065,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/applicator/index.js
   var require_applicator = __commonJS({
     "node_modules/ajv/dist/vocabularies/applicator/index.js"(exports) {
       "use strict";
@@ -6194,8 +6109,6 @@
       exports.default = getApplicator;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/format/format.js
   var require_format = __commonJS({
     "node_modules/ajv/dist/vocabularies/format/format.js"(exports) {
       "use strict";
@@ -6213,7 +6126,7 @@
         error,
         code(cxt, ruleType) {
           const { gen, data, $data, schema, schemaCode, it } = cxt;
-          const { opts, errSchemaPath, schemaEnv, self } = it;
+          const { opts, errSchemaPath, schemaEnv, self: self2 } = it;
           if (!opts.validateFormats)
             return;
           if ($data)
@@ -6222,7 +6135,7 @@
             validateFormat();
           function validate$DataFormat() {
             const fmts = gen.scopeValue("formats", {
-              ref: self.formats,
+              ref: self2.formats,
               code: opts.code.formats
             });
             const fDef = gen.const("fDef", (0, codegen_1._)`${fmts}[${schemaCode}]`);
@@ -6242,7 +6155,7 @@
             }
           }
           function validateFormat() {
-            const formatDef = self.formats[schema];
+            const formatDef = self2.formats[schema];
             if (!formatDef) {
               unknownFormat();
               return;
@@ -6254,7 +6167,7 @@
               cxt.pass(validCondition());
             function unknownFormat() {
               if (opts.strictSchema === false) {
-                self.logger.warn(unknownMsg());
+                self2.logger.warn(unknownMsg());
                 return;
               }
               throw new Error(unknownMsg());
@@ -6284,8 +6197,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/format/index.js
   var require_format2 = __commonJS({
     "node_modules/ajv/dist/vocabularies/format/index.js"(exports) {
       "use strict";
@@ -6295,8 +6206,6 @@
       exports.default = format;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/metadata.js
   var require_metadata = __commonJS({
     "node_modules/ajv/dist/vocabularies/metadata.js"(exports) {
       "use strict";
@@ -6318,8 +6227,6 @@
       ];
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/draft7.js
   var require_draft7 = __commonJS({
     "node_modules/ajv/dist/vocabularies/draft7.js"(exports) {
       "use strict";
@@ -6340,8 +6247,6 @@
       exports.default = draft7Vocabularies;
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/discriminator/types.js
   var require_types = __commonJS({
     "node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports) {
       "use strict";
@@ -6354,8 +6259,6 @@
       })(DiscrError = exports.DiscrError || (exports.DiscrError = {}));
     }
   });
-
-  // node_modules/ajv/dist/vocabularies/discriminator/index.js
   var require_discriminator = __commonJS({
     "node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports) {
       "use strict";
@@ -6455,8 +6358,6 @@
       exports.default = def;
     }
   });
-
-  // node_modules/ajv/dist/refs/json-schema-draft-07.json
   var require_json_schema_draft_07 = __commonJS({
     "node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports, module) {
       module.exports = {
@@ -6612,8 +6513,6 @@
       };
     }
   });
-
-  // node_modules/ajv/dist/ajv.js
   var require_ajv = __commonJS({
     "node_modules/ajv/dist/ajv.js"(exports, module) {
       "use strict";
@@ -6672,8 +6571,6 @@
       } });
     }
   });
-
-  // node_modules/ajv-formats/dist/formats.js
   var require_formats = __commonJS({
     "node_modules/ajv-formats/dist/formats.js"(exports) {
       "use strict";
@@ -6816,8 +6713,6 @@
       }
     }
   });
-
-  // node_modules/ajv-formats/dist/limit.js
   var require_limit = __commonJS({
     "node_modules/ajv-formats/dist/limit.js"(exports) {
       "use strict";
@@ -6844,17 +6739,17 @@
         error,
         code(cxt) {
           const { gen, data, schemaCode, keyword, it } = cxt;
-          const { opts, self } = it;
+          const { opts, self: self2 } = it;
           if (!opts.validateFormats)
             return;
-          const fCxt = new ajv_1.KeywordCxt(it, self.RULES.all.format.definition, "format");
+          const fCxt = new ajv_1.KeywordCxt(it, self2.RULES.all.format.definition, "format");
           if (fCxt.$data)
             validate$DataFormat();
           else
             validateFormat();
           function validate$DataFormat() {
             const fmts = gen.scopeValue("formats", {
-              ref: self.formats,
+              ref: self2.formats,
               code: opts.code.formats
             });
             const fmt = gen.const("fmt", codegen_1._`${fmts}[${fCxt.schemaCode}]`);
@@ -6862,7 +6757,7 @@
           }
           function validateFormat() {
             const format = fCxt.schema;
-            const fmtDef = self.formats[format];
+            const fmtDef = self2.formats[format];
             if (!fmtDef || fmtDef === true)
               return;
             if (typeof fmtDef != "object" || fmtDef instanceof RegExp || typeof fmtDef.compare != "function") {
@@ -6888,8 +6783,6 @@
       exports.default = formatLimitPlugin;
     }
   });
-
-  // node_modules/ajv-formats/dist/index.js
   var require_dist = __commonJS({
     "node_modules/ajv-formats/dist/index.js"(exports, module) {
       "use strict";
@@ -6930,12 +6823,557 @@
       exports.default = formatsPlugin;
     }
   });
-
-  // src/utils/latest.js
+  var require_Blob = __commonJS({
+    "node_modules/blob-polyfill/Blob.js"(exports) {
+      (function(global2) {
+        (function(factory) {
+          if (typeof define === "function" && define.amd) {
+            define(["exports"], factory);
+          } else if (typeof exports === "object" && typeof exports.nodeName !== "string") {
+            factory(exports);
+          } else {
+            factory(global2);
+          }
+        })(function(exports2) {
+          "use strict";
+          var BlobBuilder = global2.BlobBuilder || global2.WebKitBlobBuilder || global2.MSBlobBuilder || global2.MozBlobBuilder;
+          var URL2 = global2.URL || global2.webkitURL || function(href, a) {
+            a = document.createElement("a");
+            a.href = href;
+            return a;
+          };
+          var origBlob = global2.Blob;
+          var createObjectURL = URL2.createObjectURL;
+          var revokeObjectURL = URL2.revokeObjectURL;
+          var strTag = global2.Symbol && global2.Symbol.toStringTag;
+          var blobSupported = false;
+          var blobSupportsArrayBufferView = false;
+          var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
+          try {
+            blobSupported = new Blob(["\xE4"]).size === 2;
+            blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
+          } catch (e) {
+          }
+          function mapArrayBufferViews(ary) {
+            return ary.map(function(chunk) {
+              if (chunk.buffer instanceof ArrayBuffer) {
+                var buf = chunk.buffer;
+                if (chunk.byteLength !== buf.byteLength) {
+                  var copy = new Uint8Array(chunk.byteLength);
+                  copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
+                  buf = copy.buffer;
+                }
+                return buf;
+              }
+              return chunk;
+            });
+          }
+          function BlobBuilderConstructor(ary, options2) {
+            options2 = options2 || {};
+            var bb = new BlobBuilder();
+            mapArrayBufferViews(ary).forEach(function(part) {
+              bb.append(part);
+            });
+            return options2.type ? bb.getBlob(options2.type) : bb.getBlob();
+          }
+          function BlobConstructor(ary, options2) {
+            return new origBlob(mapArrayBufferViews(ary), options2 || {});
+          }
+          if (global2.Blob) {
+            BlobBuilderConstructor.prototype = Blob.prototype;
+            BlobConstructor.prototype = Blob.prototype;
+          }
+          function stringEncode(string) {
+            var pos = 0;
+            var len = string.length;
+            var Arr = global2.Uint8Array || Array;
+            var at = 0;
+            var tlen = Math.max(32, len + (len >> 1) + 7);
+            var target = new Arr(tlen >> 3 << 3);
+            while (pos < len) {
+              var value = string.charCodeAt(pos++);
+              if (value >= 55296 && value <= 56319) {
+                if (pos < len) {
+                  var extra = string.charCodeAt(pos);
+                  if ((extra & 64512) === 56320) {
+                    ++pos;
+                    value = ((value & 1023) << 10) + (extra & 1023) + 65536;
+                  }
+                }
+                if (value >= 55296 && value <= 56319) {
+                  continue;
+                }
+              }
+              if (at + 4 > target.length) {
+                tlen += 8;
+                tlen *= 1 + pos / string.length * 2;
+                tlen = tlen >> 3 << 3;
+                var update = new Uint8Array(tlen);
+                update.set(target);
+                target = update;
+              }
+              if ((value & 4294967168) === 0) {
+                target[at++] = value;
+                continue;
+              } else if ((value & 4294965248) === 0) {
+                target[at++] = value >> 6 & 31 | 192;
+              } else if ((value & 4294901760) === 0) {
+                target[at++] = value >> 12 & 15 | 224;
+                target[at++] = value >> 6 & 63 | 128;
+              } else if ((value & 4292870144) === 0) {
+                target[at++] = value >> 18 & 7 | 240;
+                target[at++] = value >> 12 & 63 | 128;
+                target[at++] = value >> 6 & 63 | 128;
+              } else {
+                continue;
+              }
+              target[at++] = value & 63 | 128;
+            }
+            return target.slice(0, at);
+          }
+          function stringDecode(buf) {
+            var end = buf.length;
+            var res = [];
+            var i = 0;
+            while (i < end) {
+              var firstByte = buf[i];
+              var codePoint = null;
+              var bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
+              if (i + bytesPerSequence <= end) {
+                var secondByte, thirdByte, fourthByte, tempCodePoint;
+                switch (bytesPerSequence) {
+                  case 1:
+                    if (firstByte < 128) {
+                      codePoint = firstByte;
+                    }
+                    break;
+                  case 2:
+                    secondByte = buf[i + 1];
+                    if ((secondByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
+                      if (tempCodePoint > 127) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                    break;
+                  case 3:
+                    secondByte = buf[i + 1];
+                    thirdByte = buf[i + 2];
+                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
+                      if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                    break;
+                  case 4:
+                    secondByte = buf[i + 1];
+                    thirdByte = buf[i + 2];
+                    fourthByte = buf[i + 3];
+                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
+                      if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                }
+              }
+              if (codePoint === null) {
+                codePoint = 65533;
+                bytesPerSequence = 1;
+              } else if (codePoint > 65535) {
+                codePoint -= 65536;
+                res.push(codePoint >>> 10 & 1023 | 55296);
+                codePoint = 56320 | codePoint & 1023;
+              }
+              res.push(codePoint);
+              i += bytesPerSequence;
+            }
+            var len = res.length;
+            var str = "";
+            var j = 0;
+            while (j < len) {
+              str += String.fromCharCode.apply(String, res.slice(j, j += 4096));
+            }
+            return str;
+          }
+          var textEncode = typeof TextEncoder === "function" ? TextEncoder.prototype.encode.bind(new TextEncoder()) : stringEncode;
+          var textDecode = typeof TextDecoder === "function" ? TextDecoder.prototype.decode.bind(new TextDecoder()) : stringDecode;
+          function FakeBlobBuilder() {
+            function bufferClone(buf) {
+              var view = new Array(buf.byteLength);
+              var array = new Uint8Array(buf);
+              var i = view.length;
+              while (i--) {
+                view[i] = array[i];
+              }
+              return view;
+            }
+            function array2base64(input) {
+              var byteToCharMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+              var output = [];
+              for (var i = 0; i < input.length; i += 3) {
+                var byte1 = input[i];
+                var haveByte2 = i + 1 < input.length;
+                var byte2 = haveByte2 ? input[i + 1] : 0;
+                var haveByte3 = i + 2 < input.length;
+                var byte3 = haveByte3 ? input[i + 2] : 0;
+                var outByte1 = byte1 >> 2;
+                var outByte2 = (byte1 & 3) << 4 | byte2 >> 4;
+                var outByte3 = (byte2 & 15) << 2 | byte3 >> 6;
+                var outByte4 = byte3 & 63;
+                if (!haveByte3) {
+                  outByte4 = 64;
+                  if (!haveByte2) {
+                    outByte3 = 64;
+                  }
+                }
+                output.push(
+                  byteToCharMap[outByte1],
+                  byteToCharMap[outByte2],
+                  byteToCharMap[outByte3],
+                  byteToCharMap[outByte4]
+                );
+              }
+              return output.join("");
+            }
+            var create = Object.create || function(a) {
+              function c() {
+              }
+              c.prototype = a;
+              return new c();
+            };
+            function getObjectTypeName(o) {
+              return Object.prototype.toString.call(o).slice(8, -1);
+            }
+            function isPrototypeOf(c, o) {
+              return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
+            }
+            function isDataView(o) {
+              return getObjectTypeName(o) === "DataView" || isPrototypeOf(global2.DataView, o);
+            }
+            var arrayBufferClassNames = [
+              "Int8Array",
+              "Uint8Array",
+              "Uint8ClampedArray",
+              "Int16Array",
+              "Uint16Array",
+              "Int32Array",
+              "Uint32Array",
+              "Float32Array",
+              "Float64Array",
+              "ArrayBuffer"
+            ];
+            function includes(a, v) {
+              return a.indexOf(v) !== -1;
+            }
+            function isArrayBuffer(o) {
+              return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
+            }
+            function concatTypedarrays(chunks) {
+              var size = 0;
+              var j = chunks.length;
+              while (j--) {
+                size += chunks[j].length;
+              }
+              var b = new Uint8Array(size);
+              var offset = 0;
+              for (var i = 0; i < chunks.length; i++) {
+                var chunk = chunks[i];
+                b.set(chunk, offset);
+                offset += chunk.byteLength || chunk.length;
+              }
+              return b;
+            }
+            function Blob3(chunks, opts) {
+              chunks = chunks || [];
+              opts = opts == null ? {} : opts;
+              for (var i = 0, len = chunks.length; i < len; i++) {
+                var chunk = chunks[i];
+                if (chunk instanceof Blob3) {
+                  chunks[i] = chunk._buffer;
+                } else if (typeof chunk === "string") {
+                  chunks[i] = textEncode(chunk);
+                } else if (isDataView(chunk)) {
+                  chunks[i] = bufferClone(chunk.buffer);
+                } else if (isArrayBuffer(chunk)) {
+                  chunks[i] = bufferClone(chunk);
+                } else {
+                  chunks[i] = textEncode(String(chunk));
+                }
+              }
+              this._buffer = global2.Uint8Array ? concatTypedarrays(chunks) : [].concat.apply([], chunks);
+              this.size = this._buffer.length;
+              this.type = opts.type || "";
+              if (/[^\u0020-\u007E]/.test(this.type)) {
+                this.type = "";
+              } else {
+                this.type = this.type.toLowerCase();
+              }
+            }
+            Blob3.prototype.arrayBuffer = function() {
+              return Promise.resolve(this._buffer.buffer || this._buffer);
+            };
+            Blob3.prototype.text = function() {
+              return Promise.resolve(textDecode(this._buffer));
+            };
+            Blob3.prototype.slice = function(start2, end, type) {
+              var slice = this._buffer.slice(start2 || 0, end || this._buffer.length);
+              return new Blob3([slice], { type });
+            };
+            Blob3.prototype.toString = function() {
+              return "[object Blob]";
+            };
+            function File2(chunks, name2, opts) {
+              opts = opts || {};
+              var a = Blob3.call(this, chunks, opts) || this;
+              a.name = name2.replace(/\//g, ":");
+              a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
+              a.lastModified = +a.lastModifiedDate;
+              return a;
+            }
+            File2.prototype = create(Blob3.prototype);
+            File2.prototype.constructor = File2;
+            if (Object.setPrototypeOf) {
+              Object.setPrototypeOf(File2, Blob3);
+            } else {
+              try {
+                File2.__proto__ = Blob3;
+              } catch (e) {
+              }
+            }
+            File2.prototype.toString = function() {
+              return "[object File]";
+            };
+            function FileReader2() {
+              if (!(this instanceof FileReader2)) {
+                throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
+              }
+              var delegate = document.createDocumentFragment();
+              this.addEventListener = delegate.addEventListener;
+              this.dispatchEvent = function(evt) {
+                var local = this["on" + evt.type];
+                if (typeof local === "function")
+                  local(evt);
+                delegate.dispatchEvent(evt);
+              };
+              this.removeEventListener = delegate.removeEventListener;
+            }
+            function _read(fr, blob2, kind) {
+              if (!(blob2 instanceof Blob3)) {
+                throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
+              }
+              fr.result = "";
+              setTimeout(function() {
+                this.readyState = FileReader2.LOADING;
+                fr.dispatchEvent(new Event("load"));
+                fr.dispatchEvent(new Event("loadend"));
+              });
+            }
+            FileReader2.EMPTY = 0;
+            FileReader2.LOADING = 1;
+            FileReader2.DONE = 2;
+            FileReader2.prototype.error = null;
+            FileReader2.prototype.onabort = null;
+            FileReader2.prototype.onerror = null;
+            FileReader2.prototype.onload = null;
+            FileReader2.prototype.onloadend = null;
+            FileReader2.prototype.onloadstart = null;
+            FileReader2.prototype.onprogress = null;
+            FileReader2.prototype.readAsDataURL = function(blob2) {
+              _read(this, blob2, "readAsDataURL");
+              this.result = "data:" + blob2.type + ";base64," + array2base64(blob2._buffer);
+            };
+            FileReader2.prototype.readAsText = function(blob2) {
+              _read(this, blob2, "readAsText");
+              this.result = textDecode(blob2._buffer);
+            };
+            FileReader2.prototype.readAsArrayBuffer = function(blob2) {
+              _read(this, blob2, "readAsText");
+              this.result = (blob2._buffer.buffer || blob2._buffer).slice();
+            };
+            FileReader2.prototype.abort = function() {
+            };
+            URL2.createObjectURL = function(blob2) {
+              return blob2 instanceof Blob3 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
+            };
+            URL2.revokeObjectURL = function(url) {
+              revokeObjectURL && revokeObjectURL.call(URL2, url);
+            };
+            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
+            if (_send) {
+              XMLHttpRequest.prototype.send = function(data) {
+                if (data instanceof Blob3) {
+                  this.setRequestHeader("Content-Type", data.type);
+                  _send.call(this, textDecode(data._buffer));
+                } else {
+                  _send.call(this, data);
+                }
+              };
+            }
+            exports2.Blob = Blob3;
+            exports2.File = File2;
+            exports2.FileReader = FileReader2;
+            exports2.URL = URL2;
+          }
+          function fixFileAndXHR() {
+            var isIE = !!global2.ActiveXObject || "-ms-scroll-limit" in document.documentElement.style && "-ms-ime-align" in document.documentElement.style;
+            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
+            if (isIE && _send) {
+              XMLHttpRequest.prototype.send = function(data) {
+                if (data instanceof Blob) {
+                  this.setRequestHeader("Content-Type", data.type);
+                  _send.call(this, data);
+                } else {
+                  _send.call(this, data);
+                }
+              };
+            }
+            try {
+              new File([], "");
+              exports2.File = global2.File;
+              exports2.FileReader = global2.FileReader;
+            } catch (e) {
+              try {
+                exports2.File = new Function(
+                  'class File extends Blob {constructor(chunks, name, opts) {opts = opts || {};super(chunks, opts || {});this.name = name.replace(/\\//g, ":");this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();this.lastModified = +this.lastModifiedDate;}};return new File([], ""), File'
+                )();
+              } catch (e2) {
+                exports2.File = function(b, d, c) {
+                  var blob2 = new Blob(b, c);
+                  var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
+                  blob2.name = d.replace(/\//g, ":");
+                  blob2.lastModifiedDate = t;
+                  blob2.lastModified = +t;
+                  blob2.toString = function() {
+                    return "[object File]";
+                  };
+                  if (strTag) {
+                    blob2[strTag] = "File";
+                  }
+                  return blob2;
+                };
+              }
+            }
+          }
+          if (blobSupported) {
+            fixFileAndXHR();
+            exports2.Blob = blobSupportsArrayBufferView ? global2.Blob : BlobConstructor;
+          } else if (blobBuilderSupported) {
+            fixFileAndXHR();
+            exports2.Blob = BlobBuilderConstructor;
+          } else {
+            FakeBlobBuilder();
+          }
+          if (strTag) {
+            if (!exports2.File.prototype[strTag])
+              exports2.File.prototype[strTag] = "File";
+            if (!exports2.Blob.prototype[strTag])
+              exports2.Blob.prototype[strTag] = "Blob";
+            if (!exports2.FileReader.prototype[strTag])
+              exports2.FileReader.prototype[strTag] = "FileReader";
+          }
+          var blob = exports2.Blob.prototype;
+          var stream;
+          try {
+            new ReadableStream({ type: "bytes" });
+            stream = function stream2() {
+              var position = 0;
+              var blob2 = this;
+              return new ReadableStream({
+                type: "bytes",
+                autoAllocateChunkSize: 524288,
+                pull: function(controller) {
+                  var v = controller.byobRequest.view;
+                  var chunk = blob2.slice(position, position + v.byteLength);
+                  return chunk.arrayBuffer().then(function(buffer) {
+                    var uint8array = new Uint8Array(buffer);
+                    var bytesRead = uint8array.byteLength;
+                    position += bytesRead;
+                    v.set(uint8array);
+                    controller.byobRequest.respond(bytesRead);
+                    if (position >= blob2.size)
+                      controller.close();
+                  });
+                }
+              });
+            };
+          } catch (e) {
+            try {
+              new ReadableStream({});
+              stream = function stream2(blob2) {
+                var position = 0;
+                return new ReadableStream({
+                  pull: function(controller) {
+                    var chunk = blob2.slice(position, position + 524288);
+                    return chunk.arrayBuffer().then(function(buffer) {
+                      position += buffer.byteLength;
+                      var uint8array = new Uint8Array(buffer);
+                      controller.enqueue(uint8array);
+                      if (position == blob2.size)
+                        controller.close();
+                    });
+                  }
+                });
+              };
+            } catch (e2) {
+              try {
+                new Response("").body.getReader().read();
+                stream = function stream2() {
+                  return new Response(this).body;
+                };
+              } catch (e3) {
+                stream = function stream2() {
+                  throw new Error("Include https://github.com/MattiasBuelens/web-streams-polyfill");
+                };
+              }
+            }
+          }
+          function promisify(obj) {
+            return new Promise(function(resolve2, reject) {
+              obj.onload = obj.onerror = function(evt) {
+                obj.onload = obj.onerror = null;
+                evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
+              };
+            });
+          }
+          if (!blob.arrayBuffer) {
+            blob.arrayBuffer = function arrayBuffer() {
+              var fr = new FileReader();
+              fr.readAsArrayBuffer(this);
+              return promisify(fr);
+            };
+          }
+          if (!blob.text) {
+            blob.text = function text() {
+              var fr = new FileReader();
+              fr.readAsText(this);
+              return promisify(fr);
+            };
+          }
+          if (!blob.stream) {
+            blob.stream = stream;
+          }
+        });
+      })(
+        typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || exports
+      );
+    }
+  });
+  var browser_exports = {};
+  __export(browser_exports, {
+    default: () => browser_default
+  });
+  var import_blob_polyfill;
+  var browser_default;
+  var init_browser = __esm({
+    "node_modules/cross-blob/browser.js"() {
+      import_blob_polyfill = __toESM2(require_Blob(), 1);
+      browser_default = import_blob_polyfill.Blob;
+    }
+  });
   var version = "0.0.0";
   var latest_default = version;
-
-  // versions/0.0.0/component.schema.json
   var component_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/component.schema.json",
@@ -6974,8 +7412,6 @@
     },
     required: ["graph"]
   };
-
-  // versions/0.0.0/graph.schema.json
   var graph_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/graph.schema.json",
@@ -6995,8 +7431,6 @@
     },
     required: ["nodes"]
   };
-
-  // versions/0.0.0/edges.schema.json
   var edges_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/edges.schema.json",
@@ -7023,8 +7457,6 @@
       additionalProperties: false
     }
   };
-
-  // versions/0.0.0/nodes.schema.json
   var nodes_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/nodes.schema.json",
@@ -7147,8 +7579,6 @@
     },
     additionalProperties: false
   };
-
-  // versions/0.0.0/ports.schema.json
   var ports_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/ports.schema.json",
@@ -7167,8 +7597,6 @@
     },
     additionalProperties: false
   };
-
-  // versions/0.0.0/port.schema.json
   var port_schema_default = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/port.schema.json",
@@ -7186,8 +7614,6 @@
       }
     ]
   };
-
-  // src/utils/schema.registry.js
   var schema_registry_default = {
     ["0.0.0"]: {
       "graph.schema.json": graph_schema_default,
@@ -7198,8 +7624,6 @@
       "port.schema.json": port_schema_default
     }
   };
-
-  // src/utils/get.js
   var schemaCache = {};
   var getSchema = async (v = latest_default) => {
     if (!schemaCache[v]) {
@@ -7226,12 +7650,8 @@
     });
     return o;
   };
-
-  // src/validate.ts
-  var import_ajv = __toESM(require_ajv(), 1);
-  var import_ajv_formats = __toESM(require_dist(), 1);
-
-  // src/utils/path.ts
+  var import_ajv = __toESM2(require_ajv(), 1);
+  var import_ajv_formats = __toESM2(require_dist(), 1);
   var fullSuffix = (fileName = "") => fileName.split(".").slice(1);
   var suffix = (fileName = "") => {
     const suffix2 = fullSuffix(fileName);
@@ -7288,29 +7708,165 @@
     const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
     return newPath;
   };
-
-  // src/get.ts
+  var getURL = (path2) => {
+    let url;
+    try {
+      url = new URL(path2).href;
+    } catch {
+      url = get(path2, globalThis.location.href);
+    }
+    return url;
+  };
+  var handleFetch = async (path2, options2 = {}, progressCallback) => {
+    if (!options2.mode)
+      options2.mode = "cors";
+    const url = getURL(path2);
+    const response = await fetchRemote(url, options2, progressCallback);
+    if (!response)
+      throw new Error("No response received.");
+    const type = response.type.split(";")[0];
+    return {
+      url,
+      type,
+      buffer: response.buffer
+    };
+  };
+  var fetchRemote = async (url, options2 = {}, progressCallback) => {
+    const response = await globalThis.fetch(url, options2);
+    return new Promise(async (resolve2) => {
+      if (response) {
+        const type = response.headers.get("Content-Type");
+        if (globalThis.REMOTEESM_NODE) {
+          const buffer = await response.arrayBuffer();
+          resolve2({ buffer, type });
+        } else {
+          const reader = response.body.getReader();
+          const bytes = parseInt(response.headers.get("Content-Length"), 10);
+          let bytesReceived = 0;
+          let buffer = [];
+          const processBuffer = async ({ done, value }) => {
+            if (done) {
+              const config = {};
+              if (typeof type === "string")
+                config.type = type;
+              const blob = new Blob(buffer, config);
+              const ab = await blob.arrayBuffer();
+              resolve2({ buffer: new Uint8Array(ab), type });
+              return;
+            }
+            bytesReceived += value.length;
+            const chunk = value;
+            buffer.push(chunk);
+            if (progressCallback instanceof Function)
+              progressCallback(response.headers.get("Range"), bytesReceived / bytes, bytes);
+            return reader.read().then(processBuffer);
+          };
+          reader.read().then(processBuffer);
+        }
+      } else {
+        console.warn("Response not received!", options2.headers);
+        resolve2(void 0);
+      }
+    });
+  };
+  globalThis.REMOTEESM_NODE = false;
+  var ready = new Promise(async (resolve2, reject) => {
+    try {
+      if (typeof process === "object") {
+        globalThis.REMOTEESM_NODE = true;
+        globalThis.fetch = (await import("node-fetch")).default;
+        if (typeof globalThis.fetch !== "function")
+          globalThis.fetch = fetch;
+        const Blob3 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
+        globalThis.Blob = Blob3;
+        if (typeof globalThis.Blob !== "function")
+          globalThis.Blob = Blob3;
+        resolve2(true);
+      } else
+        resolve2(true);
+    } catch (err) {
+      console.log(err);
+      reject(err);
+    }
+  });
+  var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
+  var moduleDataURI = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
+  var importFromText = async (text, extension) => {
+    const isJSON = extension === "json";
+    let mimeType = isJSON ? "application/json" : "application/javascript";
+    const uri = moduleDataURI(text, mimeType);
+    let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
+      if (e.message.includes("Unexpected token"))
+        throw new Error("Failed to fetch");
+      else
+        throw e;
+    });
+    return imported;
+  };
+  var resolve = get;
+  var safeImport = async (uri, root, onImport = () => {
+  }, output) => {
+    await ready;
+    const extension = uri.split(".").slice(-1)[0];
+    let module = await import(uri).catch(() => {
+    });
+    let text = await globalThis.fetch(uri).then((res) => res.text());
+    if (!module) {
+      try {
+        module = await importFromText(text, extension);
+      } catch (e) {
+        const base = get("", uri);
+        let childBase = base;
+        const importInfo = {};
+        let m;
+        do {
+          m = re.exec(text);
+          if (m == null)
+            m = re.exec(text);
+          if (m) {
+            text = text.replace(m[0], ``);
+            const variables = m[1].replace(/\*\s+as/, "").trim();
+            importInfo[m[3]] = variables;
+          }
+        } while (m);
+        for (let path2 in importInfo) {
+          let correctPath = get(path2, childBase);
+          const variables = importInfo[path2];
+          const dependentFilePath = get(correctPath);
+          const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
+          const extension2 = correctPath.split(".").slice(-1)[0];
+          const mimeType = extension2 === "js" ? "application/javascript" : `application/${extension2}`;
+          const info = await handleFetch(correctPath);
+          let blob = new Blob([info.buffer], { type: info.type });
+          const isJS = extension2.includes("js");
+          const newURI = dependentFileWithoutRoot;
+          const newText = await blob.text();
+          let importedText = isJS ? await safeImport(newURI, uri, onImport, "text") : newText;
+          const dataUri = moduleDataURI(importedText, mimeType);
+          text = `const ${variables} =  await import('${dataUri}', ${isJS ? "{}" : '{assert: {type: "json"}}'});
+${text}`;
+        }
+        module = await importFromText(text, extension);
+      }
+    }
+    onImport(uri, { text, module });
+    if (output === "text")
+      return text;
+    else
+      return module;
+  };
+  var remote_esm_default = safeImport;
   var cache = {};
-  var get2 = async (relPath, relativeTo = "") => {
+  var get2 = async (relPath, relativeTo = "", onImport) => {
     let type = suffix(relPath);
     const isJSON = !type || type.includes("json");
-    const fullPath = get(relPath, relativeTo);
+    const fullPath = resolve(relPath, relativeTo);
     if (!cache[fullPath]) {
-      cache[fullPath] = (isJSON ? import(fullPath, { assert: { type: "json" } }) : import(fullPath)).catch(async (e) => {
-        if (e.message.includes("Failed to fetch")) {
-          console.warn(`Trying to fetch ${fullPath} as text rather than using import()`);
-          const tryAgain = await fetch(fullPath);
-          if (tryAgain) {
-            if (isJSON)
-              return { default: await tryAgain.json() };
-            else
-              return {
-                text: await tryAgain.text()
-              };
-          } else
-            throw new Error("404");
-        } else
-          console.error(`Error loading ${relPath}`, e, e.name);
+      cache[fullPath] = remote_esm_default(fullPath, onImport).catch((e) => {
+        if (e.message.includes("Failed to fetch"))
+          throw new Error("404");
+        else
+          throw e;
       });
       const res = await cache[fullPath];
       if (isJSON)
@@ -7321,9 +7877,6 @@
     return isJSON ? JSON.parse(JSON.stringify(cache[fullPath])) : cache[fullPath];
   };
   var get_default = get2;
-
-  // src/utils/check.ts
-  var import_meta = {};
   var valid = (input, options2, location) => {
     const errors = [];
     const isUndefined = options2?.relativeTo === void 0;
@@ -7350,8 +7903,6 @@
     }
     return errors;
   };
-
-  // src/utils/languages.ts
   var languages_exports = {};
   __export(languages_exports, {
     js: () => js,
@@ -7359,8 +7910,6 @@
   });
   var js = ["js", "mjs", "cjs", "javascript"];
   var json = ["json"];
-
-  // src/utils/parse.ts
   var ARGUMENT_NAMES = /([^,]*)/g;
   function getFnParamInfo(fn) {
     var fstr = fn.toString();
@@ -7403,26 +7952,24 @@
     return info;
   }
   var parse_default = getFnParamInfo;
-
-  // src/load.ts
   var isSrc = (str) => {
     return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
   };
-  var merge = (main, override, deleteSrc = false) => {
+  var merge = (main2, override, deleteSrc = false) => {
     if (deleteSrc) {
       const ogSrc = override.src ?? override;
       delete override.src;
       if ("default" in ogSrc)
         return ogSrc.default;
     }
-    return Object.assign(Object.assign({}, main), override);
+    return Object.assign(Object.assign({}, main2), override);
   };
   var checkFiles = (key, filesystem) => {
     const isJSON = suffix(key).slice(-4) === "json" ? true : false;
     const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
     return output;
   };
-  var remove = (original, search = original, key = original, o) => {
+  var remove = (original, search, key = original, o) => {
     console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
     if (o)
       delete o[key];
@@ -7437,11 +7984,21 @@
     const arr = e.type === "warning" ? warnings : errors;
     arr.push(item);
   };
-  var getSrc = async (target, info, options2, { nodes: nodes2 = void 0, edges = void 0 } = {}) => {
+  var getWithErrorLog = async (...args) => {
+    const o = args.slice(-1)[0];
+    const path2 = args[0];
+    args = args.slice(0, -1);
+    return await get_default(...args).catch((e) => onError({
+      message: e.message,
+      file: path2
+    }, o));
+  };
+  var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } = {}) => {
     let {
       relativeToResolved,
       mainPath,
-      url
+      url,
+      onImport
     } = info;
     const isImportMode = !!url;
     relativeToResolved = options2._remote ?? relativeToResolved;
@@ -7450,20 +8007,21 @@
       const isObj = node && typeof node === "object";
       if (isObj) {
         let ogSrc = node.src ?? "";
-        if (isSrc(ogSrc) || nodes2 && edges && !ogSrc) {
+        if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
           node.src = null;
           let passToNested = null;
-          let fullPath = relativeToResolved ? get(ogSrc, mainPath) : get(ogSrc);
+          let fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
           if (isImportMode) {
-            node.src = await get_default(fullPath);
+            node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
             if (options2._remote) {
               const got = await getSrc([node], info, options2);
               node.src = got[0].src;
-              passToNested = get(ogSrc);
+              passToNested = resolve(ogSrc);
             } else
-              passToNested = get(ogSrc, url, true);
-          }
-          if (!node.src) {
+              passToNested = resolve(ogSrc, url, true);
+            if (!node.src)
+              remove(ogSrc, fullPath, name2, target);
+          } else {
             if (options2.filesystem) {
               const res = checkFiles(fullPath, options2.filesystem);
               if (res) {
@@ -7492,21 +8050,20 @@
               filesystem: options2.filesystem,
               errors: options2.errors,
               warnings: options2.warnings,
+              files: options2.files,
               _internal: ogSrc,
               _deleteSrc: options2._deleteSrc,
               _remote: options2._remote
             });
         } else {
           for (let key in node) {
-            if (key === "src") {
-              console.log("CHECKING", node.src);
+            if (key === "src" && node.src) {
               const language = node.src.language;
               if (!language || js.includes(language)) {
                 if (node.src.text) {
-                  const moduleDataURI = (text2, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text2);
-                  const esmImport = async (text2) => {
+                  const esmImport = async (text) => {
                     try {
-                      let imported = await import(moduleDataURI(text2));
+                      let imported = await importFromText(text);
                       if (imported.default && Object.keys(imported).length === 1)
                         imported = imported.default;
                       return imported;
@@ -7521,12 +8078,10 @@
                   const esm = await esmImport(node.src.text);
                   if (esm) {
                     delete node.src.text;
-                    console.log("esm", esm);
                     if (typeof esm === "object")
                       node.src = { default: Object.assign(node.src, esm) };
                     else
                       node.src = esm;
-                    console.log("New ndoe src", node.src);
                   } else {
                     onError({
                       message: "Could not import this text as ESM",
@@ -7554,7 +8109,7 @@
                   file: ogSrc
                 }, options2);
               }
-            } else if (typeof node[key] === "object") {
+            } else if (node[key] && typeof node[key] === "object") {
               const optsCopy = Object.assign({}, options2);
               optsCopy._deleteSrc = true;
               await getSrc(node[key], info, optsCopy, { nodes: node[key] });
@@ -7563,8 +8118,8 @@
         }
       }
     }
-    for (let name2 in nodes2) {
-      const node = nodes2[name2];
+    for (let name2 in nodes) {
+      const node = nodes[name2];
       if (node?.src && typeof node?.src === "object") {
         if (edges && node.src.default) {
           const fnString = node.src.default.toString();
@@ -7592,16 +8147,13 @@
                       nodes: newInfo
                     });
                     const newVal = newInfoForNode[key];
-                    if (newVal) {
-                      const resVal = newVal.src ?? newVal;
-                      const bothObj = typeof nestedNode[key] === "object" && resVal && typeof resVal === "object";
-                      nestedNode[key] = bothObj ? Object.assign(nestedNode[key] ?? {}, resVal) : resVal;
-                    } else {
+                    if (newVal)
+                      nestedNode[key] = newVal.src ?? newVal;
+                    else {
                       onError({
                         message: `Could not resolve ${ogSrc}`
                       }, options2);
                     }
-                    node.src.graph.nodes[nestedName][key] = merge(nestedNode.src[key], nestedNode[key], true);
                   } else
                     console.error("[wasl-load] Component info is not an object...");
                 }
@@ -7620,7 +8172,6 @@
               node: name2
             }, options2);
           } else if (edges) {
-            console.log("Node", node);
             const args = parse_default(node.src.default) ?? /* @__PURE__ */ new Map();
             if (args.size === 0)
               args.set("default", {});
@@ -7633,12 +8184,12 @@
             node.arguments = args;
           }
         }
-        nodes2[name2] = merge(node.src, node, options2._deleteSrc);
+        nodes[name2] = merge(node.src, node, options2._deleteSrc);
       }
     }
     for (let output in edges) {
-      const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str] ?? o.arguments.get(str);
-      let outTarget = nodes2;
+      const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str] ?? (o.arguments ? o.arguments.get(str) : void 0);
+      let outTarget = nodes;
       output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
       if (!outTarget) {
         onError({
@@ -7647,7 +8198,7 @@
         }, options2);
       }
       for (let input in edges[output]) {
-        let inTarget = nodes2;
+        let inTarget = nodes;
         input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
         if (!inTarget) {
           onError({
@@ -7660,12 +8211,13 @@
     return target;
   };
   var load = async (urlOrObject, options2 = {}, urlArg = "") => {
-    const clonedOptions = Object.assign({ errors: [], warnings: [] }, options2);
+    const clonedOptions = Object.assign({ errors: [], warnings: [], files: {} }, options2);
     let {
       relativeTo,
       errors,
       warnings
     } = clonedOptions;
+    const onImport = (path2, info) => clonedOptions.files[path2] = info;
     const isString = typeof urlOrObject === "string";
     errors.push(...valid(urlOrObject, options2, "load"));
     let object, url = urlArg, relativeToResolved = "";
@@ -7678,62 +8230,52 @@
       object = Object.assign({}, urlOrObject);
       delete clonedOptions.relativeTo;
       if (typeof clonedOptions._internal === "string")
-        relativeToResolved = get(clonedOptions._internal, clonedOptions.relativeTo);
+        relativeToResolved = resolve(clonedOptions._internal, clonedOptions.relativeTo);
     }
     try {
       new URL(url);
       clonedOptions._remote = url;
-      onError({
-        message: "Remote not supported for import mode."
-      }, { errors, warnings });
-      return void 0;
+      relativeToResolved = relativeTo = "";
     } catch {
     }
     let pkg;
-    const mainPath = await get(url, relativeToResolved);
+    const mainPath = await resolve(url, relativeToResolved);
     if (url) {
-      const main = await get_default(mainPath);
-      const pkgUrl = get(basePkgPath, mainPath, true);
-      pkg = await get_default(pkgUrl).catch((e) => onError({
-        message: e.message,
-        file: pkgUrl
-      }, { errors, warnings }));
+      const main2 = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
+      const pkgUrl = resolve(basePkgPath, mainPath, true);
+      pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
       if (pkg)
-        object = Object.assign(pkg, main);
+        object = Object.assign(pkg, main2);
     } else {
       if (clonedOptions.filesystem) {
-        const pkgPath = get(basePkgPath, relativeToResolved);
+        const pkgPath = resolve(basePkgPath, relativeToResolved);
         pkg = checkFiles(pkgPath, clonedOptions.filesystem);
         if (pkg)
           object = Object.assign(pkg, isString ? {} : object);
         else
           remove(basePkgPath, pkgPath);
       } else {
-        const pkgPath = get(basePkgPath, mainPath);
+        const pkgPath = resolve(basePkgPath, mainPath);
         if (relativeToResolved) {
-          pkg = await get_default(pkgPath).catch((e) => onError({
-            message: e.message,
-            file: pkgPath
-          }, { errors, warnings }));
+          pkg = await getWithErrorLog(pkgPath, { errors, warnings });
           if (pkg)
             object = Object.assign(pkg, isString ? {} : object);
         }
       }
     }
     if (errors.length === 0) {
-      const nodes2 = object.graph.nodes;
-      await getSrc(nodes2, {
+      const nodes = object.graph.nodes;
+      await getSrc(nodes, {
         mainPath,
         relativeToResolved,
         url,
-        object
+        object,
+        onImport
       }, clonedOptions, object.graph);
       return object;
     }
   };
   var load_default = load;
-
-  // src/validate.ts
   var activeVersion = null;
   var ajv = new import_ajv.default({
     allErrors: true
@@ -7780,7 +8322,6 @@
       if (inputIsValid && !clone._internal) {
         clone._internal = true;
         const loaded = await load_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
-        console.log("Loaded", loaded);
         if (loaded)
           schemaValid = await validate(loaded, clone);
       }
@@ -7789,321 +8330,12 @@
   };
   var validate_default = validate;
 
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/index.wasl.json
-  var index_wasl_default = {
-    graph: {
-      nodes: {
-        phaserComponent: {
-          src: "src/index.wasl.json",
-          components: {
-            config: {
-              content: {
-                physics: {
-                  default: "arcade",
-                  arcade: {
-                    gravity: {
-                      y: 500
-                    }
-                  }
-                },
-                scene: {
-                  key: "main",
-                  preload: {
-                    src: "scripts/preload.js"
-                  },
-                  create: {
-                    src: "scripts/create.js"
-                  },
-                  update: {
-                    src: "scripts/update.js"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      edges: {}
-    }
-  };
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/index.wasl.json
-  var index_wasl_default2 = {
-    graph: {
-      nodes: {
-        phaserModule: {
-          src: "components/phaser/index.js"
-        },
-        config: {
-          src: "components/config/index.js"
-        },
-        game: {
-          src: "components/game/index.js"
-        }
-      },
-      edges: {
-        phaserModule: {
-          config: {}
-        },
-        config: {
-          game: {}
-        }
-      }
-    }
-  };
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/package.json
-  var package_default = {
-    name: "phaser",
-    type: "module"
-  };
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/package.json
-  var package_default2 = {
-    name: "phaser",
-    type: "module"
-  };
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/phaser/index.js
-  var phaser_exports = {};
-  __export(phaser_exports, {
-    default: () => phaser_default,
-    oncreate: () => oncreate
-  });
-  var script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
-  document.head.appendChild(script);
-  var nodes = {};
-  var onResolve = null;
-  script.onload = function() {
-    if (onResolve instanceof Function)
-      onResolve(window.Phaser);
-    for (let tag in nodes)
-      nodes[tag].run();
-  };
-  var oncreate = (node) => {
-    if (window.Phaser)
-      node.run();
-    else {
-      nodes[node.tag] = node;
-    }
-  };
-  var phaser_default = () => {
-    if (window.Phaser)
-      return window.Phaser;
-    else
-      return new Promise((resolve) => onResolve = resolve);
-  };
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/config/index.js
-  var config_exports = {};
-  __export(config_exports, {
-    content: () => content,
-    default: () => config_default
-  });
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/config/merge.js
-  var merge2 = (base, newObj) => {
-    const copy = Object.assign({}, base);
-    const copyKeys = Object.keys(copy);
-    const newKeys = Object.keys(newObj);
-    copyKeys.forEach((k) => {
-      if (typeof newObj[k] === "object")
-        merge2(base[k], newObj[k]);
-      else if (newObj[k])
-        base[k] = newObj[k];
-    });
-    newKeys.forEach((k) => copy[k] = newObj[k]);
-    return copy;
-  };
-  var merge_default = merge2;
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/config/phaser.config.js
-  var defaultConfig = (Phaser2) => {
-    function preload2() {
-      this.load.setBaseURL("http://labs.phaser.io");
-      this.load.image("sky", "assets/skies/space3.png");
-      this.load.image("logo", "assets/sprites/phaser3-logo.png");
-      this.load.image("red", "assets/particles/red.png");
-    }
-    function create2() {
-      this.add.image(400, 300, "sky");
-      var particles = this.add.particles("red");
-      var emitter = particles.createEmitter({
-        speed: 100,
-        scale: { start: 1, end: 0 },
-        blendMode: "ADD"
-      });
-      var logo = this.physics.add.image(400, 100, "logo");
-      logo.setVelocity(100, 200);
-      logo.setBounce(1, 1);
-      logo.setCollideWorldBounds(true);
-      emitter.startFollow(logo);
-    }
-    const config = {
-      type: Phaser2.AUTO,
-      width: "100",
-      height: "100",
-      physics: {
-        default: "arcade",
-        arcade: {
-          gravity: { y: 200 },
-          debug: false
-        }
-      },
-      scene: {
-        preload: preload2,
-        create: create2
-      }
-    };
-    return config;
-  };
-  var phaser_config_default = defaultConfig;
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/config/index.js
-  var content = phaser_config_default;
-  function config_default(node) {
-    if (window.Phaser) {
-      let cfg = typeof this.content === "function" ? this.content(window.Phaser) : this.content;
-      let defaultCfg = typeof content === "function" ? content(window.Phaser) : content;
-      let config = merge_default(defaultCfg, cfg);
-      config.parent = node.graph.parentNode;
-      return config;
-    }
-  }
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/game/index.js
-  var game_exports = {};
-  __export(game_exports, {
-    default: () => game_default
-  });
-  var game_default = (config) => new Phaser.Game(config);
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/update.js
-  var update_exports = {};
-  __export(update_exports, {
-    default: () => update_default
-  });
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/create.js
-  var create_exports = {};
-  __export(create_exports, {
-    cursors: () => cursors,
-    default: () => create_default,
-    player: () => player
-  });
-  var map;
-  var player;
-  var cursors;
-  var groundLayer;
-  var coinLayer;
-  var text;
-  var score = 0;
-  function create() {
-    map = this.make.tilemap({ key: "map" });
-    var groundTiles = map.addTilesetImage("tiles");
-    groundLayer = map.createLayer("World", groundTiles, 0, 0);
-    groundLayer.setCollisionByExclusion([-1]);
-    var coinTiles = map.addTilesetImage("coin");
-    coinLayer = map.createLayer("Coins", coinTiles, 0, 0);
-    this.physics.world.bounds.width = groundLayer.width;
-    this.physics.world.bounds.height = groundLayer.height;
-    player = this.physics.add.sprite(200, 200, "player");
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(false);
-    player.body.setSize(player.width, player.height - 8);
-    this.physics.add.collider(groundLayer, player);
-    coinLayer.setTileIndexCallback(17, collectCoin, this);
-    this.physics.add.overlap(player, coinLayer);
-    window.player = player;
-    this.anims.create({
-      key: "walk",
-      frames: this.anims.generateFrameNames("player", {
-        prefix: "p1_walk",
-        start: 1,
-        end: 11,
-        zeroPad: 2
-      }),
-      frameRate: 10,
-      repeat: -1
-    });
-    this.anims.create({
-      key: "idle",
-      frames: [{ key: "player", frame: "p1_stand" }],
-      frameRate: 10
-    });
-    cursors = this.input.keyboard.createCursorKeys();
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.startFollow(player);
-    this.cameras.main.setBackgroundColor("#ccccff");
-    text = this.add.text(20, 570, "0", {
-      fontSize: "20px",
-      fill: "#ffffff"
-    });
-    text.setScrollFactor(0);
-  }
-  function collectCoin(sprite, tile) {
-    coinLayer.removeTileAt(tile.x, tile.y);
-    score++;
-    text.setText(score);
-    return false;
-  }
-  var create_default = create;
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/update.js
-  function update(time, delta) {
-    if (cursors.left.isDown) {
-      player.body.setVelocityX(-200);
-      player.anims.play("walk", true);
-      player.flipX = true;
-    } else if (cursors.right.isDown) {
-      player.body.setVelocityX(200);
-      player.anims.play("walk", true);
-      player.flipX = false;
-    } else {
-      player.body.setVelocityX(0);
-      player.anims.play("idle", true);
-    }
-  }
-  var update_default = update;
-
-  // node_modules/.cache/raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/preload.js
-  var preload_exports = {};
-  __export(preload_exports, {
-    default: () => preload_default
-  });
-  function preload() {
-    this.load.setBaseURL("https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets");
-    this.load.tilemapTiledJSON("map", "map.json");
-    this.load.spritesheet("tiles", "tiles.png", {
-      frameWidth: 70,
-      frameHeight: 70
-    });
-    this.load.image("coin", "coinGold.png");
-    this.load.atlas(
-      "player",
-      "player.png",
-      "player.json"
-    );
-  }
-  var preload_default = preload;
-
   // demos/remote.js
   var import_meta2 = {};
+  var main = "";
   var path = "https://raw.githubusercontent.com/garrettmflynn/phaser/main/index.wasl.json";
   var options = {
-    relativeTo: import_meta2.url,
-    filesystem: {
-      "package.json": package_default,
-      "src/package.json": package_default2,
-      "src/index.wasl.json": index_wasl_default2,
-      "src/components/phaser/index.js": phaser_exports,
-      "src/components/config/index.js": config_exports,
-      "src/components/game/index.js": game_exports,
-      "scripts/preload.js": preload_exports,
-      "scripts/update.js": update_exports,
-      "scripts/create.js": create_exports
-    }
+    relativeTo: import_meta2.url
   };
 
   // index.js
@@ -8115,7 +8347,7 @@
   };
   var start = async () => {
     console.log("------------------ IMPORT MODE ------------------");
-    const importOptions = Object.assign({ errors: [], warnings: [] }, options);
+    const importOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
     const res = await validate_default(path, importOptions);
     console.log("wasl.validate (import)", res);
     if (res) {
@@ -8124,16 +8356,20 @@
     }
     printError(importOptions.errors, "import");
     printError(importOptions.warnings, "import", "Warning");
-    console.log("------------------ REFERENCE MODE ------------------");
-    const directOptions = Object.assign({ errors: [], warnings: [] }, options);
-    const resDirect = await validate_default(index_wasl_default, directOptions);
-    console.log("wasl.validate (reference)", resDirect);
-    if (resDirect) {
-      const oDirect = await load_default(index_wasl_default, directOptions);
-      console.log("wasl.load (reference)", oDirect);
+    console.log("files", importOptions.files);
+    if (main) {
+      console.log("------------------ REFERENCE MODE ------------------");
+      const refOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
+      const resref = await validate_default(main, refOptions);
+      console.log("wasl.validate (reference)", resref);
+      if (resref) {
+        const oref = await load_default(main, refOptions);
+        console.log("wasl.load (reference)", oref);
+      }
+      printError(refOptions.errors, "reference");
+      printError(refOptions.warnings, "reference", "Warning");
+      console.log("files", refOptions.files);
     }
-    printError(directOptions.errors, "reference");
-    printError(directOptions.warnings, "reference", "Warning");
   };
   start();
 })();

@@ -13,6 +13,11 @@ Errors mean that the WASL file will not run.
 
 Warnings indicate that there is suboptimal syntax in the files themselves. However, these are corrected to load the file and don't impact loaded object format.
 
+## Features
+- Validation of original JSON files and loaded objects against the JSON Schema
+- Automatic importing of code specified using the `src` key (anywhere in the WASL file!)
+
+
 ##  WASL Example Syntax
 ```json
 {
