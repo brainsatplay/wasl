@@ -48,6 +48,9 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 
 On activation, exports of files linked through "src" keys (throughout the entire WASL file) are flattened to their object.
 
+## Limitations
+With the way that WASL handles remote importing (using `remote-esm`), files that are not directly linked to (e.g. index.wasl.json links to `https://example.com/index.js` which imports `function.js`, our indirect link)  **cannot** share references or modify them during runtime *unless* you use **reference mode**.
+
 ## Contributing
  > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests
 

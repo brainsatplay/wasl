@@ -29,21 +29,20 @@ const validate = async (urlOrObject, options:Options={}) => {
     let schemaValid;
     let data = urlOrObject
 
+    try {
+        new URL(urlOrObject) // Resolve remote URLs
+        clone._remote = urlOrObject
+        delete clone.relativeTo
+        relativeTo = ''
+    } catch {}
+
     // Check Input
-    const inputErrors = check.valid(urlOrObject, options, 'validate')
+    const inputErrors = check.valid(urlOrObject, clone, 'validate')
     const inputIsValid = inputErrors.length === 0
     errors.push(...inputErrors)
 
     // Check First Path
     if (typeof urlOrObject === 'string') {
-
-        // Resolve remote URLs
-        try {
-            new URL(urlOrObject)
-            clone._remote = urlOrObject
-            delete clone.relativeTo
-            relativeTo = ''
-        } catch {}
 
         data = await get(urlOrObject, relativeTo).catch(e => {
             errors.push({ 

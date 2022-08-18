@@ -366,20 +366,18 @@ const load = async (
 
     const isString = typeof urlOrObject === 'string'
 
-    errors.push(...check.valid(urlOrObject, options, 'load'))
-
+    // Resolve remote URLs
     let object, url = urlArg, relativeToResolved = ''; // catch internal calls
-    if (url || (isString && relativeTo)) {
+    if (url || (isString)) {
         if (!url) url = urlOrObject // Import Mode
         delete clonedOptions.filesystem
         relativeToResolved = relativeTo
-    } else {
+    } else if (typeof urlOrObject === 'object') {
         object = Object.assign({}, urlOrObject) // Rseference Mode
         delete clonedOptions.relativeTo
         if (typeof clonedOptions._internal === 'string') relativeToResolved = remoteImport.resolve(clonedOptions._internal, clonedOptions.relativeTo)
     }
 
-    // Resolve remote URLs
     try {
         new URL(url)
         clonedOptions._remote = url
@@ -389,6 +387,10 @@ const load = async (
         // return undefined
         relativeToResolved = relativeTo = ''
     } catch {}
+
+    errors.push(...check.valid(urlOrObject, clonedOptions, 'load'))
+
+
 
     let pkg; 
 
