@@ -448,10 +448,10 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"remote-esm@0.0.4":
-  "integrity" "sha512-wFl35wgIm5YyONgHxHKHaqYt2BPDjIG9ZymIkaGUzYkWYJdBUuKHp5vFL44Di2hoAkMwd8j3jt/s6b/M+jdsuQ=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.4.tgz"
-  "version" "0.0.4"
+"remote-esm@0.0.5":
+  "integrity" "sha512-zodmi0pZ8iYtS4kMNupP499FoyArxCQcJtBaa3+Zbq2KOYzRboUD4HV+RtQdKkgWVINzehgdFyW0HqFvcxkuDA=="
+  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.5.tgz"
+  "version" "0.0.5"
   dependencies:
     "cross-blob" "^3.0.1"
     "node-fetch" "^3.2.10"

@@ -82,13 +82,22 @@ var remove = (original, search, key=original, o?)=> {
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
             let passToNested = null
-            let fullPath = (relativeToResolved) ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc)
+
+
+            let fullPath, _remote = options._remote
+            try {
+              new URL(ogSrc);
+              fullPath = ogSrc
+              _remote = ogSrc;
+            } catch {
+              fullPath = relativeToResolved ? remoteImport.resolve(ogSrc, mainPath) : resolve(ogSrc);
+            }
 
             //Import Mode
             if (isImportMode) {
                 node.src = await getWithErrorLog(fullPath, undefined, onImport, options) as LatestWASL
-                if (options._remote) {
-                    const got = (await getSrc([node], info, options))
+                if (_remote) {
+                    const got = (await getSrc([node], info, options, {nodes: [node]}))
                     node.src = got[0].src
                     passToNested = remoteImport.resolve(ogSrc)
                 } else passToNested = remoteImport.resolve(ogSrc, url, true)
@@ -130,7 +139,7 @@ var remove = (original, search, key=original, o?)=> {
                 files: options.files,
                 _internal: ogSrc,
                 _deleteSrc: options._deleteSrc,
-                _remote: options._remote,
+                _remote,
             }) 
 
         } else {
@@ -228,7 +237,7 @@ var remove = (original, search, key=original, o?)=> {
             ) {
 
                 // Check if stateless
-                if (edges && node.src.default){
+                if (node.src.default){
                     const fnString = node.src.default.toString()
                     const keyword = 'function'
                     if (fnString.slice(0, keyword.length) === keyword){
@@ -283,7 +292,7 @@ var remove = (original, search, key=original, o?)=> {
                 } else {
 
                     // VALIDATE: Source files must have a default export
-                    if (edges && !('default' in node.src)){
+                    if (!('default' in node.src)){
                         onError({
                             message: 'No default export.',
                             node: name
@@ -291,7 +300,7 @@ var remove = (original, search, key=original, o?)=> {
                     } 
                     
                     // LOAD: Arguments // TODO: Make sure this doesn't conflict with things the user can pass in...
-                    else if (edges) {
+                    else {
                         
                         const args = getFnParamInfo(node.src.default) ?? new Map()
                         

@@ -2892,7 +2892,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve2.call(this, root, ref);
+      let _sch = resolve3.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
         const { schemaId } = this.opts;
@@ -2919,7 +2919,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve2(root, ref) {
+    function resolve3(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -3737,7 +3737,7 @@ var require_uri_all = __commonJS({
         target.fragment = relative.fragment;
         return target;
       }
-      function resolve2(baseURI, relativeURI, options2) {
+      function resolve3(baseURI, relativeURI, options2) {
         var schemelessOptions = assign({ scheme: "null" }, options2);
         return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
       }
@@ -4005,7 +4005,7 @@ var require_uri_all = __commonJS({
       exports2.removeDotSegments = removeDotSegments;
       exports2.serialize = serialize;
       exports2.resolveComponents = resolveComponents;
-      exports2.resolve = resolve2;
+      exports2.resolve = resolve3;
       exports2.normalize = normalize;
       exports2.equal = equal;
       exports2.escapeComponent = escapeComponent;
@@ -7302,10 +7302,10 @@ var require_Blob = __commonJS({
           }
         }
         function promisify(obj) {
-          return new Promise(function(resolve2, reject) {
+          return new Promise(function(resolve3, reject) {
             obj.onload = obj.onerror = function(evt) {
               obj.onload = obj.onerror = null;
-              evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
+              evt.type === "load" ? resolve3(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
             };
           });
         }
@@ -7705,12 +7705,12 @@ var handleFetch = async (path2, options2 = {}, progressCallback) => {
 };
 var fetchRemote = async (url, options2 = {}, progressCallback) => {
   const response = await globalThis.fetch(url, options2);
-  return new Promise(async (resolve2) => {
+  return new Promise(async (resolve3) => {
     if (response) {
       const type = response.headers.get("Content-Type");
       if (globalThis.REMOTEESM_NODE) {
         const buffer = await response.arrayBuffer();
-        resolve2({ buffer, type });
+        resolve3({ buffer, type });
       } else {
         const reader = response.body.getReader();
         const bytes = parseInt(response.headers.get("Content-Length"), 10);
@@ -7723,7 +7723,7 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
               config.type = type;
             const blob = new Blob(buffer, config);
             const ab = await blob.arrayBuffer();
-            resolve2({ buffer: new Uint8Array(ab), type });
+            resolve3({ buffer: new Uint8Array(ab), type });
             return;
           }
           bytesReceived += value.length;
@@ -7737,12 +7737,12 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
       }
     } else {
       console.warn("Response not received!", options2.headers);
-      resolve2(void 0);
+      resolve3(void 0);
     }
   });
 };
 globalThis.REMOTEESM_NODE = false;
-var ready = new Promise(async (resolve2, reject) => {
+var ready = new Promise(async (resolve3, reject) => {
   try {
     if (typeof process === "object") {
       globalThis.REMOTEESM_NODE = true;
@@ -7753,9 +7753,9 @@ var ready = new Promise(async (resolve2, reject) => {
       globalThis.Blob = Blob3;
       if (typeof globalThis.Blob !== "function")
         globalThis.Blob = Blob3;
-      resolve2(true);
+      resolve3(true);
     } else
-      resolve2(true);
+      resolve3(true);
   } catch (err) {
     console.log(err);
     reject(err);
@@ -7775,7 +7775,7 @@ var importFromText = async (text, extension) => {
   });
   return imported;
 };
-var resolve = get;
+var resolve2 = get;
 var safeImport = async (uri, root, onImport = () => {
 }, output) => {
   await ready;
@@ -7814,8 +7814,9 @@ var safeImport = async (uri, root, onImport = () => {
         const newURI = dependentFileWithoutRoot;
         const newText = await blob.text();
         let importedText = isJS ? await safeImport(newURI, uri, onImport, "text") : newText;
+        const hasBrackets = variables.includes("{");
         const dataUri = moduleDataURI(importedText, mimeType);
-        text = `const ${variables} =  await import('${dataUri}', ${isJS ? "{}" : '{assert: {type: "json"}}'});
+        text = `const ${variables} =  (await import('${dataUri}', ${isJS ? "{}" : '{assert: {type: "json"}}'}))${hasBrackets ? "" : ".default"};
 ${text}`;
       }
       module = await importFromText(text, extension);
@@ -7832,7 +7833,7 @@ var cache = {};
 var get2 = async (relPath, relativeTo = "", onImport) => {
   let type = suffix(relPath);
   const isJSON = !type || type.includes("json");
-  const fullPath = resolve(relPath, relativeTo);
+  const fullPath = resolve2(relPath, relativeTo);
   if (!cache[fullPath]) {
     cache[fullPath] = remote_esm_default(fullPath, onImport).catch((e) => {
       if (e.message.includes("Failed to fetch"))
@@ -7860,7 +7861,7 @@ var valid = (input, options2, location) => {
       if (import.meta.url) {
         error = { message: "Not a valid relativeTo key (required) in options", file: input };
         console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`);
-      } else {
+      } else if (!options2._remote) {
         error = { message: "import.meta.url is not supported", file: input };
         console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`);
       }
@@ -7982,15 +7983,22 @@ var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } =
       if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
         node.src = null;
         let passToNested = null;
-        let fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
+        let fullPath, _remote = options2._remote;
+        try {
+          new URL(ogSrc);
+          fullPath = ogSrc;
+          _remote = ogSrc;
+        } catch {
+          fullPath = relativeToResolved ? resolve2(ogSrc, mainPath) : resolve(ogSrc);
+        }
         if (isImportMode) {
           node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
-          if (options2._remote) {
-            const got = await getSrc([node], info, options2);
+          if (_remote) {
+            const got = await getSrc([node], info, options2, { nodes: [node] });
             node.src = got[0].src;
-            passToNested = resolve(ogSrc);
+            passToNested = resolve2(ogSrc);
           } else
-            passToNested = resolve(ogSrc, url, true);
+            passToNested = resolve2(ogSrc, url, true);
           if (!node.src)
             remove(ogSrc, fullPath, name2, target);
         } else {
@@ -8025,7 +8033,7 @@ var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } =
             files: options2.files,
             _internal: ogSrc,
             _deleteSrc: options2._deleteSrc,
-            _remote: options2._remote
+            _remote
           });
       } else {
         for (let key in node) {
@@ -8093,7 +8101,7 @@ var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } =
   for (let name2 in nodes) {
     const node = nodes[name2];
     if (node?.src && typeof node?.src === "object") {
-      if (edges && node.src.default) {
+      if (node.src.default) {
         const fnString = node.src.default.toString();
         const keyword = "function";
         if (fnString.slice(0, keyword.length) === keyword) {
@@ -8138,12 +8146,12 @@ var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } =
           }
         }
       } else {
-        if (edges && !("default" in node.src)) {
+        if (!("default" in node.src)) {
           onError({
             message: "No default export.",
             node: name2
           }, options2);
-        } else if (edges) {
+        } else {
           const args = parse_default(node.src.default) ?? /* @__PURE__ */ new Map();
           if (args.size === 0)
             args.set("default", {});
@@ -8191,18 +8199,17 @@ var load = async (urlOrObject, options2 = {}, urlArg = "") => {
   } = clonedOptions;
   const onImport = (path2, info) => clonedOptions.files[path2] = info;
   const isString = typeof urlOrObject === "string";
-  errors.push(...valid(urlOrObject, options2, "load"));
   let object, url = urlArg, relativeToResolved = "";
-  if (url || isString && relativeTo) {
+  if (url || isString) {
     if (!url)
       url = urlOrObject;
     delete clonedOptions.filesystem;
     relativeToResolved = relativeTo;
-  } else {
+  } else if (typeof urlOrObject === "object") {
     object = Object.assign({}, urlOrObject);
     delete clonedOptions.relativeTo;
     if (typeof clonedOptions._internal === "string")
-      relativeToResolved = resolve(clonedOptions._internal, clonedOptions.relativeTo);
+      relativeToResolved = resolve2(clonedOptions._internal, clonedOptions.relativeTo);
   }
   try {
     new URL(url);
@@ -8210,24 +8217,25 @@ var load = async (urlOrObject, options2 = {}, urlArg = "") => {
     relativeToResolved = relativeTo = "";
   } catch {
   }
+  errors.push(...valid(urlOrObject, clonedOptions, "load"));
   let pkg;
-  const mainPath = await resolve(url, relativeToResolved);
+  const mainPath = await resolve2(url, relativeToResolved);
   if (url) {
     const main2 = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
-    const pkgUrl = resolve(basePkgPath, mainPath, true);
+    const pkgUrl = resolve2(basePkgPath, mainPath, true);
     pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
     if (pkg)
       object = Object.assign(pkg, main2);
   } else {
     if (clonedOptions.filesystem) {
-      const pkgPath = resolve(basePkgPath, relativeToResolved);
+      const pkgPath = resolve2(basePkgPath, relativeToResolved);
       pkg = checkFiles(pkgPath, clonedOptions.filesystem);
       if (pkg)
         object = Object.assign(pkg, isString ? {} : object);
       else
         remove(basePkgPath, pkgPath);
     } else {
-      const pkgPath = resolve(basePkgPath, mainPath);
+      const pkgPath = resolve2(basePkgPath, mainPath);
       if (relativeToResolved) {
         pkg = await getWithErrorLog(pkgPath, { errors, warnings });
         if (pkg)
@@ -8260,17 +8268,17 @@ var validate = async (urlOrObject, options2 = {}) => {
     version2 = latest_default;
   let schemaValid;
   let data = urlOrObject;
-  const inputErrors = valid(urlOrObject, options2, "validate");
+  try {
+    new URL(urlOrObject);
+    clone._remote = urlOrObject;
+    delete clone.relativeTo;
+    relativeTo = "";
+  } catch {
+  }
+  const inputErrors = valid(urlOrObject, clone, "validate");
   const inputIsValid = inputErrors.length === 0;
   errors.push(...inputErrors);
   if (typeof urlOrObject === "string") {
-    try {
-      new URL(urlOrObject);
-      clone._remote = urlOrObject;
-      delete clone.relativeTo;
-      relativeTo = "";
-    } catch {
-    }
     data = await get_default(urlOrObject, relativeTo).catch((e) => {
       errors.push({
         message: e.message,
