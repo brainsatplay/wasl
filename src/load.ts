@@ -35,10 +35,9 @@ var remove = (original, search=original, key=original, o?)=> {
   const onError = (e, {errors, warnings}) => {
       const item = {
           message: e.message, 
-          file: e.file ?? basePkgPath,
+          file: e.file,
           node: e.node,
       }
-
       
       const arr = (e.type === 'warning') ? warnings : errors
       arr.push(item)
@@ -46,7 +45,7 @@ var remove = (original, search=original, key=original, o?)=> {
 
   let getSrc = async (target, info, options, {nodes = undefined, edges = undefined} = {}) => {
 
-    const {
+    let {
         relativeToResolved,
         mainPath,
         // object,
@@ -54,6 +53,8 @@ var remove = (original, search=original, key=original, o?)=> {
     } = info
 
     const isImportMode = !!url
+
+    relativeToResolved = options._remote ?? relativeToResolved
 
 
     for (let name in target) {
@@ -68,12 +69,17 @@ var remove = (original, search=original, key=original, o?)=> {
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
             let passToNested = null
-            let fullPath = (relativeToResolved) ? path.get(ogSrc, mainPath) : path.get(ogSrc, relativeToResolved)
+            let fullPath = (relativeToResolved) ? path.get(ogSrc, mainPath) : path.get(ogSrc)
 
             // Use Relative Paths
             if (isImportMode) {
                 node.src = await get(fullPath) as LatestWASL
-                passToNested = path.get(ogSrc, url, true)
+
+                if (options._remote) {
+                    const got = (await getSrc([node], info, options))
+                    node.src = got[0].src
+                    passToNested = path.get(ogSrc)
+                } else passToNested = path.get(ogSrc, url, true)
             }
             
             // Direct + Fallback for Relative Paths
@@ -109,6 +115,7 @@ var remove = (original, search=original, key=original, o?)=> {
                 warnings: options.warnings,
                 _internal: ogSrc,
                 _deleteSrc: options._deleteSrc,
+                _remote: options._remote,
             }) 
 
         } else {
@@ -116,6 +123,8 @@ var remove = (original, search=original, key=original, o?)=> {
             for (let key in node) {
 
                     if (key === 'src') {
+
+                        console.log('CHECKING', node.src)
 
                         const language = node.src.language
                         if (!language || languages.js.includes(language)){
@@ -131,8 +140,9 @@ var remove = (original, search=original, key=original, o?)=> {
                                     if (imported.default && Object.keys(imported).length === 1) imported = imported.default
                                     return imported
                                 } catch (e) {
+                                    console.error('Import did not work. Probably relies on something...')
                                     onError({
-                                        message:e.message,
+                                        message: e.message,
                                         file:name // NOTE: Is wrong...
                                     }, options)
                                 }
@@ -141,7 +151,11 @@ var remove = (original, search=original, key=original, o?)=> {
                             const esm = await esmImport(node.src.text)
                             if (esm) {
                                 delete node.src.text
-                                node.src = Object.assign(node.src, esm)
+                                console.log('esm', esm)
+
+                                if (typeof esm === 'object') node.src = {default: Object.assign(node.src, esm)}
+                                else node.src = esm
+                                console.log('New ndoe src', node.src)
                             } else {
                                 onError({
                                     message: 'Could not import this text as ESM',
@@ -275,7 +289,9 @@ var remove = (original, search=original, key=original, o?)=> {
                     } 
                     
                     // LOAD: Arguments // TODO: Make sure this doesn't conflict with things the user can pass in...
-                    else {
+                    else if (edges) {
+                        
+                        console.log('Node', node)
                         const args = getFnParamInfo(node.src.default) ?? new Map()
                         
                         if (args.size === 0) args.set("default", {});
@@ -358,7 +374,19 @@ const load = async (
         if (typeof clonedOptions._internal === 'string') relativeToResolved = path.get(clonedOptions._internal, clonedOptions.relativeTo)
     }
 
+    // Resolve remote URLs
+    try {
+        new URL(url)
+        clonedOptions._remote = url
+        onError({
+            message: 'Remote not supported for import mode.'
+        }, {errors, warnings})
+        return undefined
+        // relativeTo = ''
+    } catch {}
+
     let pkg; 
+
 
     const mainPath = await path.get(url, relativeToResolved) // maintain a reference to the main path (already resolved)
 
@@ -366,7 +394,10 @@ const load = async (
     if (url) {
         const main = await get(mainPath) as LatestWASL
         const pkgUrl = path.get(basePkgPath, mainPath, true)
-        pkg = await get(pkgUrl).catch((e) => onError(e, {errors, warnings})) as any
+        pkg = await get(pkgUrl).catch((e) => onError({
+            message: e.message,
+            file: pkgUrl
+        }, {errors, warnings})) as any
         if (pkg) object = Object.assign(pkg, main) as any
     } 
     
@@ -384,7 +415,10 @@ const load = async (
         else {
             const pkgPath = path.get(basePkgPath, mainPath)
             if (relativeToResolved){
-                pkg = await get(pkgPath).catch((e) => onError(e, {errors, warnings})) as any
+                pkg = await get(pkgPath).catch((e) => onError({
+                    message: e.message,
+                    file: pkgPath
+                }, {errors, warnings})) as any
                 if (pkg) object = Object.assign(pkg,  isString ? {} : object) as any
             }
         }

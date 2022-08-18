@@ -12,9 +12,16 @@ const get = async (relPath, relativeTo="") => {
     const fullPath = path.get(relPath, relativeTo)
 
     if (!cache[fullPath]){
-        cache[fullPath] = ((isJSON) ? import(fullPath, {assert: {type: 'json'}}) : import(fullPath)).catch(e => {
+        cache[fullPath] = ((isJSON) ? import(fullPath, {assert: {type: 'json'}}) : import(fullPath)).catch(async e => {
             if (e.message.includes('Failed to fetch')) {
-                throw new Error('404')
+                console.warn(`Trying to fetch ${fullPath} as text rather than using import()`)
+                const tryAgain = await fetch(fullPath)
+                if (tryAgain) {
+                    if (isJSON) return {default: await tryAgain.json()}
+                    else return {
+                        text: await tryAgain.text()
+                    }
+                } else throw new Error('404')
             }
             else console.error(`Error loading ${relPath}`, e, e.name)
         })

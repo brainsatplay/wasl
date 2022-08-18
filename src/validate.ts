@@ -36,6 +36,15 @@ const validate = async (urlOrObject, options:Options={}) => {
 
     // Check First Path
     if (typeof urlOrObject === 'string') {
+
+        // Resolve remote URLs
+        try {
+            new URL(urlOrObject)
+            clone._remote = urlOrObject
+            delete clone.relativeTo
+            relativeTo = ''
+        } catch {}
+
         data = await get(urlOrObject, relativeTo).catch(e => {
             errors.push({ 
                 message: e.message,
@@ -63,6 +72,7 @@ const validate = async (urlOrObject, options:Options={}) => {
     if (inputIsValid && !clone._internal){
         clone._internal = true
         const loaded = await load(data, clone, (typeof urlOrObject === 'string') ? urlOrObject : undefined)
+        console.log('Loaded', loaded)
         if (loaded)  schemaValid = await validate(loaded, clone)
     }
 }

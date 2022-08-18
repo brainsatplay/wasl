@@ -18,4 +18,5 @@ export type Options = {
     warnings?: any[],
     _internal?: string | boolean
     _deleteSrc?: boolean
+    _remote?: string
 }
