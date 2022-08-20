@@ -1,6 +1,6 @@
 {
   "name": "wasl",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "The Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/frontend/src/index.d.ts",
@@ -26,6 +26,6 @@
     "axios": "^0.27.2",
     "json-schema-to-typescript": "^11.0.2",
     "node-fetch": "^3.2.10",
-    "remote-esm": "0.0.5"
+    "remote-esm": "0.0.10"
   }
 }
