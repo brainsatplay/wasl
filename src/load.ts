@@ -70,6 +70,7 @@ var remove = (original, search, key=original, o?)=> {
 
     relativeToResolved = options._remote ?? relativeToResolved
 
+
     for (let name in target) {
         const node = target[name]
         const isObj = node && typeof node === 'object'
@@ -82,25 +83,26 @@ var remove = (original, search, key=original, o?)=> {
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
             let passToNested = null
-
-
             let fullPath, _remote = options._remote
             try {
               new URL(ogSrc);
               fullPath = ogSrc
               _remote = ogSrc;
             } catch {
-              fullPath = relativeToResolved ? remoteImport.resolve(ogSrc, mainPath) : resolve(ogSrc);
+              fullPath = relativeToResolved ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
             }
 
             //Import Mode
             if (isImportMode) {
                 node.src = await getWithErrorLog(fullPath, undefined, onImport, options) as LatestWASL
                 if (_remote) {
-                    const got = (await getSrc([node], info, options, {nodes: [node]}))
-                    node.src = got[0].src
-                    passToNested = remoteImport.resolve(ogSrc)
-                } else passToNested = remoteImport.resolve(ogSrc, url, true)
+                    if (!node.src){
+                        const got = (await getSrc([node], info, options, {nodes: [node]}))
+                        node.src = got[0].src ?? got[0]
+                        passToNested = remoteImport.resolve(ogSrc)
+                    }
+                } 
+                passToNested = remoteImport.resolve(ogSrc, url, true)
 
                 if (!node.src) remove(ogSrc, fullPath, name, target)
             } 
@@ -289,7 +291,10 @@ var remove = (original, search, key=original, o?)=> {
 
                         }
 
-                } else {
+                } 
+                
+                // Only run if parent is a complete graph (i.e. you're an actual node)
+                else if (edges) {
 
                     // VALIDATE: Source files must have a default export
                     if (!('default' in node.src)){
@@ -323,7 +328,6 @@ var remove = (original, search, key=original, o?)=> {
 
             }
         }
-
 
         // VALIDATE: Check that all edges point to valid nodes
         for (let output in edges){

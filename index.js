@@ -1,4 +1,5 @@
-import * as wasl from "./dist/index.esm.js"
+// import * as wasl from "./dist/index.esm.js"
+import * as wasl from "./src/index"
 
 // import { path, main, options } from './demos/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
@@ -22,13 +23,12 @@ const start = async () => {
     const res = await wasl.validate(path, importOptions)
     console.log('wasl.validate (import)', res)
     if (res) {
-        const o = await wasl.load(path, importOptions)
+            const o = await wasl.load(path, importOptions)
         console.log('wasl.load (import)', o)
     }
 
     printError(importOptions.errors, 'import')
     printError(importOptions.warnings, 'import', "Warning")
-    console.log('files', importOptions.files)
 
     // Option #2: Reference Mode (not possible for remote files in Node.js)
     if (main){
@@ -42,7 +42,6 @@ const start = async () => {
         }
         printError(refOptions.errors, 'reference')
         printError(refOptions.warnings, 'reference', 'Warning')
-        console.log('files', refOptions.files)
     }
 } 
 

@@ -9,12 +9,13 @@ const valid = (input, options, location): Options['errors'] => {
 
     let error;
     if (isString) {
-        if (!((!isUndefined && 'relativeTo' in options))){
+        const hasRelTo = (!isUndefined && 'relativeTo' in options)
+        if (!hasRelTo && !options._remote){
         
             if (import.meta.url) {
                 error = {message: 'Not a valid relativeTo key (required) in options', file: input}
                 console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`)
-            } else if (!options._remote) {
+            } else {
                  error = {message: 'import.meta.url is not supported', file: input}
                 console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`)
             }
