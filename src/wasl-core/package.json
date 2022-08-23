@@ -1,0 +1,26 @@
+{
+  "name": "wasl",
+  "version": "0.0.9",
+  "description": "The Web Application Specification Language (WASL)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/*.js",
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "repository": "https://github.com/brainsatplay/wasl",
+  "author": "Garrett Flynn <garrettmflynn@gmail.com>",
+  "license": "AGPL-3.0-or-later",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "start:browser": "tinybuild --path tinybuild.demo.js",
+    "build": "tinybuild",
+    "types": "node types.js"
+  },
+  "devDependencies": {
+    "remote-esm": "0.0.10"
+  }
+}

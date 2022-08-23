@@ -1,13 +1,13 @@
 import { Options } from "../types/index"
 
-const valid = (input, options, location): Options['errors'] => {
+const valid = (input:any, options: Options, location:string): any[] => {
     
-    const errors = []
+    const errors: Options['errors'] = []
     const isUndefined = options?.relativeTo === undefined
     const isString = typeof input === 'string'
     const isObject = typeof input === 'object'
 
-    let error;
+    let error: any;
     if (isString) {
         const hasRelTo = (!isUndefined && 'relativeTo' in options)
         if (!hasRelTo && !options._remote){

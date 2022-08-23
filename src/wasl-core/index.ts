@@ -1,9 +1,9 @@
-import { LatestWASL, Options } from "./types"
-import * as languages from './utils/languages'
-import * as path from './utils/path'
-import get from './get'
-import * as check from './utils/check'
-import getFnParamInfo from "./utils/parse"
+import { LatestWASL, Options } from "../common/types"
+import * as languages from '../common/utils/languages'
+import * as path from '../common/utils/path'
+import get from '../common/get'
+import * as check from '../common/utils/check'
+import getFnParamInfo from "../common/utils/parse"
 
 import * as remoteImport from 'remote-esm'
 
@@ -56,7 +56,9 @@ var remove = (original, search, key=original, o?)=> {
     }, o))
   }
 
-  let getSrc = async (target, info, options, {nodes = undefined, edges = undefined} = {}) => {
+  let getSrc = async (target, info, options, graph:any = {}) => {
+    const nodes = graph.nodes as any
+    const edges = graph.edges as any
 
     let {
         relativeToResolved,
@@ -82,7 +84,7 @@ var remove = (original, search, key=original, o?)=> {
 
             node.src = null
             // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
-            let passToNested = null
+            let passToNested:any = null
             let fullPath, _remote = options._remote
             try {
               new URL(ogSrc);
@@ -272,8 +274,13 @@ var remove = (original, search, key=original, o?)=> {
                                                 }))
                                                 const newVal = newInfoForNode[key]
 
-                                                if (newVal) nestedNode[key] = newVal.src ?? newVal // TODO: Might have to merge into the default if an object?
-                                                else {
+                                                if (newVal) {
+                                                    let chosenVal = newVal.src ?? newVal
+
+                                                    // merge default if the only key
+                                                    if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
+                                                    nestedNode[key] = chosenVal
+                                                } else {
                                                     onError({
                                                         message: `Could not resolve ${ogSrc}`
                                                     }, options)
@@ -365,7 +372,7 @@ const load = async (
 ) => {
 
 
-    const clonedOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
+    const clonedOptions = Object.assign({errors: [], warnings: [], files: {}}, options) as Options & {errors: any, warnings: any, files: any}
 
     let { 
         relativeTo, 
@@ -373,14 +380,16 @@ const load = async (
         warnings
     } = clonedOptions
 
-    const onImport = (path, info) => clonedOptions.files[path] = info
+    const onImport = (path, info) => {
+        clonedOptions.files[path] = info
+    }
 
     
 
     const isString = typeof urlOrObject === 'string'
 
     // Resolve remote URLs
-    let object, url = urlArg, relativeToResolved = ''; // catch internal calls
+    let object, url = urlArg, relativeToResolved:any = ''; // catch internal calls
     if (url || (isString)) {
         if (!url) url = urlOrObject // Import Mode
         delete clonedOptions.filesystem

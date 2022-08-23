@@ -35,6 +35,558 @@
     mod
   ));
 
+  // node_modules/blob-polyfill/Blob.js
+  var require_Blob = __commonJS({
+    "node_modules/blob-polyfill/Blob.js"(exports) {
+      (function(global2) {
+        (function(factory) {
+          if (typeof define === "function" && define.amd) {
+            define(["exports"], factory);
+          } else if (typeof exports === "object" && typeof exports.nodeName !== "string") {
+            factory(exports);
+          } else {
+            factory(global2);
+          }
+        })(function(exports2) {
+          "use strict";
+          var BlobBuilder = global2.BlobBuilder || global2.WebKitBlobBuilder || global2.MSBlobBuilder || global2.MozBlobBuilder;
+          var URL2 = global2.URL || global2.webkitURL || function(href, a) {
+            a = document.createElement("a");
+            a.href = href;
+            return a;
+          };
+          var origBlob = global2.Blob;
+          var createObjectURL = URL2.createObjectURL;
+          var revokeObjectURL = URL2.revokeObjectURL;
+          var strTag = global2.Symbol && global2.Symbol.toStringTag;
+          var blobSupported = false;
+          var blobSupportsArrayBufferView = false;
+          var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
+          try {
+            blobSupported = new Blob(["\xE4"]).size === 2;
+            blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
+          } catch (e) {
+          }
+          function mapArrayBufferViews(ary) {
+            return ary.map(function(chunk) {
+              if (chunk.buffer instanceof ArrayBuffer) {
+                var buf = chunk.buffer;
+                if (chunk.byteLength !== buf.byteLength) {
+                  var copy = new Uint8Array(chunk.byteLength);
+                  copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
+                  buf = copy.buffer;
+                }
+                return buf;
+              }
+              return chunk;
+            });
+          }
+          function BlobBuilderConstructor(ary, options2) {
+            options2 = options2 || {};
+            var bb = new BlobBuilder();
+            mapArrayBufferViews(ary).forEach(function(part) {
+              bb.append(part);
+            });
+            return options2.type ? bb.getBlob(options2.type) : bb.getBlob();
+          }
+          function BlobConstructor(ary, options2) {
+            return new origBlob(mapArrayBufferViews(ary), options2 || {});
+          }
+          if (global2.Blob) {
+            BlobBuilderConstructor.prototype = Blob.prototype;
+            BlobConstructor.prototype = Blob.prototype;
+          }
+          function stringEncode(string) {
+            var pos = 0;
+            var len = string.length;
+            var Arr = global2.Uint8Array || Array;
+            var at = 0;
+            var tlen = Math.max(32, len + (len >> 1) + 7);
+            var target = new Arr(tlen >> 3 << 3);
+            while (pos < len) {
+              var value = string.charCodeAt(pos++);
+              if (value >= 55296 && value <= 56319) {
+                if (pos < len) {
+                  var extra = string.charCodeAt(pos);
+                  if ((extra & 64512) === 56320) {
+                    ++pos;
+                    value = ((value & 1023) << 10) + (extra & 1023) + 65536;
+                  }
+                }
+                if (value >= 55296 && value <= 56319) {
+                  continue;
+                }
+              }
+              if (at + 4 > target.length) {
+                tlen += 8;
+                tlen *= 1 + pos / string.length * 2;
+                tlen = tlen >> 3 << 3;
+                var update = new Uint8Array(tlen);
+                update.set(target);
+                target = update;
+              }
+              if ((value & 4294967168) === 0) {
+                target[at++] = value;
+                continue;
+              } else if ((value & 4294965248) === 0) {
+                target[at++] = value >> 6 & 31 | 192;
+              } else if ((value & 4294901760) === 0) {
+                target[at++] = value >> 12 & 15 | 224;
+                target[at++] = value >> 6 & 63 | 128;
+              } else if ((value & 4292870144) === 0) {
+                target[at++] = value >> 18 & 7 | 240;
+                target[at++] = value >> 12 & 63 | 128;
+                target[at++] = value >> 6 & 63 | 128;
+              } else {
+                continue;
+              }
+              target[at++] = value & 63 | 128;
+            }
+            return target.slice(0, at);
+          }
+          function stringDecode(buf) {
+            var end = buf.length;
+            var res = [];
+            var i = 0;
+            while (i < end) {
+              var firstByte = buf[i];
+              var codePoint = null;
+              var bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
+              if (i + bytesPerSequence <= end) {
+                var secondByte, thirdByte, fourthByte, tempCodePoint;
+                switch (bytesPerSequence) {
+                  case 1:
+                    if (firstByte < 128) {
+                      codePoint = firstByte;
+                    }
+                    break;
+                  case 2:
+                    secondByte = buf[i + 1];
+                    if ((secondByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
+                      if (tempCodePoint > 127) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                    break;
+                  case 3:
+                    secondByte = buf[i + 1];
+                    thirdByte = buf[i + 2];
+                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
+                      if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                    break;
+                  case 4:
+                    secondByte = buf[i + 1];
+                    thirdByte = buf[i + 2];
+                    fourthByte = buf[i + 3];
+                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
+                      tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
+                      if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
+                        codePoint = tempCodePoint;
+                      }
+                    }
+                }
+              }
+              if (codePoint === null) {
+                codePoint = 65533;
+                bytesPerSequence = 1;
+              } else if (codePoint > 65535) {
+                codePoint -= 65536;
+                res.push(codePoint >>> 10 & 1023 | 55296);
+                codePoint = 56320 | codePoint & 1023;
+              }
+              res.push(codePoint);
+              i += bytesPerSequence;
+            }
+            var len = res.length;
+            var str = "";
+            var j = 0;
+            while (j < len) {
+              str += String.fromCharCode.apply(String, res.slice(j, j += 4096));
+            }
+            return str;
+          }
+          var textEncode = typeof TextEncoder === "function" ? TextEncoder.prototype.encode.bind(new TextEncoder()) : stringEncode;
+          var textDecode = typeof TextDecoder === "function" ? TextDecoder.prototype.decode.bind(new TextDecoder()) : stringDecode;
+          function FakeBlobBuilder() {
+            function bufferClone(buf) {
+              var view = new Array(buf.byteLength);
+              var array = new Uint8Array(buf);
+              var i = view.length;
+              while (i--) {
+                view[i] = array[i];
+              }
+              return view;
+            }
+            function array2base64(input) {
+              var byteToCharMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+              var output = [];
+              for (var i = 0; i < input.length; i += 3) {
+                var byte1 = input[i];
+                var haveByte2 = i + 1 < input.length;
+                var byte2 = haveByte2 ? input[i + 1] : 0;
+                var haveByte3 = i + 2 < input.length;
+                var byte3 = haveByte3 ? input[i + 2] : 0;
+                var outByte1 = byte1 >> 2;
+                var outByte2 = (byte1 & 3) << 4 | byte2 >> 4;
+                var outByte3 = (byte2 & 15) << 2 | byte3 >> 6;
+                var outByte4 = byte3 & 63;
+                if (!haveByte3) {
+                  outByte4 = 64;
+                  if (!haveByte2) {
+                    outByte3 = 64;
+                  }
+                }
+                output.push(
+                  byteToCharMap[outByte1],
+                  byteToCharMap[outByte2],
+                  byteToCharMap[outByte3],
+                  byteToCharMap[outByte4]
+                );
+              }
+              return output.join("");
+            }
+            var create = Object.create || function(a) {
+              function c() {
+              }
+              c.prototype = a;
+              return new c();
+            };
+            function getObjectTypeName(o) {
+              return Object.prototype.toString.call(o).slice(8, -1);
+            }
+            function isPrototypeOf(c, o) {
+              return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
+            }
+            function isDataView(o) {
+              return getObjectTypeName(o) === "DataView" || isPrototypeOf(global2.DataView, o);
+            }
+            var arrayBufferClassNames = [
+              "Int8Array",
+              "Uint8Array",
+              "Uint8ClampedArray",
+              "Int16Array",
+              "Uint16Array",
+              "Int32Array",
+              "Uint32Array",
+              "Float32Array",
+              "Float64Array",
+              "ArrayBuffer"
+            ];
+            function includes(a, v) {
+              return a.indexOf(v) !== -1;
+            }
+            function isArrayBuffer(o) {
+              return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
+            }
+            function concatTypedarrays(chunks) {
+              var size = 0;
+              var j = chunks.length;
+              while (j--) {
+                size += chunks[j].length;
+              }
+              var b = new Uint8Array(size);
+              var offset = 0;
+              for (var i = 0; i < chunks.length; i++) {
+                var chunk = chunks[i];
+                b.set(chunk, offset);
+                offset += chunk.byteLength || chunk.length;
+              }
+              return b;
+            }
+            function Blob3(chunks, opts) {
+              chunks = chunks || [];
+              opts = opts == null ? {} : opts;
+              for (var i = 0, len = chunks.length; i < len; i++) {
+                var chunk = chunks[i];
+                if (chunk instanceof Blob3) {
+                  chunks[i] = chunk._buffer;
+                } else if (typeof chunk === "string") {
+                  chunks[i] = textEncode(chunk);
+                } else if (isDataView(chunk)) {
+                  chunks[i] = bufferClone(chunk.buffer);
+                } else if (isArrayBuffer(chunk)) {
+                  chunks[i] = bufferClone(chunk);
+                } else {
+                  chunks[i] = textEncode(String(chunk));
+                }
+              }
+              this._buffer = global2.Uint8Array ? concatTypedarrays(chunks) : [].concat.apply([], chunks);
+              this.size = this._buffer.length;
+              this.type = opts.type || "";
+              if (/[^\u0020-\u007E]/.test(this.type)) {
+                this.type = "";
+              } else {
+                this.type = this.type.toLowerCase();
+              }
+            }
+            Blob3.prototype.arrayBuffer = function() {
+              return Promise.resolve(this._buffer.buffer || this._buffer);
+            };
+            Blob3.prototype.text = function() {
+              return Promise.resolve(textDecode(this._buffer));
+            };
+            Blob3.prototype.slice = function(start2, end, type) {
+              var slice = this._buffer.slice(start2 || 0, end || this._buffer.length);
+              return new Blob3([slice], { type });
+            };
+            Blob3.prototype.toString = function() {
+              return "[object Blob]";
+            };
+            function File2(chunks, name2, opts) {
+              opts = opts || {};
+              var a = Blob3.call(this, chunks, opts) || this;
+              a.name = name2.replace(/\//g, ":");
+              a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
+              a.lastModified = +a.lastModifiedDate;
+              return a;
+            }
+            File2.prototype = create(Blob3.prototype);
+            File2.prototype.constructor = File2;
+            if (Object.setPrototypeOf) {
+              Object.setPrototypeOf(File2, Blob3);
+            } else {
+              try {
+                File2.__proto__ = Blob3;
+              } catch (e) {
+              }
+            }
+            File2.prototype.toString = function() {
+              return "[object File]";
+            };
+            function FileReader2() {
+              if (!(this instanceof FileReader2)) {
+                throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
+              }
+              var delegate = document.createDocumentFragment();
+              this.addEventListener = delegate.addEventListener;
+              this.dispatchEvent = function(evt) {
+                var local = this["on" + evt.type];
+                if (typeof local === "function")
+                  local(evt);
+                delegate.dispatchEvent(evt);
+              };
+              this.removeEventListener = delegate.removeEventListener;
+            }
+            function _read(fr, blob2, kind) {
+              if (!(blob2 instanceof Blob3)) {
+                throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
+              }
+              fr.result = "";
+              setTimeout(function() {
+                this.readyState = FileReader2.LOADING;
+                fr.dispatchEvent(new Event("load"));
+                fr.dispatchEvent(new Event("loadend"));
+              });
+            }
+            FileReader2.EMPTY = 0;
+            FileReader2.LOADING = 1;
+            FileReader2.DONE = 2;
+            FileReader2.prototype.error = null;
+            FileReader2.prototype.onabort = null;
+            FileReader2.prototype.onerror = null;
+            FileReader2.prototype.onload = null;
+            FileReader2.prototype.onloadend = null;
+            FileReader2.prototype.onloadstart = null;
+            FileReader2.prototype.onprogress = null;
+            FileReader2.prototype.readAsDataURL = function(blob2) {
+              _read(this, blob2, "readAsDataURL");
+              this.result = "data:" + blob2.type + ";base64," + array2base64(blob2._buffer);
+            };
+            FileReader2.prototype.readAsText = function(blob2) {
+              _read(this, blob2, "readAsText");
+              this.result = textDecode(blob2._buffer);
+            };
+            FileReader2.prototype.readAsArrayBuffer = function(blob2) {
+              _read(this, blob2, "readAsText");
+              this.result = (blob2._buffer.buffer || blob2._buffer).slice();
+            };
+            FileReader2.prototype.abort = function() {
+            };
+            URL2.createObjectURL = function(blob2) {
+              return blob2 instanceof Blob3 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
+            };
+            URL2.revokeObjectURL = function(url) {
+              revokeObjectURL && revokeObjectURL.call(URL2, url);
+            };
+            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
+            if (_send) {
+              XMLHttpRequest.prototype.send = function(data) {
+                if (data instanceof Blob3) {
+                  this.setRequestHeader("Content-Type", data.type);
+                  _send.call(this, textDecode(data._buffer));
+                } else {
+                  _send.call(this, data);
+                }
+              };
+            }
+            exports2.Blob = Blob3;
+            exports2.File = File2;
+            exports2.FileReader = FileReader2;
+            exports2.URL = URL2;
+          }
+          function fixFileAndXHR() {
+            var isIE = !!global2.ActiveXObject || "-ms-scroll-limit" in document.documentElement.style && "-ms-ime-align" in document.documentElement.style;
+            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
+            if (isIE && _send) {
+              XMLHttpRequest.prototype.send = function(data) {
+                if (data instanceof Blob) {
+                  this.setRequestHeader("Content-Type", data.type);
+                  _send.call(this, data);
+                } else {
+                  _send.call(this, data);
+                }
+              };
+            }
+            try {
+              new File([], "");
+              exports2.File = global2.File;
+              exports2.FileReader = global2.FileReader;
+            } catch (e) {
+              try {
+                exports2.File = new Function(
+                  'class File extends Blob {constructor(chunks, name, opts) {opts = opts || {};super(chunks, opts || {});this.name = name.replace(/\\//g, ":");this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();this.lastModified = +this.lastModifiedDate;}};return new File([], ""), File'
+                )();
+              } catch (e2) {
+                exports2.File = function(b, d, c) {
+                  var blob2 = new Blob(b, c);
+                  var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
+                  blob2.name = d.replace(/\//g, ":");
+                  blob2.lastModifiedDate = t;
+                  blob2.lastModified = +t;
+                  blob2.toString = function() {
+                    return "[object File]";
+                  };
+                  if (strTag) {
+                    blob2[strTag] = "File";
+                  }
+                  return blob2;
+                };
+              }
+            }
+          }
+          if (blobSupported) {
+            fixFileAndXHR();
+            exports2.Blob = blobSupportsArrayBufferView ? global2.Blob : BlobConstructor;
+          } else if (blobBuilderSupported) {
+            fixFileAndXHR();
+            exports2.Blob = BlobBuilderConstructor;
+          } else {
+            FakeBlobBuilder();
+          }
+          if (strTag) {
+            if (!exports2.File.prototype[strTag])
+              exports2.File.prototype[strTag] = "File";
+            if (!exports2.Blob.prototype[strTag])
+              exports2.Blob.prototype[strTag] = "Blob";
+            if (!exports2.FileReader.prototype[strTag])
+              exports2.FileReader.prototype[strTag] = "FileReader";
+          }
+          var blob = exports2.Blob.prototype;
+          var stream;
+          try {
+            new ReadableStream({ type: "bytes" });
+            stream = function stream2() {
+              var position = 0;
+              var blob2 = this;
+              return new ReadableStream({
+                type: "bytes",
+                autoAllocateChunkSize: 524288,
+                pull: function(controller) {
+                  var v = controller.byobRequest.view;
+                  var chunk = blob2.slice(position, position + v.byteLength);
+                  return chunk.arrayBuffer().then(function(buffer) {
+                    var uint8array = new Uint8Array(buffer);
+                    var bytesRead = uint8array.byteLength;
+                    position += bytesRead;
+                    v.set(uint8array);
+                    controller.byobRequest.respond(bytesRead);
+                    if (position >= blob2.size)
+                      controller.close();
+                  });
+                }
+              });
+            };
+          } catch (e) {
+            try {
+              new ReadableStream({});
+              stream = function stream2(blob2) {
+                var position = 0;
+                return new ReadableStream({
+                  pull: function(controller) {
+                    var chunk = blob2.slice(position, position + 524288);
+                    return chunk.arrayBuffer().then(function(buffer) {
+                      position += buffer.byteLength;
+                      var uint8array = new Uint8Array(buffer);
+                      controller.enqueue(uint8array);
+                      if (position == blob2.size)
+                        controller.close();
+                    });
+                  }
+                });
+              };
+            } catch (e2) {
+              try {
+                new Response("").body.getReader().read();
+                stream = function stream2() {
+                  return new Response(this).body;
+                };
+              } catch (e3) {
+                stream = function stream2() {
+                  throw new Error("Include https://github.com/MattiasBuelens/web-streams-polyfill");
+                };
+              }
+            }
+          }
+          function promisify(obj) {
+            return new Promise(function(resolve2, reject) {
+              obj.onload = obj.onerror = function(evt) {
+                obj.onload = obj.onerror = null;
+                evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
+              };
+            });
+          }
+          if (!blob.arrayBuffer) {
+            blob.arrayBuffer = function arrayBuffer() {
+              var fr = new FileReader();
+              fr.readAsArrayBuffer(this);
+              return promisify(fr);
+            };
+          }
+          if (!blob.text) {
+            blob.text = function text() {
+              var fr = new FileReader();
+              fr.readAsText(this);
+              return promisify(fr);
+            };
+          }
+          if (!blob.stream) {
+            blob.stream = stream;
+          }
+        });
+      })(
+        typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || exports
+      );
+    }
+  });
+
+  // node_modules/cross-blob/browser.js
+  var browser_exports = {};
+  __export(browser_exports, {
+    default: () => browser_default
+  });
+  var import_blob_polyfill, browser_default;
+  var init_browser = __esm({
+    "node_modules/cross-blob/browser.js"() {
+      import_blob_polyfill = __toESM(require_Blob(), 1);
+      browser_default = import_blob_polyfill.Blob;
+    }
+  });
+
   // node_modules/ajv/dist/compile/codegen/code.js
   var require_code = __commonJS({
     "node_modules/ajv/dist/compile/codegen/code.js"(exports) {
@@ -6941,559 +7493,685 @@
     }
   });
 
-  // node_modules/blob-polyfill/Blob.js
-  var require_Blob = __commonJS({
-    "node_modules/blob-polyfill/Blob.js"(exports) {
-      (function(global2) {
-        (function(factory) {
-          if (typeof define === "function" && define.amd) {
-            define(["exports"], factory);
-          } else if (typeof exports === "object" && typeof exports.nodeName !== "string") {
-            factory(exports);
-          } else {
-            factory(global2);
-          }
-        })(function(exports2) {
-          "use strict";
-          var BlobBuilder = global2.BlobBuilder || global2.WebKitBlobBuilder || global2.MSBlobBuilder || global2.MozBlobBuilder;
-          var URL2 = global2.URL || global2.webkitURL || function(href, a) {
-            a = document.createElement("a");
-            a.href = href;
-            return a;
+  // src/common/utils/languages.ts
+  var languages_exports = {};
+  __export(languages_exports, {
+    js: () => js,
+    json: () => json
+  });
+  var js = ["js", "mjs", "cjs", "javascript"];
+  var json = ["json"];
+
+  // src/common/utils/path.ts
+  var fullSuffix = (fileName = "") => fileName.split(".").slice(1);
+  var suffix = (fileName = "") => {
+    const suffix2 = fullSuffix(fileName);
+    return suffix2.join(".");
+  };
+
+  // node_modules/remote-esm/utils/path.js
+  var regex = new RegExp("https?:", "g");
+  var get = (path2, rel = "", keepRelativeImports = false) => {
+    const windowLocation = globalThis?.location?.origin;
+    let pathMatch = false;
+    let relMatch = false;
+    if (windowLocation) {
+      relMatch = rel.includes(windowLocation);
+      if (relMatch) {
+        rel = rel.replace(windowLocation, "");
+        if (rel[0] === "/")
+          rel = rel.slice(1);
+      }
+      pathMatch = path2.includes(windowLocation);
+      if (pathMatch) {
+        path2 = path2.replace(windowLocation, "");
+        if (path2[0] === "/")
+          path2 = path2.slice(1);
+      }
+    }
+    if (!keepRelativeImports)
+      rel = rel.split("/").filter((v) => v != "..").join("/");
+    if (rel[rel.length - 1] === "/")
+      rel = rel.slice(0, -1);
+    let dirTokens = rel.split("/");
+    if (dirTokens.length === 1 && dirTokens[0] === "")
+      dirTokens = [];
+    const potentialFile = dirTokens.pop();
+    if (potentialFile) {
+      const splitPath2 = potentialFile.split(".");
+      if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
+        dirTokens.push(potentialFile);
+    }
+    const splitPath = path2.split("/");
+    const pathTokens = splitPath.filter((str, i) => {
+      if (splitPath[i - 1] && regex.test(splitPath[i - 1]))
+        return true;
+      else
+        return !!str;
+    });
+    const extensionTokens = pathTokens.filter((str, i) => {
+      if (str === "..") {
+        dirTokens.pop();
+        return false;
+      } else if (str === ".")
+        return false;
+      else
+        return true;
+    });
+    const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
+    return newPath;
+  };
+
+  // node_modules/remote-esm/utils/request.js
+  var getURL = (path2) => {
+    let url;
+    try {
+      url = new URL(path2).href;
+    } catch {
+      url = get(path2, globalThis.location.href);
+    }
+    return url;
+  };
+  var handleFetch = async (path2, options2 = {}, progressCallback) => {
+    if (!options2.mode)
+      options2.mode = "cors";
+    const url = getURL(path2);
+    const response = await fetchRemote(url, options2, progressCallback);
+    if (!response)
+      throw new Error("No response received.");
+    const type = response.type.split(";")[0];
+    return {
+      url,
+      type,
+      buffer: response.buffer
+    };
+  };
+  var fetchRemote = async (url, options2 = {}, progressCallback) => {
+    const response = await globalThis.fetch(url, options2);
+    return new Promise(async (resolve2) => {
+      if (response) {
+        const type = response.headers.get("Content-Type");
+        if (globalThis.REMOTEESM_NODE) {
+          const buffer = await response.arrayBuffer();
+          resolve2({ buffer, type });
+        } else {
+          const reader = response.body.getReader();
+          const bytes = parseInt(response.headers.get("Content-Length"), 10);
+          let bytesReceived = 0;
+          let buffer = [];
+          const processBuffer = async ({ done, value }) => {
+            if (done) {
+              const config = {};
+              if (typeof type === "string")
+                config.type = type;
+              const blob = new Blob(buffer, config);
+              const ab = await blob.arrayBuffer();
+              resolve2({ buffer: new Uint8Array(ab), type });
+              return;
+            }
+            bytesReceived += value.length;
+            const chunk = value;
+            buffer.push(chunk);
+            if (progressCallback instanceof Function)
+              progressCallback(response.headers.get("Range"), bytesReceived / bytes, bytes);
+            return reader.read().then(processBuffer);
           };
-          var origBlob = global2.Blob;
-          var createObjectURL = URL2.createObjectURL;
-          var revokeObjectURL = URL2.revokeObjectURL;
-          var strTag = global2.Symbol && global2.Symbol.toStringTag;
-          var blobSupported = false;
-          var blobSupportsArrayBufferView = false;
-          var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
+          reader.read().then(processBuffer);
+        }
+      } else {
+        console.warn("Response not received!", options2.headers);
+        resolve2(void 0);
+      }
+    });
+  };
+
+  // node_modules/remote-esm/index.js
+  globalThis.REMOTEESM_TEXT_REFERENCES = {};
+  globalThis.REMOTEESM_NODE = false;
+  var ready = new Promise(async (resolve2, reject) => {
+    try {
+      if (typeof process === "object") {
+        globalThis.REMOTEESM_NODE = true;
+        globalThis.fetch = (await import("node-fetch")).default;
+        if (typeof globalThis.fetch !== "function")
+          globalThis.fetch = fetch;
+        const Blob3 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
+        globalThis.Blob = Blob3;
+        if (typeof globalThis.Blob !== "function")
+          globalThis.Blob = Blob3;
+        resolve2(true);
+      } else
+        resolve2(true);
+    } catch (err) {
+      console.log(err);
+      reject(err);
+    }
+  });
+  var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
+  var moduleDataURI = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
+  var importFromText = async (text, path2) => {
+    const extension = path2.split(".").slice(-1)[0];
+    const isJSON = extension === "json";
+    let mimeType = isJSON ? "application/json" : "application/javascript";
+    const uri = moduleDataURI(text, mimeType);
+    let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
+      if (e.message.includes("Unexpected token"))
+        throw new Error("Failed to fetch");
+      else
+        throw e;
+    });
+    globalThis.REMOTEESM_TEXT_REFERENCES[path2] = imported;
+    return imported;
+  };
+  var resolve = get;
+  var getText = async (uri) => await globalThis.fetch(uri).then((res) => res.text());
+  var safeImport = async (uri, root, onImport = () => {
+  }, outputText) => {
+    await ready;
+    const extension = uri.split(".").slice(-1)[0];
+    const isJSON = extension === "json";
+    let module = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
+    });
+    let text;
+    if (!module) {
+      text = await getText(uri);
+      try {
+        module = await importFromText(text, uri);
+      } catch (e) {
+        const base = get("", uri);
+        let childBase = base;
+        const importInfo = {};
+        let m;
+        do {
+          m = re.exec(text);
+          if (m == null)
+            m = re.exec(text);
+          if (m) {
+            text = text.replace(m[0], ``);
+            const wildcard = !!m[1].match(/\*\s+as/);
+            const variables = m[1].replace(/\*\s+as/, "").trim();
+            importInfo[m[3]] = {
+              variables,
+              wildcard
+            };
+          }
+        } while (m);
+        for (let path2 in importInfo) {
+          const { variables, wildcard } = importInfo[path2];
+          let correctPath = get(path2, childBase);
+          const dependentFilePath = get(correctPath);
+          const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
+          let ref = globalThis.REMOTEESM_TEXT_REFERENCES[dependentFilePath];
+          if (!ref) {
+            const extension2 = correctPath.split(".").slice(-1)[0];
+            const info = await handleFetch(correctPath);
+            let blob = new Blob([info.buffer], { type: info.type });
+            const isJS = extension2.includes("js");
+            const newURI = dependentFileWithoutRoot;
+            const newText = await blob.text();
+            let importedText = isJS ? await new Promise(async (resolve2) => {
+              await safeImport(newURI, uri, (path3, info2) => {
+                onImport(path3, info2);
+                if (path3 == newURI)
+                  resolve2(info2.text);
+              }, true);
+            }) : newText;
+            await importFromText(importedText, correctPath);
+          }
+          text = `const ${variables} =  globalThis.REMOTEESM_TEXT_REFERENCES['${correctPath}']${variables.includes("{") ? "" : wildcard ? "" : ".default"};
+        ${text}`;
+        }
+        module = await importFromText(text, uri);
+      }
+    }
+    onImport(uri, {
+      text: outputText ? text ?? await getText(uri) : void 0,
+      module
+    });
+    return module;
+  };
+  var remote_esm_default = safeImport;
+
+  // src/common/get.ts
+  var cache = {};
+  var get2 = async (relPath, relativeTo = "", onImport) => {
+    let type = suffix(relPath);
+    const isJSON = !type || type.includes("json");
+    const fullPath = resolve(relPath, relativeTo);
+    if (!cache[fullPath]) {
+      cache[fullPath] = remote_esm_default(fullPath, void 0, onImport).catch((e) => {
+        if (e.message.includes("Failed to fetch"))
+          throw new Error("404");
+        else
+          throw e;
+      });
+      const res = await cache[fullPath];
+      if (isJSON)
+        cache[fullPath] = res?.default ?? {};
+      else
+        cache[fullPath] = res;
+    }
+    return isJSON ? JSON.parse(JSON.stringify(cache[fullPath])) : cache[fullPath];
+  };
+  var get_default = get2;
+
+  // src/common/utils/check.ts
+  var import_meta = {};
+  var valid = (input, options2, location) => {
+    const errors = [];
+    const isUndefined = options2?.relativeTo === void 0;
+    const isString = typeof input === "string";
+    const isObject = typeof input === "object";
+    let error;
+    if (isString) {
+      const hasRelTo = !isUndefined && "relativeTo" in options2;
+      if (!hasRelTo && !options2._remote) {
+        if (import_meta.url) {
+          error = { message: "Not a valid relativeTo key (required) in options", file: input };
+          console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`);
+        } else {
+          error = { message: "import.meta.url is not supported", file: input };
+          console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`);
+        }
+      }
+    } else if (!isObject) {
+      error = { message: "Not a valid object passed in the first argument", file: null };
+      console.warn(`[wasl-${location}] Reference Mode Error: Please pass a valid object in the first argument and pass file object references via the options.filesystem field.`);
+    }
+    if (error) {
+      error.function = location;
+      errors.push(error);
+    }
+    return errors;
+  };
+
+  // src/common/utils/parse.ts
+  var ARGUMENT_NAMES = /([^,]*)/g;
+  function getFnParamInfo(fn) {
+    var fstr = fn.toString();
+    const openPar = fstr.indexOf("(");
+    const closePar = fstr.indexOf(")");
+    const getFirstBracket = (str, offset = 0) => {
+      const fb = offset + str.indexOf("{");
+      if (fb < closePar && fb > openPar) {
+        return getFirstBracket(str.slice(fb), offset + fb);
+      } else
+        return fb;
+    };
+    const firstBracket = getFirstBracket(fstr);
+    let innerMatch;
+    if (firstBracket === -1 || closePar < firstBracket)
+      innerMatch = fstr.slice(fstr.indexOf("(") + 1, fstr.indexOf(")"));
+    else
+      innerMatch = fstr.match(/([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\)) =>/)?.[1];
+    if (!innerMatch)
+      return void 0;
+    const matches = innerMatch.match(ARGUMENT_NAMES).filter((e) => !!e);
+    const info = /* @__PURE__ */ new Map();
+    matches.forEach((v) => {
+      let [name2, value] = v.split("=");
+      name2 = name2.trim();
+      name2 = name2.replace(/\d+$/, "");
+      const spread = name2.includes("...");
+      name2 = name2.replace("...", "");
+      try {
+        if (name2)
+          info.set(name2, {
+            state: (0, eval)(`(${value})`),
+            spread
+          });
+      } catch (e) {
+        info.set(name2, {});
+        console.warn(`Argument ${name2} could be parsed for`, fn.toString());
+      }
+    });
+    return info;
+  }
+  var parse_default = getFnParamInfo;
+
+  // src/wasl-core/index.ts
+  var isSrc = (str) => {
+    return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
+  };
+  var merge = (main, override, deleteSrc = false) => {
+    if (deleteSrc) {
+      const ogSrc = override.src ?? override;
+      delete override.src;
+      if ("default" in ogSrc)
+        return ogSrc.default;
+    }
+    return Object.assign(Object.assign({}, main), override);
+  };
+  var checkFiles = (key, filesystem2) => {
+    const isJSON = suffix(key).slice(-4) === "json" ? true : false;
+    const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
+    return output;
+  };
+  var remove = (original, search, key = original, o) => {
+    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
+    if (o)
+      delete o[key];
+  };
+  var basePkgPath = "./package.json";
+  var onError = (e, { errors, warnings }) => {
+    const item = {
+      message: e.message,
+      file: e.file,
+      node: e.node
+    };
+    const arr = e.type === "warning" ? warnings : errors;
+    arr.push(item);
+  };
+  var getWithErrorLog = async (...args) => {
+    const o = args.slice(-1)[0];
+    const path2 = args[0];
+    args = args.slice(0, -1);
+    return await get_default(...args).catch((e) => onError({
+      message: e.message,
+      file: path2
+    }, o));
+  };
+  var getSrc = async (target, info, options2, graph = {}) => {
+    const nodes = graph.nodes;
+    const edges = graph.edges;
+    let {
+      relativeToResolved,
+      mainPath,
+      url,
+      onImport
+    } = info;
+    const isImportMode = !!url;
+    relativeToResolved = options2._remote ?? relativeToResolved;
+    for (let name2 in target) {
+      const node = target[name2];
+      const isObj = node && typeof node === "object";
+      if (isObj) {
+        let ogSrc = node.src ?? "";
+        if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
+          node.src = null;
+          let passToNested = null;
+          let fullPath, _remote = options2._remote;
           try {
-            blobSupported = new Blob(["\xE4"]).size === 2;
-            blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
-          } catch (e) {
+            new URL(ogSrc);
+            fullPath = ogSrc;
+            _remote = ogSrc;
+          } catch {
+            fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
           }
-          function mapArrayBufferViews(ary) {
-            return ary.map(function(chunk) {
-              if (chunk.buffer instanceof ArrayBuffer) {
-                var buf = chunk.buffer;
-                if (chunk.byteLength !== buf.byteLength) {
-                  var copy = new Uint8Array(chunk.byteLength);
-                  copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-                  buf = copy.buffer;
-                }
-                return buf;
-              }
-              return chunk;
-            });
-          }
-          function BlobBuilderConstructor(ary, options2) {
-            options2 = options2 || {};
-            var bb = new BlobBuilder();
-            mapArrayBufferViews(ary).forEach(function(part) {
-              bb.append(part);
-            });
-            return options2.type ? bb.getBlob(options2.type) : bb.getBlob();
-          }
-          function BlobConstructor(ary, options2) {
-            return new origBlob(mapArrayBufferViews(ary), options2 || {});
-          }
-          if (global2.Blob) {
-            BlobBuilderConstructor.prototype = Blob.prototype;
-            BlobConstructor.prototype = Blob.prototype;
-          }
-          function stringEncode(string) {
-            var pos = 0;
-            var len = string.length;
-            var Arr = global2.Uint8Array || Array;
-            var at = 0;
-            var tlen = Math.max(32, len + (len >> 1) + 7);
-            var target = new Arr(tlen >> 3 << 3);
-            while (pos < len) {
-              var value = string.charCodeAt(pos++);
-              if (value >= 55296 && value <= 56319) {
-                if (pos < len) {
-                  var extra = string.charCodeAt(pos);
-                  if ((extra & 64512) === 56320) {
-                    ++pos;
-                    value = ((value & 1023) << 10) + (extra & 1023) + 65536;
-                  }
-                }
-                if (value >= 55296 && value <= 56319) {
-                  continue;
-                }
-              }
-              if (at + 4 > target.length) {
-                tlen += 8;
-                tlen *= 1 + pos / string.length * 2;
-                tlen = tlen >> 3 << 3;
-                var update = new Uint8Array(tlen);
-                update.set(target);
-                target = update;
-              }
-              if ((value & 4294967168) === 0) {
-                target[at++] = value;
-                continue;
-              } else if ((value & 4294965248) === 0) {
-                target[at++] = value >> 6 & 31 | 192;
-              } else if ((value & 4294901760) === 0) {
-                target[at++] = value >> 12 & 15 | 224;
-                target[at++] = value >> 6 & 63 | 128;
-              } else if ((value & 4292870144) === 0) {
-                target[at++] = value >> 18 & 7 | 240;
-                target[at++] = value >> 12 & 63 | 128;
-                target[at++] = value >> 6 & 63 | 128;
-              } else {
-                continue;
-              }
-              target[at++] = value & 63 | 128;
-            }
-            return target.slice(0, at);
-          }
-          function stringDecode(buf) {
-            var end = buf.length;
-            var res = [];
-            var i = 0;
-            while (i < end) {
-              var firstByte = buf[i];
-              var codePoint = null;
-              var bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
-              if (i + bytesPerSequence <= end) {
-                var secondByte, thirdByte, fourthByte, tempCodePoint;
-                switch (bytesPerSequence) {
-                  case 1:
-                    if (firstByte < 128) {
-                      codePoint = firstByte;
-                    }
-                    break;
-                  case 2:
-                    secondByte = buf[i + 1];
-                    if ((secondByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
-                      if (tempCodePoint > 127) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                    break;
-                  case 3:
-                    secondByte = buf[i + 1];
-                    thirdByte = buf[i + 2];
-                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
-                      if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                    break;
-                  case 4:
-                    secondByte = buf[i + 1];
-                    thirdByte = buf[i + 2];
-                    fourthByte = buf[i + 3];
-                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
-                      if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                }
-              }
-              if (codePoint === null) {
-                codePoint = 65533;
-                bytesPerSequence = 1;
-              } else if (codePoint > 65535) {
-                codePoint -= 65536;
-                res.push(codePoint >>> 10 & 1023 | 55296);
-                codePoint = 56320 | codePoint & 1023;
-              }
-              res.push(codePoint);
-              i += bytesPerSequence;
-            }
-            var len = res.length;
-            var str = "";
-            var j = 0;
-            while (j < len) {
-              str += String.fromCharCode.apply(String, res.slice(j, j += 4096));
-            }
-            return str;
-          }
-          var textEncode = typeof TextEncoder === "function" ? TextEncoder.prototype.encode.bind(new TextEncoder()) : stringEncode;
-          var textDecode = typeof TextDecoder === "function" ? TextDecoder.prototype.decode.bind(new TextDecoder()) : stringDecode;
-          function FakeBlobBuilder() {
-            function bufferClone(buf) {
-              var view = new Array(buf.byteLength);
-              var array = new Uint8Array(buf);
-              var i = view.length;
-              while (i--) {
-                view[i] = array[i];
-              }
-              return view;
-            }
-            function array2base64(input) {
-              var byteToCharMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-              var output = [];
-              for (var i = 0; i < input.length; i += 3) {
-                var byte1 = input[i];
-                var haveByte2 = i + 1 < input.length;
-                var byte2 = haveByte2 ? input[i + 1] : 0;
-                var haveByte3 = i + 2 < input.length;
-                var byte3 = haveByte3 ? input[i + 2] : 0;
-                var outByte1 = byte1 >> 2;
-                var outByte2 = (byte1 & 3) << 4 | byte2 >> 4;
-                var outByte3 = (byte2 & 15) << 2 | byte3 >> 6;
-                var outByte4 = byte3 & 63;
-                if (!haveByte3) {
-                  outByte4 = 64;
-                  if (!haveByte2) {
-                    outByte3 = 64;
-                  }
-                }
-                output.push(
-                  byteToCharMap[outByte1],
-                  byteToCharMap[outByte2],
-                  byteToCharMap[outByte3],
-                  byteToCharMap[outByte4]
-                );
-              }
-              return output.join("");
-            }
-            var create = Object.create || function(a) {
-              function c() {
-              }
-              c.prototype = a;
-              return new c();
-            };
-            function getObjectTypeName(o) {
-              return Object.prototype.toString.call(o).slice(8, -1);
-            }
-            function isPrototypeOf(c, o) {
-              return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
-            }
-            function isDataView(o) {
-              return getObjectTypeName(o) === "DataView" || isPrototypeOf(global2.DataView, o);
-            }
-            var arrayBufferClassNames = [
-              "Int8Array",
-              "Uint8Array",
-              "Uint8ClampedArray",
-              "Int16Array",
-              "Uint16Array",
-              "Int32Array",
-              "Uint32Array",
-              "Float32Array",
-              "Float64Array",
-              "ArrayBuffer"
-            ];
-            function includes(a, v) {
-              return a.indexOf(v) !== -1;
-            }
-            function isArrayBuffer(o) {
-              return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
-            }
-            function concatTypedarrays(chunks) {
-              var size = 0;
-              var j = chunks.length;
-              while (j--) {
-                size += chunks[j].length;
-              }
-              var b = new Uint8Array(size);
-              var offset = 0;
-              for (var i = 0; i < chunks.length; i++) {
-                var chunk = chunks[i];
-                b.set(chunk, offset);
-                offset += chunk.byteLength || chunk.length;
-              }
-              return b;
-            }
-            function Blob3(chunks, opts) {
-              chunks = chunks || [];
-              opts = opts == null ? {} : opts;
-              for (var i = 0, len = chunks.length; i < len; i++) {
-                var chunk = chunks[i];
-                if (chunk instanceof Blob3) {
-                  chunks[i] = chunk._buffer;
-                } else if (typeof chunk === "string") {
-                  chunks[i] = textEncode(chunk);
-                } else if (isDataView(chunk)) {
-                  chunks[i] = bufferClone(chunk.buffer);
-                } else if (isArrayBuffer(chunk)) {
-                  chunks[i] = bufferClone(chunk);
-                } else {
-                  chunks[i] = textEncode(String(chunk));
-                }
-              }
-              this._buffer = global2.Uint8Array ? concatTypedarrays(chunks) : [].concat.apply([], chunks);
-              this.size = this._buffer.length;
-              this.type = opts.type || "";
-              if (/[^\u0020-\u007E]/.test(this.type)) {
-                this.type = "";
-              } else {
-                this.type = this.type.toLowerCase();
+          if (isImportMode) {
+            node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
+            if (_remote) {
+              if (!node.src) {
+                const got = await getSrc([node], info, options2, { nodes: [node] });
+                node.src = got[0].src ?? got[0];
+                passToNested = resolve(ogSrc);
               }
             }
-            Blob3.prototype.arrayBuffer = function() {
-              return Promise.resolve(this._buffer.buffer || this._buffer);
-            };
-            Blob3.prototype.text = function() {
-              return Promise.resolve(textDecode(this._buffer));
-            };
-            Blob3.prototype.slice = function(start2, end, type) {
-              var slice = this._buffer.slice(start2 || 0, end || this._buffer.length);
-              return new Blob3([slice], { type });
-            };
-            Blob3.prototype.toString = function() {
-              return "[object Blob]";
-            };
-            function File2(chunks, name2, opts) {
-              opts = opts || {};
-              var a = Blob3.call(this, chunks, opts) || this;
-              a.name = name2.replace(/\//g, ":");
-              a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
-              a.lastModified = +a.lastModifiedDate;
-              return a;
-            }
-            File2.prototype = create(Blob3.prototype);
-            File2.prototype.constructor = File2;
-            if (Object.setPrototypeOf) {
-              Object.setPrototypeOf(File2, Blob3);
-            } else {
-              try {
-                File2.__proto__ = Blob3;
-              } catch (e) {
-              }
-            }
-            File2.prototype.toString = function() {
-              return "[object File]";
-            };
-            function FileReader2() {
-              if (!(this instanceof FileReader2)) {
-                throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
-              }
-              var delegate = document.createDocumentFragment();
-              this.addEventListener = delegate.addEventListener;
-              this.dispatchEvent = function(evt) {
-                var local = this["on" + evt.type];
-                if (typeof local === "function")
-                  local(evt);
-                delegate.dispatchEvent(evt);
-              };
-              this.removeEventListener = delegate.removeEventListener;
-            }
-            function _read(fr, blob2, kind) {
-              if (!(blob2 instanceof Blob3)) {
-                throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
-              }
-              fr.result = "";
-              setTimeout(function() {
-                this.readyState = FileReader2.LOADING;
-                fr.dispatchEvent(new Event("load"));
-                fr.dispatchEvent(new Event("loadend"));
-              });
-            }
-            FileReader2.EMPTY = 0;
-            FileReader2.LOADING = 1;
-            FileReader2.DONE = 2;
-            FileReader2.prototype.error = null;
-            FileReader2.prototype.onabort = null;
-            FileReader2.prototype.onerror = null;
-            FileReader2.prototype.onload = null;
-            FileReader2.prototype.onloadend = null;
-            FileReader2.prototype.onloadstart = null;
-            FileReader2.prototype.onprogress = null;
-            FileReader2.prototype.readAsDataURL = function(blob2) {
-              _read(this, blob2, "readAsDataURL");
-              this.result = "data:" + blob2.type + ";base64," + array2base64(blob2._buffer);
-            };
-            FileReader2.prototype.readAsText = function(blob2) {
-              _read(this, blob2, "readAsText");
-              this.result = textDecode(blob2._buffer);
-            };
-            FileReader2.prototype.readAsArrayBuffer = function(blob2) {
-              _read(this, blob2, "readAsText");
-              this.result = (blob2._buffer.buffer || blob2._buffer).slice();
-            };
-            FileReader2.prototype.abort = function() {
-            };
-            URL2.createObjectURL = function(blob2) {
-              return blob2 instanceof Blob3 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
-            };
-            URL2.revokeObjectURL = function(url) {
-              revokeObjectURL && revokeObjectURL.call(URL2, url);
-            };
-            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-            if (_send) {
-              XMLHttpRequest.prototype.send = function(data) {
-                if (data instanceof Blob3) {
-                  this.setRequestHeader("Content-Type", data.type);
-                  _send.call(this, textDecode(data._buffer));
-                } else {
-                  _send.call(this, data);
-                }
-              };
-            }
-            exports2.Blob = Blob3;
-            exports2.File = File2;
-            exports2.FileReader = FileReader2;
-            exports2.URL = URL2;
-          }
-          function fixFileAndXHR() {
-            var isIE = !!global2.ActiveXObject || "-ms-scroll-limit" in document.documentElement.style && "-ms-ime-align" in document.documentElement.style;
-            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-            if (isIE && _send) {
-              XMLHttpRequest.prototype.send = function(data) {
-                if (data instanceof Blob) {
-                  this.setRequestHeader("Content-Type", data.type);
-                  _send.call(this, data);
-                } else {
-                  _send.call(this, data);
-                }
-              };
-            }
-            try {
-              new File([], "");
-              exports2.File = global2.File;
-              exports2.FileReader = global2.FileReader;
-            } catch (e) {
-              try {
-                exports2.File = new Function(
-                  'class File extends Blob {constructor(chunks, name, opts) {opts = opts || {};super(chunks, opts || {});this.name = name.replace(/\\//g, ":");this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();this.lastModified = +this.lastModifiedDate;}};return new File([], ""), File'
-                )();
-              } catch (e2) {
-                exports2.File = function(b, d, c) {
-                  var blob2 = new Blob(b, c);
-                  var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
-                  blob2.name = d.replace(/\//g, ":");
-                  blob2.lastModifiedDate = t;
-                  blob2.lastModified = +t;
-                  blob2.toString = function() {
-                    return "[object File]";
-                  };
-                  if (strTag) {
-                    blob2[strTag] = "File";
-                  }
-                  return blob2;
-                };
-              }
-            }
-          }
-          if (blobSupported) {
-            fixFileAndXHR();
-            exports2.Blob = blobSupportsArrayBufferView ? global2.Blob : BlobConstructor;
-          } else if (blobBuilderSupported) {
-            fixFileAndXHR();
-            exports2.Blob = BlobBuilderConstructor;
+            passToNested = resolve(ogSrc, url, true);
+            if (!node.src)
+              remove(ogSrc, fullPath, name2, target);
           } else {
-            FakeBlobBuilder();
-          }
-          if (strTag) {
-            if (!exports2.File.prototype[strTag])
-              exports2.File.prototype[strTag] = "File";
-            if (!exports2.Blob.prototype[strTag])
-              exports2.Blob.prototype[strTag] = "Blob";
-            if (!exports2.FileReader.prototype[strTag])
-              exports2.FileReader.prototype[strTag] = "FileReader";
-          }
-          var blob = exports2.Blob.prototype;
-          var stream;
-          try {
-            new ReadableStream({ type: "bytes" });
-            stream = function stream2() {
-              var position = 0;
-              var blob2 = this;
-              return new ReadableStream({
-                type: "bytes",
-                autoAllocateChunkSize: 524288,
-                pull: function(controller) {
-                  var v = controller.byobRequest.view;
-                  var chunk = blob2.slice(position, position + v.byteLength);
-                  return chunk.arrayBuffer().then(function(buffer) {
-                    var uint8array = new Uint8Array(buffer);
-                    var bytesRead = uint8array.byteLength;
-                    position += bytesRead;
-                    v.set(uint8array);
-                    controller.byobRequest.respond(bytesRead);
-                    if (position >= blob2.size)
-                      controller.close();
-                  });
+            if (options2.filesystem) {
+              const res = checkFiles(fullPath, options2.filesystem);
+              if (res) {
+                if (res.default || fullPath.includes(".json"))
+                  node.src = passToNested = res;
+                else {
+                  onError({
+                    type: "warning",
+                    message: `Node (${name2}) at ${fullPath} does not have a default export.`,
+                    file: ogSrc
+                  }, options2);
+                  node.src = passToNested = { default: res };
                 }
-              });
-            };
-          } catch (e) {
-            try {
-              new ReadableStream({});
-              stream = function stream2(blob2) {
-                var position = 0;
-                return new ReadableStream({
-                  pull: function(controller) {
-                    var chunk = blob2.slice(position, position + 524288);
-                    return chunk.arrayBuffer().then(function(buffer) {
-                      position += buffer.byteLength;
-                      var uint8array = new Uint8Array(buffer);
-                      controller.enqueue(uint8array);
-                      if (position == blob2.size)
-                        controller.close();
-                    });
-                  }
-                });
-              };
-            } catch (e2) {
-              try {
-                new Response("").body.getReader().read();
-                stream = function stream2() {
-                  return new Response(this).body;
-                };
-              } catch (e3) {
-                stream = function stream2() {
-                  throw new Error("Include https://github.com/MattiasBuelens/web-streams-polyfill");
-                };
-              }
+              } else
+                remove(ogSrc, fullPath, name2, target);
+            } else {
+              onError({
+                message: "No options.filesystem field to get JavaScript objects",
+                file: ogSrc
+              }, options2);
             }
           }
-          function promisify(obj) {
-            return new Promise(function(resolve2, reject) {
-              obj.onload = obj.onerror = function(evt) {
-                obj.onload = obj.onerror = null;
-                evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
-              };
+          if (node.src && node.src.graph)
+            node.src = await load(passToNested, {
+              relativeTo: relativeToResolved || options2.relativeTo,
+              filesystem: options2.filesystem,
+              errors: options2.errors,
+              warnings: options2.warnings,
+              files: options2.files,
+              _internal: ogSrc,
+              _deleteSrc: options2._deleteSrc,
+              _remote
             });
+        } else {
+          for (let key in node) {
+            if (key === "src" && node.src) {
+              const language = node.src.language;
+              if (!language || js.includes(language)) {
+                if (node.src.text) {
+                  const esmImport = async (text) => {
+                    try {
+                      let imported = await importFromText(text);
+                      if (imported.default && Object.keys(imported).length === 1)
+                        imported = imported.default;
+                      return imported;
+                    } catch (e) {
+                      console.error("Import did not work. Probably relies on something...");
+                      onError({
+                        message: e.message,
+                        file: name2
+                      }, options2);
+                    }
+                  };
+                  const esm = await esmImport(node.src.text);
+                  if (esm) {
+                    delete node.src.text;
+                    if (typeof esm === "object")
+                      node.src = { default: Object.assign(node.src, esm) };
+                    else
+                      node.src = esm;
+                  } else {
+                    onError({
+                      message: "Could not import this text as ESM",
+                      file: node.src
+                    }, options2);
+                  }
+                } else {
+                  const expectedFunctions = ["default", "oncreate", "onrender"];
+                  for (let key2 in node.src) {
+                    try {
+                      if (expectedFunctions.includes(key2) && typeof node.src[key2] === "string")
+                        node.src[key2] = (0, eval)(`(${node.src[key2]})`);
+                    } catch (e) {
+                      onError({
+                        message: `Field ${key2} could not be parsed`,
+                        file: node.src[key2]
+                      }, options2);
+                    }
+                  }
+                }
+              } else {
+                console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
+                onError({
+                  message: `Source is in ${language}. Currently only JavaScript is supported.`,
+                  file: ogSrc
+                }, options2);
+              }
+            } else if (node[key] && typeof node[key] === "object") {
+              const optsCopy = Object.assign({}, options2);
+              optsCopy._deleteSrc = true;
+              await getSrc(node[key], info, optsCopy, { nodes: node[key] });
+            }
           }
-          if (!blob.arrayBuffer) {
-            blob.arrayBuffer = function arrayBuffer() {
-              var fr = new FileReader();
-              fr.readAsArrayBuffer(this);
-              return promisify(fr);
-            };
-          }
-          if (!blob.text) {
-            blob.text = function text() {
-              var fr = new FileReader();
-              fr.readAsText(this);
-              return promisify(fr);
-            };
-          }
-          if (!blob.stream) {
-            blob.stream = stream;
-          }
-        });
-      })(
-        typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || exports
-      );
+        }
+      }
     }
-  });
-
-  // node_modules/cross-blob/browser.js
-  var browser_exports = {};
-  __export(browser_exports, {
-    default: () => browser_default
-  });
-  var import_blob_polyfill, browser_default;
-  var init_browser = __esm({
-    "node_modules/cross-blob/browser.js"() {
-      import_blob_polyfill = __toESM(require_Blob(), 1);
-      browser_default = import_blob_polyfill.Blob;
+    for (let name2 in nodes) {
+      const node = nodes[name2];
+      if (node?.src && typeof node?.src === "object") {
+        if (node.src.default) {
+          const fnString = node.src.default.toString();
+          const keyword = "function";
+          if (fnString.slice(0, keyword.length) === keyword) {
+            onError({
+              type: "warning",
+              message: `Default export may be stateful.`,
+              node: name2
+            }, options2);
+          }
+        }
+        if (node.src.graph) {
+          for (let nestedName in node.components) {
+            const nestedNode = node.src.graph.nodes[nestedName];
+            if (nestedNode) {
+              if (node.components) {
+                for (let key in node.components[nestedName]) {
+                  const newInfo = node.components[nestedName][key];
+                  if (typeof newInfo === "object") {
+                    const optsCopy = Object.assign({}, options2);
+                    optsCopy._deleteSrc = true;
+                    const ogSrc = newInfo.src;
+                    const newInfoForNode = await getSrc({ [key]: newInfo }, info, optsCopy, {
+                      nodes: newInfo
+                    });
+                    const newVal = newInfoForNode[key];
+                    if (newVal) {
+                      let chosenVal = newVal.src ?? newVal;
+                      if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
+                        chosenVal = chosenVal.default;
+                      nestedNode[key] = chosenVal;
+                    } else {
+                      onError({
+                        message: `Could not resolve ${ogSrc}`
+                      }, options2);
+                    }
+                  } else
+                    console.error("[wasl-load] Component info is not an object...");
+                }
+              }
+            } else {
+              onError({
+                message: `Component target '${nestedName}' does not exist`,
+                node: name2
+              }, options2);
+            }
+          }
+        } else if (edges) {
+          if (!("default" in node.src)) {
+            onError({
+              message: "No default export.",
+              node: name2
+            }, options2);
+          } else {
+            const args = parse_default(node.src.default) ?? /* @__PURE__ */ new Map();
+            if (args.size === 0)
+              args.set("default", {});
+            if (node.arguments) {
+              for (let key in node.arguments) {
+                const o = args.get(key);
+                o.state = node.arguments[key];
+              }
+            }
+            node.arguments = args;
+          }
+        }
+        nodes[name2] = merge(node.src, node, options2._deleteSrc);
+      }
     }
-  });
+    for (let output in edges) {
+      const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str] ?? (o.arguments ? o.arguments.get(str) : void 0);
+      let outTarget = nodes;
+      output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
+      if (!outTarget) {
+        onError({
+          message: `Node '${output}' (output) does not exist to create an edge.`,
+          file: url
+        }, options2);
+      }
+      for (let input in edges[output]) {
+        let inTarget = nodes;
+        input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
+        if (!inTarget) {
+          onError({
+            message: `Node '${input}' (input) does not exist to create an edge.`,
+            file: url
+          }, options2);
+        }
+      }
+    }
+    return target;
+  };
+  var load = async (urlOrObject, options2 = {}, urlArg = "") => {
+    const clonedOptions = Object.assign({ errors: [], warnings: [], files: {} }, options2);
+    let {
+      relativeTo,
+      errors,
+      warnings
+    } = clonedOptions;
+    const onImport = (path2, info) => {
+      clonedOptions.files[path2] = info;
+    };
+    const isString = typeof urlOrObject === "string";
+    let object, url = urlArg, relativeToResolved = "";
+    if (url || isString) {
+      if (!url)
+        url = urlOrObject;
+      delete clonedOptions.filesystem;
+      relativeToResolved = relativeTo;
+    } else if (typeof urlOrObject === "object") {
+      object = Object.assign({}, urlOrObject);
+      delete clonedOptions.relativeTo;
+      if (typeof clonedOptions._internal === "string")
+        relativeToResolved = resolve(clonedOptions._internal, clonedOptions.relativeTo);
+    }
+    try {
+      new URL(url);
+      clonedOptions._remote = url;
+      relativeToResolved = relativeTo = "";
+    } catch {
+    }
+    errors.push(...valid(urlOrObject, clonedOptions, "load"));
+    let pkg;
+    const mainPath = await resolve(url, relativeToResolved);
+    if (url) {
+      const main = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
+      const pkgUrl = resolve(basePkgPath, mainPath, true);
+      pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
+      if (pkg)
+        object = Object.assign(pkg, main);
+    } else {
+      if (clonedOptions.filesystem) {
+        const pkgPath = resolve(basePkgPath, relativeToResolved);
+        pkg = checkFiles(pkgPath, clonedOptions.filesystem);
+        if (pkg)
+          object = Object.assign(pkg, isString ? {} : object);
+        else
+          remove(basePkgPath, pkgPath);
+      } else {
+        const pkgPath = resolve(basePkgPath, mainPath);
+        if (relativeToResolved) {
+          pkg = await getWithErrorLog(pkgPath, { errors, warnings });
+          if (pkg)
+            object = Object.assign(pkg, isString ? {} : object);
+        }
+      }
+    }
+    if (errors.length === 0) {
+      const nodes = object.graph.nodes;
+      await getSrc(nodes, {
+        mainPath,
+        relativeToResolved,
+        url,
+        object,
+        onImport
+      }, clonedOptions, object.graph);
+      return object;
+    }
+  };
+  var wasl_core_default = load;
 
-  // src/utils/latest.js
+  // src/common/utils/latest.js
   var version = "0.0.0";
   var latest_default = version;
 
@@ -7749,7 +8427,7 @@
     ]
   };
 
-  // src/utils/schema.registry.js
+  // src/common/utils/schema.registry.js
   var schema_registry_default = {
     ["0.0.0"]: {
       "graph.schema.json": graph_schema_default,
@@ -7761,7 +8439,7 @@
     }
   };
 
-  // src/utils/get.js
+  // src/common/utils/get.js
   var schemaCache = {};
   var getSchema = async (v = latest_default) => {
     if (!schemaCache[v]) {
@@ -7789,684 +8467,9 @@
     return o;
   };
 
-  // src/validate.ts
+  // src/wasl-validate/index.ts
   var import_ajv = __toESM(require_ajv(), 1);
   var import_ajv_formats = __toESM(require_dist(), 1);
-
-  // src/utils/path.ts
-  var fullSuffix = (fileName = "") => fileName.split(".").slice(1);
-  var suffix = (fileName = "") => {
-    const suffix2 = fullSuffix(fileName);
-    return suffix2.join(".");
-  };
-
-  // node_modules/remote-esm/utils/path.js
-  var regex = new RegExp("https?:", "g");
-  var get = (path2, rel = "", keepRelativeImports = false) => {
-    const windowLocation = globalThis?.location?.origin;
-    let pathMatch = false;
-    let relMatch = false;
-    if (windowLocation) {
-      relMatch = rel.includes(windowLocation);
-      if (relMatch) {
-        rel = rel.replace(windowLocation, "");
-        if (rel[0] === "/")
-          rel = rel.slice(1);
-      }
-      pathMatch = path2.includes(windowLocation);
-      if (pathMatch) {
-        path2 = path2.replace(windowLocation, "");
-        if (path2[0] === "/")
-          path2 = path2.slice(1);
-      }
-    }
-    if (!keepRelativeImports)
-      rel = rel.split("/").filter((v) => v != "..").join("/");
-    if (rel[rel.length - 1] === "/")
-      rel = rel.slice(0, -1);
-    let dirTokens = rel.split("/");
-    if (dirTokens.length === 1 && dirTokens[0] === "")
-      dirTokens = [];
-    const potentialFile = dirTokens.pop();
-    if (potentialFile) {
-      const splitPath2 = potentialFile.split(".");
-      if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
-        dirTokens.push(potentialFile);
-    }
-    const splitPath = path2.split("/");
-    const pathTokens = splitPath.filter((str, i) => {
-      if (splitPath[i - 1] && regex.test(splitPath[i - 1]))
-        return true;
-      else
-        return !!str;
-    });
-    const extensionTokens = pathTokens.filter((str, i) => {
-      if (str === "..") {
-        dirTokens.pop();
-        return false;
-      } else if (str === ".")
-        return false;
-      else
-        return true;
-    });
-    const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
-    return newPath;
-  };
-
-  // node_modules/remote-esm/utils/request.js
-  var getURL = (path2) => {
-    let url;
-    try {
-      url = new URL(path2).href;
-    } catch {
-      url = get(path2, globalThis.location.href);
-    }
-    return url;
-  };
-  var handleFetch = async (path2, options2 = {}, progressCallback) => {
-    if (!options2.mode)
-      options2.mode = "cors";
-    const url = getURL(path2);
-    const response = await fetchRemote(url, options2, progressCallback);
-    if (!response)
-      throw new Error("No response received.");
-    const type = response.type.split(";")[0];
-    return {
-      url,
-      type,
-      buffer: response.buffer
-    };
-  };
-  var fetchRemote = async (url, options2 = {}, progressCallback) => {
-    const response = await globalThis.fetch(url, options2);
-    return new Promise(async (resolve2) => {
-      if (response) {
-        const type = response.headers.get("Content-Type");
-        if (globalThis.REMOTEESM_NODE) {
-          const buffer = await response.arrayBuffer();
-          resolve2({ buffer, type });
-        } else {
-          const reader = response.body.getReader();
-          const bytes = parseInt(response.headers.get("Content-Length"), 10);
-          let bytesReceived = 0;
-          let buffer = [];
-          const processBuffer = async ({ done, value }) => {
-            if (done) {
-              const config = {};
-              if (typeof type === "string")
-                config.type = type;
-              const blob = new Blob(buffer, config);
-              const ab = await blob.arrayBuffer();
-              resolve2({ buffer: new Uint8Array(ab), type });
-              return;
-            }
-            bytesReceived += value.length;
-            const chunk = value;
-            buffer.push(chunk);
-            if (progressCallback instanceof Function)
-              progressCallback(response.headers.get("Range"), bytesReceived / bytes, bytes);
-            return reader.read().then(processBuffer);
-          };
-          reader.read().then(processBuffer);
-        }
-      } else {
-        console.warn("Response not received!", options2.headers);
-        resolve2(void 0);
-      }
-    });
-  };
-
-  // node_modules/remote-esm/index.js
-  globalThis.REMOTEESM_TEXT_REFERENCES = {};
-  globalThis.REMOTEESM_NODE = false;
-  var ready = new Promise(async (resolve2, reject) => {
-    try {
-      if (typeof process === "object") {
-        globalThis.REMOTEESM_NODE = true;
-        globalThis.fetch = (await import("node-fetch")).default;
-        if (typeof globalThis.fetch !== "function")
-          globalThis.fetch = fetch;
-        const Blob3 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
-        globalThis.Blob = Blob3;
-        if (typeof globalThis.Blob !== "function")
-          globalThis.Blob = Blob3;
-        resolve2(true);
-      } else
-        resolve2(true);
-    } catch (err) {
-      console.log(err);
-      reject(err);
-    }
-  });
-  var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
-  var moduleDataURI = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
-  var importFromText = async (text, path2) => {
-    const extension = path2.split(".").slice(-1)[0];
-    const isJSON = extension === "json";
-    let mimeType = isJSON ? "application/json" : "application/javascript";
-    const uri = moduleDataURI(text, mimeType);
-    let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
-      if (e.message.includes("Unexpected token"))
-        throw new Error("Failed to fetch");
-      else
-        throw e;
-    });
-    globalThis.REMOTEESM_TEXT_REFERENCES[path2] = imported;
-    return imported;
-  };
-  var resolve = get;
-  var getText = async (uri) => await globalThis.fetch(uri).then((res) => res.text());
-  var safeImport = async (uri, root, onImport = () => {
-  }, outputText) => {
-    await ready;
-    const extension = uri.split(".").slice(-1)[0];
-    const isJSON = extension === "json";
-    let module = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
-    });
-    let text;
-    if (!module) {
-      text = await getText(uri);
-      try {
-        module = await importFromText(text, uri);
-      } catch (e) {
-        const base = get("", uri);
-        let childBase = base;
-        const importInfo = {};
-        let m;
-        do {
-          m = re.exec(text);
-          if (m == null)
-            m = re.exec(text);
-          if (m) {
-            text = text.replace(m[0], ``);
-            const wildcard = !!m[1].match(/\*\s+as/);
-            const variables = m[1].replace(/\*\s+as/, "").trim();
-            importInfo[m[3]] = {
-              variables,
-              wildcard
-            };
-          }
-        } while (m);
-        for (let path2 in importInfo) {
-          const { variables, wildcard } = importInfo[path2];
-          let correctPath = get(path2, childBase);
-          const dependentFilePath = get(correctPath);
-          const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
-          let ref = globalThis.REMOTEESM_TEXT_REFERENCES[dependentFilePath];
-          if (!ref) {
-            const extension2 = correctPath.split(".").slice(-1)[0];
-            const info = await handleFetch(correctPath);
-            let blob = new Blob([info.buffer], { type: info.type });
-            const isJS = extension2.includes("js");
-            const newURI = dependentFileWithoutRoot;
-            const newText = await blob.text();
-            let importedText = isJS ? await new Promise(async (resolve2) => {
-              await safeImport(newURI, uri, (path3, info2) => {
-                onImport(path3, info2);
-                if (path3 == newURI)
-                  resolve2(info2.text);
-              }, true);
-            }) : newText;
-            await importFromText(importedText, correctPath);
-          }
-          text = `const ${variables} =  globalThis.REMOTEESM_TEXT_REFERENCES['${correctPath}']${variables.includes("{") ? "" : wildcard ? "" : ".default"};
-        ${text}`;
-        }
-        module = await importFromText(text, uri);
-      }
-    }
-    onImport(uri, {
-      text: outputText ? text ?? await getText(uri) : void 0,
-      module
-    });
-    return module;
-  };
-  var remote_esm_default = safeImport;
-
-  // src/get.ts
-  var cache = {};
-  var get2 = async (relPath, relativeTo = "", onImport) => {
-    let type = suffix(relPath);
-    const isJSON = !type || type.includes("json");
-    const fullPath = resolve(relPath, relativeTo);
-    if (!cache[fullPath]) {
-      cache[fullPath] = remote_esm_default(fullPath, void 0, onImport).catch((e) => {
-        if (e.message.includes("Failed to fetch"))
-          throw new Error("404");
-        else
-          throw e;
-      });
-      const res = await cache[fullPath];
-      if (isJSON)
-        cache[fullPath] = res?.default ?? {};
-      else
-        cache[fullPath] = res;
-    }
-    return isJSON ? JSON.parse(JSON.stringify(cache[fullPath])) : cache[fullPath];
-  };
-  var get_default = get2;
-
-  // src/utils/check.ts
-  var import_meta = {};
-  var valid = (input, options2, location) => {
-    const errors = [];
-    const isUndefined = options2?.relativeTo === void 0;
-    const isString = typeof input === "string";
-    const isObject = typeof input === "object";
-    let error;
-    if (isString) {
-      const hasRelTo = !isUndefined && "relativeTo" in options2;
-      if (!hasRelTo && !options2._remote) {
-        if (import_meta.url) {
-          error = { message: "Not a valid relativeTo key (required) in options", file: input };
-          console.warn(`[wasl-${location}] Import Mode Error: Please pass a valid string to options.relativeTo (ideally import.meta.url).`);
-        } else {
-          error = { message: "import.meta.url is not supported", file: input };
-          console.warn(`[wasl-${location}] Import Mode Error: import.meta.url is not available. Does your bundler support it?`);
-        }
-      }
-    } else if (!isObject) {
-      error = { message: "Not a valid object passed in the first argument", file: null };
-      console.warn(`[wasl-${location}] Reference Mode Error: Please pass a valid object in the first argument and pass file object references via the options.filesystem field.`);
-    }
-    if (error) {
-      error.function = location;
-      errors.push(error);
-    }
-    return errors;
-  };
-
-  // src/utils/languages.ts
-  var languages_exports = {};
-  __export(languages_exports, {
-    js: () => js,
-    json: () => json
-  });
-  var js = ["js", "mjs", "cjs", "javascript"];
-  var json = ["json"];
-
-  // src/utils/parse.ts
-  var ARGUMENT_NAMES = /([^,]*)/g;
-  function getFnParamInfo(fn) {
-    var fstr = fn.toString();
-    const openPar = fstr.indexOf("(");
-    const closePar = fstr.indexOf(")");
-    const getFirstBracket = (str, offset = 0) => {
-      const fb = offset + str.indexOf("{");
-      if (fb < closePar && fb > openPar) {
-        return getFirstBracket(str.slice(fb), offset + fb);
-      } else
-        return fb;
-    };
-    const firstBracket = getFirstBracket(fstr);
-    let innerMatch;
-    if (firstBracket === -1 || closePar < firstBracket)
-      innerMatch = fstr.slice(fstr.indexOf("(") + 1, fstr.indexOf(")"));
-    else
-      innerMatch = fstr.match(/([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\)) =>/)?.[1];
-    if (!innerMatch)
-      return void 0;
-    const matches = innerMatch.match(ARGUMENT_NAMES).filter((e) => !!e);
-    const info = /* @__PURE__ */ new Map();
-    matches.forEach((v) => {
-      let [name2, value] = v.split("=");
-      name2 = name2.trim();
-      name2 = name2.replace(/\d+$/, "");
-      const spread = name2.includes("...");
-      name2 = name2.replace("...", "");
-      try {
-        if (name2)
-          info.set(name2, {
-            state: (0, eval)(`(${value})`),
-            spread
-          });
-      } catch (e) {
-        info.set(name2, {});
-        console.warn(`Argument ${name2} could be parsed for`, fn.toString());
-      }
-    });
-    return info;
-  }
-  var parse_default = getFnParamInfo;
-
-  // src/load.ts
-  var isSrc = (str) => {
-    return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
-  };
-  var merge = (main2, override, deleteSrc = false) => {
-    if (deleteSrc) {
-      const ogSrc = override.src ?? override;
-      delete override.src;
-      if ("default" in ogSrc)
-        return ogSrc.default;
-    }
-    return Object.assign(Object.assign({}, main2), override);
-  };
-  var checkFiles = (key, filesystem) => {
-    const isJSON = suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
-    return output;
-  };
-  var remove = (original, search, key = original, o) => {
-    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
-    if (o)
-      delete o[key];
-  };
-  var basePkgPath = "./package.json";
-  var onError = (e, { errors, warnings }) => {
-    const item = {
-      message: e.message,
-      file: e.file,
-      node: e.node
-    };
-    const arr = e.type === "warning" ? warnings : errors;
-    arr.push(item);
-  };
-  var getWithErrorLog = async (...args) => {
-    const o = args.slice(-1)[0];
-    const path2 = args[0];
-    args = args.slice(0, -1);
-    return await get_default(...args).catch((e) => onError({
-      message: e.message,
-      file: path2
-    }, o));
-  };
-  var getSrc = async (target, info, options2, { nodes = void 0, edges = void 0 } = {}) => {
-    let {
-      relativeToResolved,
-      mainPath,
-      url,
-      onImport
-    } = info;
-    const isImportMode = !!url;
-    relativeToResolved = options2._remote ?? relativeToResolved;
-    for (let name2 in target) {
-      const node = target[name2];
-      const isObj = node && typeof node === "object";
-      if (isObj) {
-        let ogSrc = node.src ?? "";
-        if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
-          node.src = null;
-          let passToNested = null;
-          let fullPath, _remote = options2._remote;
-          try {
-            new URL(ogSrc);
-            fullPath = ogSrc;
-            _remote = ogSrc;
-          } catch {
-            fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
-          }
-          if (isImportMode) {
-            node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
-            console.log("got", node.src);
-            if (_remote) {
-              if (!node.src) {
-                const got = await getSrc([node], info, options2, { nodes: [node] });
-                console.log("_remote", fullPath, node, got);
-                node.src = got[0].src ?? got[0];
-                passToNested = resolve(ogSrc);
-              }
-            }
-            passToNested = resolve(ogSrc, url, true);
-            if (!node.src)
-              remove(ogSrc, fullPath, name2, target);
-          } else {
-            if (options2.filesystem) {
-              const res = checkFiles(fullPath, options2.filesystem);
-              if (res) {
-                if (res.default || fullPath.includes(".json"))
-                  node.src = passToNested = res;
-                else {
-                  onError({
-                    type: "warning",
-                    message: `Node (${name2}) at ${fullPath} does not have a default export.`,
-                    file: ogSrc
-                  }, options2);
-                  node.src = passToNested = { default: res };
-                }
-              } else
-                remove(ogSrc, fullPath, name2, target);
-            } else {
-              onError({
-                message: "No options.filesystem field to get JavaScript objects",
-                file: ogSrc
-              }, options2);
-            }
-          }
-          if (node.src && node.src.graph)
-            node.src = await load(passToNested, {
-              relativeTo: relativeToResolved || options2.relativeTo,
-              filesystem: options2.filesystem,
-              errors: options2.errors,
-              warnings: options2.warnings,
-              files: options2.files,
-              _internal: ogSrc,
-              _deleteSrc: options2._deleteSrc,
-              _remote
-            });
-        } else {
-          for (let key in node) {
-            if (key === "src" && node.src) {
-              const language = node.src.language;
-              if (!language || js.includes(language)) {
-                if (node.src.text) {
-                  const esmImport = async (text) => {
-                    try {
-                      let imported = await importFromText(text);
-                      if (imported.default && Object.keys(imported).length === 1)
-                        imported = imported.default;
-                      return imported;
-                    } catch (e) {
-                      console.error("Import did not work. Probably relies on something...");
-                      onError({
-                        message: e.message,
-                        file: name2
-                      }, options2);
-                    }
-                  };
-                  const esm = await esmImport(node.src.text);
-                  if (esm) {
-                    delete node.src.text;
-                    if (typeof esm === "object")
-                      node.src = { default: Object.assign(node.src, esm) };
-                    else
-                      node.src = esm;
-                  } else {
-                    onError({
-                      message: "Could not import this text as ESM",
-                      file: node.src
-                    }, options2);
-                  }
-                } else {
-                  const expectedFunctions = ["default", "oncreate", "onrender"];
-                  for (let key2 in node.src) {
-                    try {
-                      if (expectedFunctions.includes(key2) && typeof node.src[key2] === "string")
-                        node.src[key2] = (0, eval)(`(${node.src[key2]})`);
-                    } catch (e) {
-                      onError({
-                        message: `Field ${key2} could not be parsed`,
-                        file: node.src[key2]
-                      }, options2);
-                    }
-                  }
-                }
-              } else {
-                console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
-                onError({
-                  message: `Source is in ${language}. Currently only JavaScript is supported.`,
-                  file: ogSrc
-                }, options2);
-              }
-            } else if (node[key] && typeof node[key] === "object") {
-              const optsCopy = Object.assign({}, options2);
-              optsCopy._deleteSrc = true;
-              await getSrc(node[key], info, optsCopy, { nodes: node[key] });
-            }
-          }
-        }
-      }
-    }
-    for (let name2 in nodes) {
-      const node = nodes[name2];
-      if (node?.src && typeof node?.src === "object") {
-        if (node.src.default) {
-          const fnString = node.src.default.toString();
-          const keyword = "function";
-          if (fnString.slice(0, keyword.length) === keyword) {
-            onError({
-              type: "warning",
-              message: `Default export may be stateful.`,
-              node: name2
-            }, options2);
-          }
-        }
-        if (node.src.graph) {
-          for (let nestedName in node.components) {
-            const nestedNode = node.src.graph.nodes[nestedName];
-            if (nestedNode) {
-              if (node.components) {
-                for (let key in node.components[nestedName]) {
-                  const newInfo = node.components[nestedName][key];
-                  if (typeof newInfo === "object") {
-                    const optsCopy = Object.assign({}, options2);
-                    optsCopy._deleteSrc = true;
-                    const ogSrc = newInfo.src;
-                    const newInfoForNode = await getSrc({ [key]: newInfo }, info, optsCopy, {
-                      nodes: newInfo
-                    });
-                    const newVal = newInfoForNode[key];
-                    if (newVal)
-                      nestedNode[key] = newVal.src ?? newVal;
-                    else {
-                      onError({
-                        message: `Could not resolve ${ogSrc}`
-                      }, options2);
-                    }
-                  } else
-                    console.error("[wasl-load] Component info is not an object...");
-                }
-              }
-            } else {
-              onError({
-                message: `Component target '${nestedName}' does not exist`,
-                node: name2
-              }, options2);
-            }
-          }
-        } else if (edges) {
-          if (!("default" in node.src)) {
-            onError({
-              message: "No default export.",
-              node: name2
-            }, options2);
-          } else {
-            const args = parse_default(node.src.default) ?? /* @__PURE__ */ new Map();
-            if (args.size === 0)
-              args.set("default", {});
-            if (node.arguments) {
-              for (let key in node.arguments) {
-                const o = args.get(key);
-                o.state = node.arguments[key];
-              }
-            }
-            node.arguments = args;
-          }
-        }
-        nodes[name2] = merge(node.src, node, options2._deleteSrc);
-      }
-    }
-    for (let output in edges) {
-      const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str] ?? (o.arguments ? o.arguments.get(str) : void 0);
-      let outTarget = nodes;
-      output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
-      if (!outTarget) {
-        onError({
-          message: `Node '${output}' (output) does not exist to create an edge.`,
-          file: url
-        }, options2);
-      }
-      for (let input in edges[output]) {
-        let inTarget = nodes;
-        input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
-        if (!inTarget) {
-          onError({
-            message: `Node '${input}' (input) does not exist to create an edge.`,
-            file: url
-          }, options2);
-        }
-      }
-    }
-    return target;
-  };
-  var load = async (urlOrObject, options2 = {}, urlArg = "") => {
-    const clonedOptions = Object.assign({ errors: [], warnings: [], files: {} }, options2);
-    let {
-      relativeTo,
-      errors,
-      warnings
-    } = clonedOptions;
-    const onImport = (path2, info) => clonedOptions.files[path2] = info;
-    const isString = typeof urlOrObject === "string";
-    let object, url = urlArg, relativeToResolved = "";
-    if (url || isString) {
-      if (!url)
-        url = urlOrObject;
-      delete clonedOptions.filesystem;
-      relativeToResolved = relativeTo;
-    } else if (typeof urlOrObject === "object") {
-      object = Object.assign({}, urlOrObject);
-      delete clonedOptions.relativeTo;
-      if (typeof clonedOptions._internal === "string")
-        relativeToResolved = resolve(clonedOptions._internal, clonedOptions.relativeTo);
-    }
-    try {
-      new URL(url);
-      clonedOptions._remote = url;
-      relativeToResolved = relativeTo = "";
-    } catch {
-    }
-    errors.push(...valid(urlOrObject, clonedOptions, "load"));
-    let pkg;
-    const mainPath = await resolve(url, relativeToResolved);
-    if (url) {
-      const main2 = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
-      const pkgUrl = resolve(basePkgPath, mainPath, true);
-      pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
-      if (pkg)
-        object = Object.assign(pkg, main2);
-    } else {
-      if (clonedOptions.filesystem) {
-        const pkgPath = resolve(basePkgPath, relativeToResolved);
-        pkg = checkFiles(pkgPath, clonedOptions.filesystem);
-        if (pkg)
-          object = Object.assign(pkg, isString ? {} : object);
-        else
-          remove(basePkgPath, pkgPath);
-      } else {
-        const pkgPath = resolve(basePkgPath, mainPath);
-        if (relativeToResolved) {
-          pkg = await getWithErrorLog(pkgPath, { errors, warnings });
-          if (pkg)
-            object = Object.assign(pkg, isString ? {} : object);
-        }
-      }
-    }
-    if (errors.length === 0) {
-      const nodes = object.graph.nodes;
-      await getSrc(nodes, {
-        mainPath,
-        relativeToResolved,
-        url,
-        object,
-        onImport
-      }, clonedOptions, object.graph);
-      return object;
-    }
-  };
-  var load_default = load;
-
-  // src/validate.ts
   var activeVersion = null;
   var ajv = new import_ajv.default({
     allErrors: true
@@ -8512,21 +8515,189 @@
         errors.push(...ajvValidate.errors);
       if (inputIsValid && !clone._internal) {
         clone._internal = true;
-        const loaded = await load_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
+        const loaded = await wasl_core_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
         if (loaded)
           schemaValid = await validate(loaded, clone);
       }
     }
     return schemaValid && inputIsValid;
   };
-  var validate_default = validate;
+  var wasl_validate_default = validate;
 
-  // demos/remote.js
+  // src/wasl-run/GraphNode.ts
+  var GraphNode = class {
+    constructor(tag, node, parent) {
+      this.run = async (...args) => {
+        const results = {
+          default: void 0,
+          children: {}
+        };
+        if (this.node.graph) {
+          const input = this.node.graph.ports?.input;
+          if (input) {
+            const output = this.node.graph.ports?.output;
+            const node = this.node.graph.nodes[input];
+            const res = await node.run(...args);
+            results.default = res.children[output].default;
+          }
+        } else {
+          results.default = this.node.default(...args);
+        }
+        if (results.default !== void 0) {
+          for (let tag in this.graph.edges[this.tag]) {
+            results.children[tag] = await this.graph.nodes[tag].run(results.default);
+          }
+        }
+        return results;
+      };
+      this.tag = tag;
+      this.node = node;
+      if (parent.nested) {
+        this.parent = parent;
+        this.graph = this.parent.nested;
+      } else
+        this.graph = parent;
+      this.nested = this.node.graph;
+      if (this.nested) {
+        for (let name2 in this.nested.nodes) {
+          const node2 = this.nested.nodes[name2];
+          this.nested.nodes[name2] = new GraphNode(name2, node2, this);
+        }
+      }
+    }
+  };
+  var GraphNode_default = GraphNode;
+
+  // src/wasl-run/index.ts
+  var start = (wasl) => {
+    const graph = Object.assign(wasl.graph);
+    graph.nodes = Object.assign(graph.nodes);
+    for (let name2 in graph.nodes) {
+      const node = graph.nodes[name2];
+      graph.nodes[name2] = new GraphNode_default(name2, node, wasl.graph);
+    }
+    for (let name2 in graph.edges)
+      graph.nodes[name2].run(1).then((res) => console.log("run res", name2, res));
+    return graph;
+  };
+  var wasl_run_default = start;
+
+  // tests/0/0.0/0.0.0/index.wasl.json
+  var index_wasl_default = {
+    name: "App",
+    graph: {
+      nodes: {
+        plugin: {
+          src: "../../plugins/plugin/index.wasl.json",
+          offload: true,
+          components: {
+            add: {
+              toAdd: {
+                src: "number.js"
+              }
+            }
+          }
+        },
+        log: {
+          src: "../../plugins/log.js"
+        }
+      },
+      edges: {
+        plugin: {
+          log: {
+            protocol: "websockets"
+          }
+        }
+      }
+    }
+  };
+
+  // tests/0/0.0/0.0.0/package.json
+  var package_default = {
+    name: "app",
+    description: "A basic WASL application",
+    author: "Garrett Flynn <garrettmflynn@gmail.com>",
+    type: "module",
+    main: "index.js"
+  };
+
+  // tests/0/plugins/plugin/package.json
+  var package_default2 = {
+    name: "plugin",
+    description: "A basic WASL plugin",
+    author: "Garrett Flynn <garrettmflynn@gmail.com>",
+    type: "module",
+    main: "index.js"
+  };
+
+  // tests/0/plugins/plugin/index.wasl.json
+  var index_wasl_default2 = {
+    name: "Plugin",
+    graph: {
+      nodes: {
+        add: {
+          src: "../add.js"
+        },
+        multiply: {
+          src: "../multiply.js"
+        }
+      },
+      edges: {
+        add: {
+          multiply: {}
+        }
+      },
+      ports: {
+        input: "add",
+        output: "multiply"
+      }
+    }
+  };
+
+  // tests/0/plugins/log.js
+  var log_exports = {};
+  __export(log_exports, {
+    default: () => log_default
+  });
+  var log_default = (input) => console.log(input);
+
+  // tests/0/plugins/add.js
+  var add_exports = {};
+  __export(add_exports, {
+    default: () => add_default,
+    toAdd: () => toAdd
+  });
+  var toAdd = 1;
+  function add_default(input) {
+    return input + this.toAdd;
+  }
+
+  // tests/0/plugins/multiply.js
+  var multiply_exports = {};
+  __export(multiply_exports, {
+    default: () => multiply_default
+  });
+  var multiply_default = (input) => 10 * input;
+
+  // tests/0/0.0/0.0.0/number.js
+  var number_default = 3;
+
+  // demos/0.0.0.js
   var import_meta2 = {};
-  var main = "";
-  var path = "https://raw.githubusercontent.com/garrettmflynn/phaser/main/index.wasl.json";
+  var path = "../tests/0/0.0/0.0.0/index.wasl.json";
+  var filesystem = {
+    ["package.json"]: package_default,
+    ["plugins/plugin/index.wasl.json"]: index_wasl_default2,
+    ["plugins/log.js"]: log_exports,
+    ["plugins/add.js"]: add_exports,
+    ["plugins/multiply.js"]: multiply_exports,
+    ["plugins/plugin/package.json"]: package_default2,
+    ["number.js"]: number_default
+  };
   var options = {
-    relativeTo: import_meta2.url
+    relativeTo: import_meta2.url,
+    version: "0.0.0",
+    filesystem
   };
 
   // index.js
@@ -8536,30 +8707,38 @@
       log(`${severity} (${type})`, e);
     });
   };
-  var start = async () => {
+  var startExecution = async () => {
     console.log("------------------ IMPORT MODE ------------------");
     const importOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
-    const res = await validate_default(path, importOptions);
-    console.log("wasl.validate (import)", res);
+    const res = await wasl_validate_default(path, importOptions);
+    console.log("validate (import)", res);
     if (res) {
-      const o = await load_default(path, importOptions);
-      console.log("wasl.load (import)", o);
+      const o = await wasl_core_default(path, importOptions);
+      console.log("load (import)", o);
+      if (o) {
+        const output = await wasl_run_default(o);
+        console.log("start (import)", output);
+      }
     }
     printError(importOptions.errors, "import");
     printError(importOptions.warnings, "import", "Warning");
-    if (main) {
+    if (index_wasl_default) {
       console.log("------------------ REFERENCE MODE ------------------");
       const refOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
-      const resref = await validate_default(main, refOptions);
-      console.log("wasl.validate (reference)", resref);
+      const resref = await wasl_validate_default(index_wasl_default, refOptions);
+      console.log("validate (reference)", resref);
       if (resref) {
-        const oref = await load_default(main, refOptions);
-        console.log("wasl.load (reference)", oref);
+        const o = await wasl_core_default(index_wasl_default, refOptions);
+        console.log("load (reference)", o);
+        if (o) {
+          const output = await wasl_run_default(o);
+          console.log("start (import)", output);
+        }
       }
       printError(refOptions.errors, "reference");
       printError(refOptions.warnings, "reference", "Warning");
     }
   };
-  start();
+  startExecution();
 })();
 /** @license URI.js v4.4.1 (c) 2011 Gary Court. License: http://github.com/garycourt/uri-js */

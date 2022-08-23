@@ -41,8 +41,13 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
 }
 ```
 
-## The Library
-The `wasl` library validates and loads **WASL** files into JavaScript.
+## The Libraries
+The libraries in this repo validate and load **WASL** files into JavaScript.
+
+### Libraries
+1. `wasl` - Load the `src` keys into a **WASL** file.
+2. `wasl-validate` - Validation of a **WASL** file using JSON Schema (Ajv)
+3. `wasl-run` - Minimal execution of a **WASL** graph loaded using `wasl`
 
 ### Features
 - Validation of original JSON files and loaded objects against the JSON Schema

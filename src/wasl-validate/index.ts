@@ -1,11 +1,11 @@
-import { getSchemas } from "./utils/get.js"
+import { getSchemas } from "../common/utils/get.js"
 import Ajv from "ajv"
 import addFormats from "ajv-formats"
-import latest from "./utils/latest.js"
-import { LatestWASL, Options } from "./types/index.js"
-import get from "./get.js"
-import * as check from './utils/check'
-import load from "./load.js"
+import latest from "../common/utils/latest.js"
+import { LatestWASL, Options } from "../common/types/index.js"
+import get from "../common/get.js"
+import * as check from '../common/utils/check'
+import load from "../wasl-core/index"
 
 let activeVersion = null
 const ajv = new Ajv({
