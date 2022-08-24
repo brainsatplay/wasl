@@ -6,6 +6,7 @@ import * as check from '../common/utils/check'
 import getFnParamInfo from "../common/utils/parse"
 
 import * as remoteImport from 'remote-esm'
+import ESComponent from "src/wasl-core/ESComponent"
 
 const isSrc = (str) => {
     return typeof str === 'string' && Object.values(languages).find(arr => arr.includes(str.split('.').slice(-1)[0])) // Has supported extension
@@ -13,13 +14,28 @@ const isSrc = (str) => {
 
 const merge = (main, override, deleteSrc=false) => {
 
+    const copy = Object.assign({}, main)
     if (deleteSrc) {
         const ogSrc = override.src ?? override
         delete override.src
         if ('default' in ogSrc) return ogSrc.default // default export
     }
+
+    const keys = Object.keys(copy)
+    const newKeys = new Set(Object.keys(override))
+
+    keys.forEach(k => {
+        newKeys.delete(k)
+        if (typeof override[k] === 'object') copy[k] = merge(copy[k], override[k])
+        else if (k in override) copy[k] = override[k]
+    })
+
+    newKeys.forEach(k => {
+        copy[k] = override[k]
+    })
+
     
-    return Object.assign(Object.assign({}, main), override) // named exports
+    return copy // named exports
 }
 
 const checkFiles = (key, filesystem) => {
@@ -214,7 +230,7 @@ var remove = (original, search, key=original, o?)=> {
                 } 
                 
                 // Drill other object keys to replace and merge src...
-                else if (node[key] && typeof node[key] === 'object') {
+                else if (node[key] && typeof node[key] === 'object' && !(node[key] instanceof ESComponent)) {
                     const optsCopy = Object.assign({}, options) as Options
                     optsCopy._deleteSrc = true
                     await getSrc(node[key], info, optsCopy, {nodes: node[key]}) // check for src to merge
@@ -276,7 +292,6 @@ var remove = (original, search, key=original, o?)=> {
 
                                                 if (newVal) {
                                                     let chosenVal = newVal.src ?? newVal
-
                                                     // merge default if the only key
                                                     if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
                                                     nestedNode[key] = chosenVal
@@ -310,39 +325,30 @@ var remove = (original, search, key=original, o?)=> {
                             node: name
                         }, options)
                     } 
-                    
-                    // LOAD: Arguments // TODO: Make sure this doesn't conflict with things the user can pass in...
-                    else {
-                        
-                        const args = getFnParamInfo(node.src.default) ?? new Map()
-                        
-                        if (args.size === 0) args.set("default", {});
 
-                        // merge with user-specified arguments
-                        if (node.arguments) {
-                          for (let key in node.arguments) {
-                            const o = args.get(key)
-                            o.state = node.arguments[key]
-                          }
-                        }
-                        
-                        // set arguments field
-                        node.arguments = args
-                    }
                 }
 
                 nodes[name] = merge(node.src, node, options._deleteSrc)
-
             }
         }
+
+        // convert to ES Component
+        for (let name in nodes) nodes[name] = new ESComponent(name, nodes[name], {
+            parent: graph,
+            activate: options.activate
+        })
+        
 
         // VALIDATE: Check that all edges point to valid nodes
         for (let output in edges){
 
-            const getTarget = (o,str) => o.graph?.nodes?.[str] ?? o[str] ?? (o.arguments ? o.arguments.get(str) : undefined)
+            const getTarget = (o,str) => {
+                return o.graph?.nodes?.[str] ?? o[str]
+            }
 
             let outTarget = nodes
             output.split('.').forEach((str) => outTarget = getTarget(outTarget,str))
+
             if (!outTarget) {
                 onError({
                     message: `Node '${output}' (output) does not exist to create an edge.`,

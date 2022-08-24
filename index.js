@@ -1,10 +1,9 @@
 // import * as wasl from "./dist/index.esm.js"
 import wasl from "./src/wasl-core/index"
 import validate from "./src/wasl-validate/index"
-import start from "./src/wasl-run/index"
 
-import { path, main, options } from './demos/0.0.0.js'
-// import { path, main, options } from './demos/starter.js'
+// import { path, main, options } from './demos/0.0.0.js'
+import { path, main, options } from './demos/starter.js'
 // import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/signals.js'
 // import { path, main, options } from './demos/remote.js'
@@ -19,6 +18,8 @@ const printError = (arr, type, severity='Error') => {
 
 const startExecution = async () => {
 
+    options.activate = true
+
     // Option #1: Import Mode
     console.log('------------------ IMPORT MODE ------------------')
     const importOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
@@ -27,10 +28,6 @@ const startExecution = async () => {
     if (res) {
         const o = await wasl(path, importOptions)
         console.log('load (import)', o)
-        if (o) {
-            const output = await start(o)
-            console.log('start (import)', output)
-        }
     }
 
     printError(importOptions.errors, 'import')
@@ -40,15 +37,11 @@ const startExecution = async () => {
     if (main){
         console.log('------------------ REFERENCE MODE ------------------')
         const refOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
-        const resref = await validate(main, refOptions)
-        console.log('validate (reference)', resref)
-        if (resref) {
+        const res = await validate(main, refOptions)
+        console.log('validate (reference)', res)
+        if (res) {
             const o = await wasl(main, refOptions)
             console.log('load (reference)', o)
-            if (o) {
-                const output = await start(o)
-                console.log('start (import)', output)
-            }
         }
         printError(refOptions.errors, 'reference')
         printError(refOptions.warnings, 'reference', 'Warning')

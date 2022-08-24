@@ -20,4 +20,7 @@ export type Options = {
     _internal?: string | boolean
     _deleteSrc?: boolean
     _remote?: string
+
+    // ES Components
+    activate?: boolean
 }

@@ -61,6 +61,12 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 ## Contributing
  > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests
 
+
+ ### Backlog
+ - Activate arguments as graphs
+ - Validate ports
+ - Load as components (using `es-components`)
+
 ## Acknowledgments
 `wasl` was developed for [brainsatplay], along with [graphscript] and [visualscript], to construct interactive, high-performance web applications as directed acyclic graphs (DAGs).
 

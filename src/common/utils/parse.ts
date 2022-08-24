@@ -34,12 +34,12 @@ export function getFnParamInfo(fn):Map<string, any>{
 
         try {
             if (name) info.set(name,  {
-              state: (0, eval)(`(${value})`),
+              state: (value) ? (0, eval)(`(${value})`) : value,
               spread
             })
         } catch (e) {
             info.set(name,  {})
-            console.warn(`Argument ${name} could be parsed for`, fn.toString());
+            console.warn(`Argument ${name} could not be parsed for`, fn.toString(), value);
         }
     })
 
