@@ -3,8 +3,8 @@ import wasl from "./src/wasl-core/index"
 import validate from "./src/wasl-validate/index"
 
 // import { path, main, options } from './demos/0.0.0.js'
-import { path, main, options } from './demos/starter.js'
-// import { path, main, options } from './demos/phaser.js'
+// import { path, main, options } from './demos/starter.js'
+import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/signals.js'
 // import { path, main, options } from './demos/remote.js'
 
@@ -18,7 +18,8 @@ const printError = (arr, type, severity='Error') => {
 
 const startExecution = async () => {
 
-    options.activate = true
+    options.activate = true // use internal graph system
+    options.parentNode = document.getElementById('container') // set parent node
 
     // Option #1: Import Mode
     console.log('------------------ IMPORT MODE ------------------')

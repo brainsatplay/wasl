@@ -13,7 +13,7 @@ const get = async (relPath, relativeTo="", onImport?) => {
 
     if (!cache[fullPath]){
 
-        cache[fullPath] = remoteImport.default(fullPath, undefined, onImport).catch(e => {
+        cache[fullPath] = remoteImport.default(fullPath, {onImport}).catch(e => {
             if (e.message.includes("Failed to fetch")) throw new Error("404");
             else throw e
         })

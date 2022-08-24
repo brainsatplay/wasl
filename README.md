@@ -63,9 +63,7 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 
 
  ### Backlog
- - Activate arguments as graphs
  - Validate ports
- - Load as components (using `es-components`)
 
 ## Acknowledgments
 `wasl` was developed for [brainsatplay], along with [graphscript] and [visualscript], to construct interactive, high-performance web applications as directed acyclic graphs (DAGs).

@@ -7,6 +7,9 @@
                 "offload": true,
                 "components": {
                     "add": {
+                        "arguments": {
+                            "input": 3
+                        },
                         "toAdd": {
                             "src": "number.js"
                         }

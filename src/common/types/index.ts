@@ -23,4 +23,5 @@ export type Options = {
 
     // ES Components
     activate?: boolean
+    parentNode?: HTMLElement
 }

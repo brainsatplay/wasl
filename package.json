@@ -2,9 +2,8 @@
   "name": "wasl-monorepo",
   "description": "The Web Application Specification Language (WASL)",
   "workspaces": [
-    "wasl/**/*",
-    "wasl-validate/**/*",
-    "wasl-run/**/*"
+    "src/wasl-core",
+    "src/wasl-validate"
   ],
   "private": true,
   "type": "module",
@@ -12,10 +11,5 @@
     "start": "node index.js",
     "start:browser": "tinybuild",
     "types": "node types.js"
-  },
-  "dependencies": {
-    "ajv": "^8.11.0",
-    "ajv-formats": "^2.1.1",
-    "remote-esm": "^0.0.10"
   }
 }

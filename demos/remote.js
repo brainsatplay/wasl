@@ -13,6 +13,7 @@ const main = ''
 // import * as create from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/create.js'
 
 const path = 'https://raw.githubusercontent.com/garrettmflynn/phaser/main/index.wasl.json'
+// const path = 'http://127.0.0.1:5502/index.wasl.json'
 
 const options = {
     relativeTo: import.meta.url,

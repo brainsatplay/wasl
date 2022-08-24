@@ -3,10 +3,9 @@ import * as languages from '../common/utils/languages'
 import * as path from '../common/utils/path'
 import get from '../common/get'
 import * as check from '../common/utils/check'
-import getFnParamInfo from "../common/utils/parse"
 
 import * as remoteImport from 'remote-esm'
-import ESComponent from "src/wasl-core/ESComponent"
+import ESPlugin from "es-plugins"
 
 const isSrc = (str) => {
     return typeof str === 'string' && Object.values(languages).find(arr => arr.includes(str.split('.').slice(-1)[0])) // Has supported extension
@@ -15,25 +14,26 @@ const isSrc = (str) => {
 const merge = (main, override, deleteSrc=false) => {
 
     const copy = Object.assign({}, main)
-    if (deleteSrc) {
-        const ogSrc = override.src ?? override
-        delete override.src
-        if ('default' in ogSrc) return ogSrc.default // default export
+    if (override){
+        if (deleteSrc) {
+            const ogSrc = override.src ?? override
+            delete override.src
+            if ('default' in ogSrc) return ogSrc.default // default export
+        }
+
+        const keys = Object.keys(copy)
+        const newKeys = new Set(Object.keys(override))
+
+        keys.forEach(k => {
+            newKeys.delete(k)
+            if (typeof override[k] === 'object') copy[k] = merge(copy[k], override[k])
+            else if (k in override) copy[k] = override[k]
+        })
+
+        newKeys.forEach(k => {
+            copy[k] = override[k]
+        })
     }
-
-    const keys = Object.keys(copy)
-    const newKeys = new Set(Object.keys(override))
-
-    keys.forEach(k => {
-        newKeys.delete(k)
-        if (typeof override[k] === 'object') copy[k] = merge(copy[k], override[k])
-        else if (k in override) copy[k] = override[k]
-    })
-
-    newKeys.forEach(k => {
-        copy[k] = override[k]
-    })
-
     
     return copy // named exports
 }
@@ -230,7 +230,7 @@ var remove = (original, search, key=original, o?)=> {
                 } 
                 
                 // Drill other object keys to replace and merge src...
-                else if (node[key] && typeof node[key] === 'object' && !(node[key] instanceof ESComponent)) {
+                else if (node[key] && typeof node[key] === 'object') {
                     const optsCopy = Object.assign({}, options) as Options
                     optsCopy._deleteSrc = true
                     await getSrc(node[key], info, optsCopy, {nodes: node[key]}) // check for src to merge
@@ -278,6 +278,7 @@ var remove = (original, search, key=original, o?)=> {
                                     if (node.components) {
                                         for (let key in node.components[nestedName]){
                                             const newInfo = node.components[nestedName][key]
+                                                                                        
                                             if (typeof newInfo === 'object') {
 
                                                 // Properly merge the resolved src info
@@ -294,7 +295,7 @@ var remove = (original, search, key=original, o?)=> {
                                                     let chosenVal = newVal.src ?? newVal
                                                     // merge default if the only key
                                                     if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
-                                                    nestedNode[key] = chosenVal
+                                                    nestedNode[key] = chosenVal // MERGE BY REPLACEMENT
                                                 } else {
                                                     onError({
                                                         message: `Could not resolve ${ogSrc}`
@@ -332,42 +333,6 @@ var remove = (original, search, key=original, o?)=> {
             }
         }
 
-        // convert to ES Component
-        for (let name in nodes) nodes[name] = new ESComponent(name, nodes[name], {
-            parent: graph,
-            activate: options.activate
-        })
-        
-
-        // VALIDATE: Check that all edges point to valid nodes
-        for (let output in edges){
-
-            const getTarget = (o,str) => {
-                return o.graph?.nodes?.[str] ?? o[str]
-            }
-
-            let outTarget = nodes
-            output.split('.').forEach((str) => outTarget = getTarget(outTarget,str))
-
-            if (!outTarget) {
-                onError({
-                    message: `Node '${output}' (output) does not exist to create an edge.`,
-                    file: url,
-                }, options)
-            }
-
-            for (let input in edges[output]){
-                let inTarget = nodes
-                input.split('.').forEach((str) => inTarget =  getTarget(inTarget, str))
-                if (!inTarget) {
-                    onError({
-                        message: `Node '${input}' (input) does not exist to create an edge.`,
-                        file: url,
-                    }, options)
-                }
-            }
-    }
-
     return target
   }
 
@@ -386,6 +351,8 @@ const load = async (
         warnings
     } = clonedOptions
 
+    const internalLoadCall = clonedOptions._internal
+
     const onImport = (path, info) => {
         clonedOptions.files[path] = info
     }
@@ -401,9 +368,9 @@ const load = async (
         delete clonedOptions.filesystem
         relativeToResolved = relativeTo
     } else if (typeof urlOrObject === 'object') {
-        object = Object.assign({}, urlOrObject) // Rseference Mode
+        object = Object.assign({}, urlOrObject) // Reference Mode
         delete clonedOptions.relativeTo
-        if (typeof clonedOptions._internal === 'string') relativeToResolved = remoteImport.resolve(clonedOptions._internal, clonedOptions.relativeTo)
+        if (typeof internalLoadCall === 'string') relativeToResolved = remoteImport.resolve(internalLoadCall, clonedOptions.relativeTo)
     }
 
     try {
@@ -467,6 +434,72 @@ const load = async (
             object,
             onImport
         }, clonedOptions, object.graph)
+
+
+        // convert valid nodes to ES Plugins
+        const drill = (parent, callback) => {
+            const nodes = parent.graph.nodes
+            for (let tag in nodes) {
+                const res = callback(nodes[tag], {
+                    tag,
+                    parent,
+                    options: clonedOptions
+                })
+                if (res) nodes[tag] = res
+            }
+        }
+
+        // -------------------------- convert valid nodes to ES Plugins --------------------------
+        const plugins = []
+
+        // -------------------------- do plugin-dependent tests --------------------------
+        const drillToTest = (target) => {
+            drill(target, (node, info) => {
+
+                    // VALIDATE: Check that all edges point to valid nodes
+                    const edges = info.parent.graph.edges
+                    for (let output in edges){
+
+                        const getTarget = (o,str) => {
+                            return o.graph?.nodes?.[str] ?? o[str]
+                        }
+
+                        let outTarget = info.parent.graph.nodes
+                        output.split('.').forEach((str) =>  outTarget = getTarget(outTarget,str))
+
+                        if (!outTarget) {
+                            onError({
+                                message: `Node '${output}' (output) does not exist to create an edge.`,
+                                file: url,
+                            }, info.options)
+                        }
+
+                        for (let input in edges[output]){
+                            let inTarget = nodes
+                            input.split('.').forEach((str) => inTarget =  getTarget(inTarget, str))
+                            if (!inTarget) {
+                                onError({
+                                    message: `Node '${input}' (input) does not exist to create an edge.`,
+                                    file: url,
+                                }, info.options)
+                            }
+                        }
+                }
+
+            })
+        }
+
+        // -------------------------- initialize plugins --------------------------
+        if (!internalLoadCall) {
+            new ESPlugin(object, {
+                activate: clonedOptions.activate,
+                onPlugin: (o) => plugins.push(o),
+                parentNode: clonedOptions.parentNode
+            }) // convert
+
+            drillToTest(object) // test
+            for (let i in plugins) await plugins[i].init()
+        }
 
         return object
     }
