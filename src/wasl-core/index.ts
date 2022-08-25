@@ -249,7 +249,7 @@ var remove = (original, search, key=original, o?)=> {
         for (let name in nodes){
             const node = nodes[name]
 
-            // Merge and validate components
+            // Merge and validate plugins
             if 
             (
                 node?.src && 
@@ -269,15 +269,15 @@ var remove = (original, search, key=original, o?)=> {
                     }
                 }
 
-                // Merge node.components info with the actual node (i.e. instance) information
+                // Merge node.plugins info with the actual node (i.e. instance) information
 
                 if (node.src.graph) {
-                        for (let nestedName in node.components){
+                        for (let nestedName in node.plugins){
                                 const nestedNode = node.src.graph.nodes[nestedName]
                                 if (nestedNode) {
-                                    if (node.components) {
-                                        for (let key in node.components[nestedName]){
-                                            const newInfo = node.components[nestedName][key]
+                                    if (node.plugins) {
+                                        for (let key in node.plugins[nestedName]){
+                                            const newInfo = node.plugins[nestedName][key]
                                                                                         
                                             if (typeof newInfo === 'object') {
 
@@ -302,12 +302,12 @@ var remove = (original, search, key=original, o?)=> {
                                                     }, options)
                                                 }
 
-                                            } else console.error('[wasl-load] Component info is not an object...')
+                                            } else console.error('[wasl-load] Plugin info is not an object...')
                                         }
                                     }
                                 } else {
                                     onError({
-                                        message: `Component target '${nestedName}' does not exist`,
+                                        message: `Plugin target '${nestedName}' does not exist`,
                                         node: name
                                     }, options)
                                 }

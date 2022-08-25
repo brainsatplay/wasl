@@ -9,7 +9,7 @@ This specification is written in [JSON Schema](https://json-schema.org/) and val
 
 Its defining features are: 
 - A new `graph` key/value pair to declare application logic and associations with other code files.
-- The adoption of [ES Components]('https://github.com/brainsatplay/es-components') to instantiate Web Components through a configuration object
+- The adoption of [ES Plugins]('https://github.com/brainsatplay/es-plugins') to instantiate Web Components through a configuration object
 
 Each version of `wasl` is archived in the `versions` folder of this repository.
 
@@ -20,7 +20,6 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
         "nodes": {
             "first": {
                 "src": "first.wasl.json",
-                "offload": false,
                 "extensions": {
                     "arbitrary": {
                         "x": 1080,
@@ -28,7 +27,9 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
                     }
                 }
             } ,
-            "second": {} 
+            "second": {
+                "href": "https://example.com/second"
+            } 
         },
         "edges": {
             "first": {

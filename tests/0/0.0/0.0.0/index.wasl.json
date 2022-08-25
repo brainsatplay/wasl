@@ -4,8 +4,7 @@
         "nodes": {
             "plugin": {
                 "src": "../../plugins/plugin/index.wasl.json",
-                "offload": true,
-                "components": {
+                "plugins": {
                     "add": {
                         "arguments": {
                             "input": 3

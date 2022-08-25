@@ -4,9 +4,9 @@ const main = ''
 
 // import mainPkg from 'https://raw.githubusercontent.com/garrettmflynn/phaser/main/package.json'  assert {type: "json"}
 // import phaserPkg from 'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/package.json'  assert {type: "json"}
-// import * as phaser from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/phaser/index.js'
-// import * as config from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/config/index.js'
-// import * as game from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/components/game/index.js'
+// import * as phaser from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/plugins/phaser/index.js'
+// import * as config from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/plugins/config/index.js'
+// import * as game from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/plugins/game/index.js'
 
 // import * as update from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/update.js'
 // import * as preload from  'https://raw.githubusercontent.com/garrettmflynn/phaser/main/scripts/preload.js'
@@ -21,9 +21,9 @@ const options = {
     //     'package.json': mainPkg,
     //     'src/package.json': phaserPkg,
     //     'src/index.wasl.json': phaserInfo,
-    //     'src/components/phaser/index.js': phaser,
-    //     'src/components/config/index.js': config,
-    //     'src/components/game/index.js': game,
+    //     'src/plugins/phaser/index.js': phaser,
+    //     'src/plugins/config/index.js': config,
+    //     'src/plugins/game/index.js': game,
     //     'scripts/preload.js': preload,
     //     'scripts/update.js': update,
     //     'scripts/create.js': create
