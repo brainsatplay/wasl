@@ -22,9 +22,7 @@
     
         "edges": {
             "plugin": {
-                "log": {
-                    "protocol": "websockets"
-                }
+                "log": {}
             }
         }
     }

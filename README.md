@@ -34,7 +34,7 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
         "edges": {
             "first": {
                 "second" :{
-                    "protocol": "none"
+                    "protocol": "websockets"
                 }
             } 
         }

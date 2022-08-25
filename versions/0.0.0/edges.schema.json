@@ -12,6 +12,7 @@
           "type": "object",
           "properties": {
             "protocol": {
+              "$comment": "Can be inferred from the href property of each node",
               "type": "string",
               "pattern": "^(http|websockets|webrtc)$"
             }
