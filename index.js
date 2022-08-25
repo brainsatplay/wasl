@@ -1,11 +1,11 @@
 // import * as wasl from "./dist/index.esm.js"
-import wasl from "./src/wasl-core/index"
-import validate from "./src/wasl-validate/index"
+import wasl from "./src/core/index"
+import validate from "./src/validate/index"
 
 // import { path, main, options } from './demos/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
-// import { path, main, options } from './demos/phaser.js'
-import { path, main, options } from './demos/signals.js'
+import { path, main, options } from './demos/phaser.js'
+// import { path, main, options } from './demos/signals.js'
 // import { path, main, options } from './demos/remote.js'
 
 const printError = (arr, type, severity='Error') => {

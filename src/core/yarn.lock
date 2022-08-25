@@ -20,10 +20,10 @@
   "resolved" "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   "version" "4.0.0"
 
-"es-plugins@0.0.3":
-  "integrity" "sha512-1/cy62qsVYG0JEcKuIY8IBHVQauiTjf0b2hhSNJHBI6r4Qx/uzIsGJfg0R4XI0QzGq65QzeqOUWaJv1PaO6rrQ=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.3.tgz"
-  "version" "0.0.3"
+"es-plugins@0.0.6":
+  "integrity" "sha512-bm3paGbBVgMN+v2zegA+JPdO9y5QChKh4VkGSOrDhEtTAB0myt9nlme4mL7SpF146RjawKocL2h86FhPgJJLGA=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.6.tgz"
+  "version" "0.0.6"
 
 "fetch-blob@^3.1.2", "fetch-blob@^3.1.4":
   "integrity" "sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ=="

@@ -26,8 +26,8 @@ const merge = (main, override, deleteSrc=false) => {
 
         keys.forEach(k => {
             newKeys.delete(k)
-            if (typeof override[k] === 'object') copy[k] = merge(copy[k], override[k])
-            else if (k in override) copy[k] = override[k]
+            if (typeof override[k] === 'object' && !Array.isArray(override[k])) copy[k] = merge(copy[k], override[k])
+            else if (k in override) copy[k] = override[k] // replace values and arrays
         })
 
         newKeys.forEach(k => {
@@ -88,10 +88,9 @@ var remove = (original, search, key=original, o?)=> {
 
     relativeToResolved = options._remote ?? relativeToResolved
 
-
     for (let name in target) {
         const node = target[name]
-        const isObj = node && typeof node === 'object'
+        const isObj = node && typeof node === 'object' && !Array.isArray(node)
 
         if (isObj){
         let ogSrc = node.src ?? '';
@@ -230,7 +229,7 @@ var remove = (original, search, key=original, o?)=> {
                 } 
                 
                 // Drill other object keys to replace and merge src...
-                else if (node[key] && typeof node[key] === 'object') {
+                else if (node[key] && typeof node[key] === 'object' && !Array.isArray(node[key])) {
                     const optsCopy = Object.assign({}, options) as Options
                     optsCopy._deleteSrc = true
                     await getSrc(node[key], info, optsCopy, {nodes: node[key]}) // check for src to merge
@@ -279,7 +278,7 @@ var remove = (original, search, key=original, o?)=> {
                                         for (let key in node.plugins[nestedName]){
                                             const newInfo = node.plugins[nestedName][key]
                                                                                         
-                                            if (typeof newInfo === 'object') {
+                                            if (typeof newInfo === 'object' && !Array.isArray(newInfo)) {
 
                                                 // Properly merge the resolved src info
                                                 const optsCopy = Object.assign({}, options) as Options
@@ -289,6 +288,7 @@ var remove = (original, search, key=original, o?)=> {
                                                 const newInfoForNode = (await getSrc({[key]: newInfo}, info, optsCopy, {
                                                     nodes: newInfo
                                                 }))
+
                                                 const newVal = newInfoForNode[key]
 
                                                 if (newVal) {
@@ -300,7 +300,7 @@ var remove = (original, search, key=original, o?)=> {
                                                     onError({
                                                         message: `Could not resolve ${ogSrc}`
                                                     }, options)
-                                                }
+                                            }
 
                                             } else  nestedNode[key] = newInfo // MERGE BY REPLACEMENT
                                         }

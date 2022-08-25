@@ -2,8 +2,8 @@
   "name": "wasl-monorepo",
   "description": "The Web Application Specification Language (WASL)",
   "workspaces": [
-    "src/wasl-core",
-    "src/wasl-validate"
+    "src/core",
+    "src/validate"
   ],
   "private": true,
   "type": "module",

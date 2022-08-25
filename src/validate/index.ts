@@ -5,7 +5,7 @@ import latest from "../common/utils/latest.js"
 import { LatestWASL, Options } from "../common/types/index.js"
 import get from "../common/get.js"
 import * as check from '../common/utils/check'
-import load from "../wasl-core/index"
+import load from "../core/index"
 
 let activeVersion = null
 const ajv = new Ajv({
