@@ -4,8 +4,8 @@ import validate from "./src/wasl-validate/index"
 
 // import { path, main, options } from './demos/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
-import { path, main, options } from './demos/phaser.js'
-// import { path, main, options } from './demos/signals.js'
+// import { path, main, options } from './demos/phaser.js'
+import { path, main, options } from './demos/signals.js'
 // import { path, main, options } from './demos/remote.js'
 
 const printError = (arr, type, severity='Error') => {

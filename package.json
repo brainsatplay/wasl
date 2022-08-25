@@ -8,8 +8,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "start:browser": "tinybuild",
+    "start": "tinybuild",
+    "start:server": "node index.js",
     "types": "node types.js"
   }
 }
