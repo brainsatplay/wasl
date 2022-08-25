@@ -302,7 +302,7 @@ var remove = (original, search, key=original, o?)=> {
                                                     }, options)
                                                 }
 
-                                            } else console.error('[wasl-load] Plugin info is not an object...')
+                                            } else  nestedNode[key] = newInfo // MERGE BY REPLACEMENT
                                         }
                                     }
                                 } else {
