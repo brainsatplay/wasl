@@ -3,9 +3,11 @@
 ## Introduction
 **WASL** is a specification language for defining web applications. 
 
-This specification is written in [JSON Schema](https://json-schema.org/) and validated using [Ajv](https://ajv.js.org/). Typescript types are generaged using [json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript). 
+At its core, `wasl` allows you to specify a JSON tree of source files and custom scripts. This then executes a whole program stored across the web.
 
 **WASL** files inherit heavily from the `package.json` file from Node.js. 
+
+The specification is written in [JSON Schema](https://json-schema.org/) and validated using [Ajv](https://ajv.js.org/). Typescript types are generaged using [json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript). 
 
 Its defining features are: 
 - A new `graph` key/value pair to declare application logic and associations with other code files.
@@ -65,6 +67,7 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 
  ### Backlog
  - Validate ports
+ - Nested html source tags that determine execution (using a custom component)
 
 ## Acknowledgments
 `wasl` was developed for [brainsatplay], along with [graphscript] and [visualscript], to construct interactive, high-performance web applications as directed acyclic graphs (DAGs).

@@ -137,10 +137,10 @@
   "resolved" "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   "version" "4.0.0"
 
-"es-plugins@0.0.6":
-  "integrity" "sha512-bm3paGbBVgMN+v2zegA+JPdO9y5QChKh4VkGSOrDhEtTAB0myt9nlme4mL7SpF146RjawKocL2h86FhPgJJLGA=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.6.tgz"
-  "version" "0.0.6"
+"es-plugins@0.0.8":
+  "integrity" "sha512-DOIoHLv+tFDjgbvBt+AK1mmrdK/tzrCYwnbcP1Av0cWJ+ZVNFwQHuUOWaCY4eO2qjKp7maJbNstX4ySPwb9Lhg=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.8.tgz"
+  "version" "0.0.8"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="
@@ -462,12 +462,12 @@
   dependencies:
     "punycode" "^2.1.0"
 
-"wasl-validate@file:/Users/garrettflynn/Documents/Github/wasl/src/wasl-validate":
-  "resolved" "file:src/wasl-validate"
+"wasl-validate@file:/Users/garrettflynn/Documents/Github/wasl/src/validate":
+  "resolved" "file:src/validate"
   "version" "0.0.0"
 
-"wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/wasl-core":
-  "resolved" "file:src/wasl-core"
+"wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
+  "resolved" "file:src/core"
   "version" "0.0.9"
 
 "web-streams-polyfill@^3.0.3":

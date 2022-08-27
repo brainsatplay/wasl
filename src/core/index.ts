@@ -5,7 +5,7 @@ import get from '../common/get'
 import * as check from '../common/utils/check'
 
 import * as remoteImport from 'remote-esm'
-import ESPlugin from "es-plugins"
+import ESPlugin from "es-plugins/dist/index.esm"
 
 const isSrc = (str) => {
     return typeof str === 'string' && Object.values(languages).find(arr => arr.includes(str.split('.').slice(-1)[0])) // Has supported extension
@@ -72,9 +72,72 @@ var remove = (original, search, key=original, o?)=> {
     }, o))
   }
 
-  let getSrc = async (target, info, options, graph:any = {}) => {
+  let loaded:any = {}
+  async function loadPlugins(node, info, options, id?:Symbol, debug = false){
+    if (node.plugins) {
+    for (let nestedName in node.plugins){
+
+                const nestedNode = node.src.graph?.nodes?.[nestedName]
+                if (node.plugins) {
+                    for (let key in node.plugins[nestedName]){
+                        const newInfo = node.plugins[nestedName][key]
+                                              
+                        if (typeof newInfo === 'object' && !Array.isArray(newInfo)) {
+
+                            const ogSrc = newInfo.src
+                            let newInfoForNode;
+                            if (id) newInfoForNode = loaded[id]?.[key] // check cache
+                            if (!newInfoForNode){
+
+                                // Properly merge the resolved src info
+                                const optsCopy = Object.assign({}, options) as Options
+                                if (key === 'graph') optsCopy._deleteSrc = false // keep all node imports
+                                else optsCopy._deleteSrc = true // keep all node imports
+
+                                newInfoForNode = (await getSrc({[key]: newInfo}, info, optsCopy, {
+                                    nodes: newInfo
+                                }))
+
+                                if (id) {
+                                    if (!loaded[id]) loaded[id] = {}
+                                    loaded[id][key] = newInfoForNode // cache
+                                }
+                            }
+
+                            // Only With Node Resolved
+                            if (nestedNode){
+                                const newVal = newInfoForNode[key]
+
+                                if (newVal) {
+                                    let chosenVal = newVal.src ?? newVal
+                                    // merge default if the only key
+                                    if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
+                                    if (nestedNode) nestedNode[key] = chosenVal // MERGE BY REPLACEMENT
+                                } else {
+                                    onError({ message: `Could not resolve ${ogSrc}` }, options)
+                            }
+                        }
+
+                        } else if (nestedNode) nestedNode[key] = newInfo // MERGE BY REPLACEMENT
+                    }
+                }
+            
+            // Source is Resolved but Node is Not
+            if  (node.src?.graph && !nestedNode){
+                onError({
+                    message: `Plugin target '${nestedName}' does not exist`,
+                    node: name
+                }, options)
+            }
+    }
+}
+  }
+
+  async function getSrc(target, info, options, graph:any = {}, debug = false){
     const nodes = graph.nodes as any
     const edges = graph.edges as any
+
+    const id = Symbol()
 
     let {
         relativeToResolved,
@@ -89,8 +152,11 @@ var remove = (original, search, key=original, o?)=> {
     relativeToResolved = options._remote ?? relativeToResolved
 
     for (let name in target) {
+
         const node = target[name]
         const isObj = node && typeof node === 'object' && !Array.isArray(node)
+
+        await loadPlugins(node, info, options, id, debug) // before loading make sure graph is not specified at a higher level
 
         if (isObj){
         let ogSrc = node.src ?? '';
@@ -129,6 +195,7 @@ var remove = (original, search, key=original, o?)=> {
                 if (options.filesystem) {
                     const res = checkFiles(fullPath, options.filesystem)
                     if (res) {
+
                         if (res.default || fullPath.includes('.json')) node.src = passToNested = res
                         else {
                             onError({
@@ -231,14 +298,16 @@ var remove = (original, search, key=original, o?)=> {
                 // Drill other object keys to replace and merge src...
                 else if (node[key] && typeof node[key] === 'object' && !Array.isArray(node[key])) {
                     const optsCopy = Object.assign({}, options) as Options
-                    optsCopy._deleteSrc = true
-                    await getSrc(node[key], info, optsCopy, {nodes: node[key]}) // check for src to merge
+                    optsCopy._deleteSrc = key !== 'nodes' && name !== 'graph' // NOTE: Restricted progression
+                    const includesPlayer = Object.keys(node[key]).includes('player')
+                    await getSrc(node[key], info, optsCopy, {nodes: node[key]}, includesPlayer) // check for src to merge
                 }
             }
         }
         }
     }
 
+    
         // Search the nodes that are produced for .src fields
         // to modify it
 
@@ -270,51 +339,7 @@ var remove = (original, search, key=original, o?)=> {
 
                 // Merge node.plugins info with the actual node (i.e. instance) information
 
-                if (node.src.graph) {
-                        for (let nestedName in node.plugins){
-                                const nestedNode = node.src.graph.nodes[nestedName]
-                                if (nestedNode) {
-                                    if (node.plugins) {
-                                        for (let key in node.plugins[nestedName]){
-                                            const newInfo = node.plugins[nestedName][key]
-                                                                                        
-                                            if (typeof newInfo === 'object' && !Array.isArray(newInfo)) {
-
-                                                // Properly merge the resolved src info
-                                                const optsCopy = Object.assign({}, options) as Options
-                                                optsCopy._deleteSrc = true
-
-                                                const ogSrc = newInfo.src
-                                                const newInfoForNode = (await getSrc({[key]: newInfo}, info, optsCopy, {
-                                                    nodes: newInfo
-                                                }))
-
-                                                const newVal = newInfoForNode[key]
-
-                                                if (newVal) {
-                                                    let chosenVal = newVal.src ?? newVal
-                                                    // merge default if the only key
-                                                    if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
-                                                    nestedNode[key] = chosenVal // MERGE BY REPLACEMENT
-                                                } else {
-                                                    onError({
-                                                        message: `Could not resolve ${ogSrc}`
-                                                    }, options)
-                                            }
-
-                                            } else  nestedNode[key] = newInfo // MERGE BY REPLACEMENT
-                                        }
-                                    }
-                                } else {
-                                    onError({
-                                        message: `Plugin target '${nestedName}' does not exist`,
-                                        node: name
-                                    }, options)
-                                }
-
-                        }
-
-                } 
+                if (node.src.graph) await loadPlugins(node, info, options, id, debug) // attach to graph
                 
                 // Only run if parent is a complete graph (i.e. you're an actual node)
                 else if (edges) {
@@ -498,7 +523,6 @@ const load = async (
             }) // convert
 
             drillToTest(object) // test
-            for (let i in plugins) await plugins[i].init()
         }
 
         return object

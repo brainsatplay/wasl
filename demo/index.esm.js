@@ -282,12 +282,12 @@ var require_Blob = __commonJS({
             }
             return b;
           }
-          function Blob4(chunks, opts) {
+          function Blob3(chunks, opts) {
             chunks = chunks || [];
             opts = opts == null ? {} : opts;
             for (var i = 0, len = chunks.length; i < len; i++) {
               var chunk = chunks[i];
-              if (chunk instanceof Blob4) {
+              if (chunk instanceof Blob3) {
                 chunks[i] = chunk._buffer;
               } else if (typeof chunk === "string") {
                 chunks[i] = textEncode(chunk);
@@ -308,34 +308,34 @@ var require_Blob = __commonJS({
               this.type = this.type.toLowerCase();
             }
           }
-          Blob4.prototype.arrayBuffer = function() {
+          Blob3.prototype.arrayBuffer = function() {
             return Promise.resolve(this._buffer.buffer || this._buffer);
           };
-          Blob4.prototype.text = function() {
+          Blob3.prototype.text = function() {
             return Promise.resolve(textDecode(this._buffer));
           };
-          Blob4.prototype.slice = function(start, end, type) {
+          Blob3.prototype.slice = function(start, end, type) {
             var slice = this._buffer.slice(start || 0, end || this._buffer.length);
-            return new Blob4([slice], { type });
+            return new Blob3([slice], { type });
           };
-          Blob4.prototype.toString = function() {
+          Blob3.prototype.toString = function() {
             return "[object Blob]";
           };
           function File2(chunks, name2, opts) {
             opts = opts || {};
-            var a = Blob4.call(this, chunks, opts) || this;
+            var a = Blob3.call(this, chunks, opts) || this;
             a.name = name2.replace(/\//g, ":");
             a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
             a.lastModified = +a.lastModifiedDate;
             return a;
           }
-          File2.prototype = create3(Blob4.prototype);
+          File2.prototype = create3(Blob3.prototype);
           File2.prototype.constructor = File2;
           if (Object.setPrototypeOf) {
-            Object.setPrototypeOf(File2, Blob4);
+            Object.setPrototypeOf(File2, Blob3);
           } else {
             try {
-              File2.__proto__ = Blob4;
+              File2.__proto__ = Blob3;
             } catch (e) {
             }
           }
@@ -357,7 +357,7 @@ var require_Blob = __commonJS({
             this.removeEventListener = delegate.removeEventListener;
           }
           function _read(fr, blob2, kind) {
-            if (!(blob2 instanceof Blob4)) {
+            if (!(blob2 instanceof Blob3)) {
               throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
             }
             fr.result = "";
@@ -392,7 +392,7 @@ var require_Blob = __commonJS({
           FileReader2.prototype.abort = function() {
           };
           URL2.createObjectURL = function(blob2) {
-            return blob2 instanceof Blob4 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
+            return blob2 instanceof Blob3 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
           };
           URL2.revokeObjectURL = function(url) {
             revokeObjectURL && revokeObjectURL.call(URL2, url);
@@ -400,7 +400,7 @@ var require_Blob = __commonJS({
           var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
           if (_send) {
             XMLHttpRequest.prototype.send = function(data) {
-              if (data instanceof Blob4) {
+              if (data instanceof Blob3) {
                 this.setRequestHeader("Content-Type", data.type);
                 _send.call(this, textDecode(data._buffer));
               } else {
@@ -408,7 +408,7 @@ var require_Blob = __commonJS({
               }
             };
           }
-          exports2.Blob = Blob4;
+          exports2.Blob = Blob3;
           exports2.File = File2;
           exports2.FileReader = FileReader2;
           exports2.URL = URL2;
@@ -525,10 +525,10 @@ var require_Blob = __commonJS({
           }
         }
         function promisify(obj) {
-          return new Promise(function(resolve3, reject) {
+          return new Promise(function(resolve2, reject) {
             obj.onload = obj.onerror = function(evt) {
               obj.onload = obj.onerror = null;
-              evt.type === "load" ? resolve3(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
+              evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
             };
           });
         }
@@ -540,7 +540,7 @@ var require_Blob = __commonJS({
           };
         }
         if (!blob.text) {
-          blob.text = function text2() {
+          blob.text = function text() {
             var fr = new FileReader();
             fr.readAsText(this);
             return promisify(fr);
@@ -567,552 +567,9 @@ var init_browser = __esm({
   }
 });
 
-// src/core/node_modules/blob-polyfill/Blob.js
-var require_Blob2 = __commonJS({
-  "src/core/node_modules/blob-polyfill/Blob.js"(exports) {
-    (function(global2) {
-      (function(factory) {
-        if (typeof define === "function" && define.amd) {
-          define(["exports"], factory);
-        } else if (typeof exports === "object" && typeof exports.nodeName !== "string") {
-          factory(exports);
-        } else {
-          factory(global2);
-        }
-      })(function(exports2) {
-        "use strict";
-        var BlobBuilder = global2.BlobBuilder || global2.WebKitBlobBuilder || global2.MSBlobBuilder || global2.MozBlobBuilder;
-        var URL2 = global2.URL || global2.webkitURL || function(href, a) {
-          a = document.createElement("a");
-          a.href = href;
-          return a;
-        };
-        var origBlob = global2.Blob;
-        var createObjectURL = URL2.createObjectURL;
-        var revokeObjectURL = URL2.revokeObjectURL;
-        var strTag = global2.Symbol && global2.Symbol.toStringTag;
-        var blobSupported = false;
-        var blobSupportsArrayBufferView = false;
-        var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
-        try {
-          blobSupported = new Blob(["\xE4"]).size === 2;
-          blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
-        } catch (e) {
-        }
-        function mapArrayBufferViews(ary) {
-          return ary.map(function(chunk) {
-            if (chunk.buffer instanceof ArrayBuffer) {
-              var buf = chunk.buffer;
-              if (chunk.byteLength !== buf.byteLength) {
-                var copy = new Uint8Array(chunk.byteLength);
-                copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-                buf = copy.buffer;
-              }
-              return buf;
-            }
-            return chunk;
-          });
-        }
-        function BlobBuilderConstructor(ary, options2) {
-          options2 = options2 || {};
-          var bb = new BlobBuilder();
-          mapArrayBufferViews(ary).forEach(function(part) {
-            bb.append(part);
-          });
-          return options2.type ? bb.getBlob(options2.type) : bb.getBlob();
-        }
-        function BlobConstructor(ary, options2) {
-          return new origBlob(mapArrayBufferViews(ary), options2 || {});
-        }
-        if (global2.Blob) {
-          BlobBuilderConstructor.prototype = Blob.prototype;
-          BlobConstructor.prototype = Blob.prototype;
-        }
-        function stringEncode(string) {
-          var pos = 0;
-          var len = string.length;
-          var Arr = global2.Uint8Array || Array;
-          var at = 0;
-          var tlen = Math.max(32, len + (len >> 1) + 7);
-          var target = new Arr(tlen >> 3 << 3);
-          while (pos < len) {
-            var value = string.charCodeAt(pos++);
-            if (value >= 55296 && value <= 56319) {
-              if (pos < len) {
-                var extra = string.charCodeAt(pos);
-                if ((extra & 64512) === 56320) {
-                  ++pos;
-                  value = ((value & 1023) << 10) + (extra & 1023) + 65536;
-                }
-              }
-              if (value >= 55296 && value <= 56319) {
-                continue;
-              }
-            }
-            if (at + 4 > target.length) {
-              tlen += 8;
-              tlen *= 1 + pos / string.length * 2;
-              tlen = tlen >> 3 << 3;
-              var update3 = new Uint8Array(tlen);
-              update3.set(target);
-              target = update3;
-            }
-            if ((value & 4294967168) === 0) {
-              target[at++] = value;
-              continue;
-            } else if ((value & 4294965248) === 0) {
-              target[at++] = value >> 6 & 31 | 192;
-            } else if ((value & 4294901760) === 0) {
-              target[at++] = value >> 12 & 15 | 224;
-              target[at++] = value >> 6 & 63 | 128;
-            } else if ((value & 4292870144) === 0) {
-              target[at++] = value >> 18 & 7 | 240;
-              target[at++] = value >> 12 & 63 | 128;
-              target[at++] = value >> 6 & 63 | 128;
-            } else {
-              continue;
-            }
-            target[at++] = value & 63 | 128;
-          }
-          return target.slice(0, at);
-        }
-        function stringDecode(buf) {
-          var end = buf.length;
-          var res = [];
-          var i = 0;
-          while (i < end) {
-            var firstByte = buf[i];
-            var codePoint = null;
-            var bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
-            if (i + bytesPerSequence <= end) {
-              var secondByte, thirdByte, fourthByte, tempCodePoint;
-              switch (bytesPerSequence) {
-                case 1:
-                  if (firstByte < 128) {
-                    codePoint = firstByte;
-                  }
-                  break;
-                case 2:
-                  secondByte = buf[i + 1];
-                  if ((secondByte & 192) === 128) {
-                    tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
-                    if (tempCodePoint > 127) {
-                      codePoint = tempCodePoint;
-                    }
-                  }
-                  break;
-                case 3:
-                  secondByte = buf[i + 1];
-                  thirdByte = buf[i + 2];
-                  if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
-                    tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
-                    if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
-                      codePoint = tempCodePoint;
-                    }
-                  }
-                  break;
-                case 4:
-                  secondByte = buf[i + 1];
-                  thirdByte = buf[i + 2];
-                  fourthByte = buf[i + 3];
-                  if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
-                    tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
-                    if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
-                      codePoint = tempCodePoint;
-                    }
-                  }
-              }
-            }
-            if (codePoint === null) {
-              codePoint = 65533;
-              bytesPerSequence = 1;
-            } else if (codePoint > 65535) {
-              codePoint -= 65536;
-              res.push(codePoint >>> 10 & 1023 | 55296);
-              codePoint = 56320 | codePoint & 1023;
-            }
-            res.push(codePoint);
-            i += bytesPerSequence;
-          }
-          var len = res.length;
-          var str = "";
-          var j = 0;
-          while (j < len) {
-            str += String.fromCharCode.apply(String, res.slice(j, j += 4096));
-          }
-          return str;
-        }
-        var textEncode = typeof TextEncoder === "function" ? TextEncoder.prototype.encode.bind(new TextEncoder()) : stringEncode;
-        var textDecode = typeof TextDecoder === "function" ? TextDecoder.prototype.decode.bind(new TextDecoder()) : stringDecode;
-        function FakeBlobBuilder() {
-          function bufferClone(buf) {
-            var view = new Array(buf.byteLength);
-            var array = new Uint8Array(buf);
-            var i = view.length;
-            while (i--) {
-              view[i] = array[i];
-            }
-            return view;
-          }
-          function array2base64(input) {
-            var byteToCharMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-            var output = [];
-            for (var i = 0; i < input.length; i += 3) {
-              var byte1 = input[i];
-              var haveByte2 = i + 1 < input.length;
-              var byte2 = haveByte2 ? input[i + 1] : 0;
-              var haveByte3 = i + 2 < input.length;
-              var byte3 = haveByte3 ? input[i + 2] : 0;
-              var outByte1 = byte1 >> 2;
-              var outByte2 = (byte1 & 3) << 4 | byte2 >> 4;
-              var outByte3 = (byte2 & 15) << 2 | byte3 >> 6;
-              var outByte4 = byte3 & 63;
-              if (!haveByte3) {
-                outByte4 = 64;
-                if (!haveByte2) {
-                  outByte3 = 64;
-                }
-              }
-              output.push(byteToCharMap[outByte1], byteToCharMap[outByte2], byteToCharMap[outByte3], byteToCharMap[outByte4]);
-            }
-            return output.join("");
-          }
-          var create3 = Object.create || function(a) {
-            function c() {
-            }
-            c.prototype = a;
-            return new c();
-          };
-          function getObjectTypeName(o) {
-            return Object.prototype.toString.call(o).slice(8, -1);
-          }
-          function isPrototypeOf(c, o) {
-            return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
-          }
-          function isDataView(o) {
-            return getObjectTypeName(o) === "DataView" || isPrototypeOf(global2.DataView, o);
-          }
-          var arrayBufferClassNames = [
-            "Int8Array",
-            "Uint8Array",
-            "Uint8ClampedArray",
-            "Int16Array",
-            "Uint16Array",
-            "Int32Array",
-            "Uint32Array",
-            "Float32Array",
-            "Float64Array",
-            "ArrayBuffer"
-          ];
-          function includes(a, v) {
-            return a.indexOf(v) !== -1;
-          }
-          function isArrayBuffer(o) {
-            return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
-          }
-          function concatTypedarrays(chunks) {
-            var size2 = 0;
-            var j = chunks.length;
-            while (j--) {
-              size2 += chunks[j].length;
-            }
-            var b = new Uint8Array(size2);
-            var offset = 0;
-            for (var i = 0; i < chunks.length; i++) {
-              var chunk = chunks[i];
-              b.set(chunk, offset);
-              offset += chunk.byteLength || chunk.length;
-            }
-            return b;
-          }
-          function Blob4(chunks, opts) {
-            chunks = chunks || [];
-            opts = opts == null ? {} : opts;
-            for (var i = 0, len = chunks.length; i < len; i++) {
-              var chunk = chunks[i];
-              if (chunk instanceof Blob4) {
-                chunks[i] = chunk._buffer;
-              } else if (typeof chunk === "string") {
-                chunks[i] = textEncode(chunk);
-              } else if (isDataView(chunk)) {
-                chunks[i] = bufferClone(chunk.buffer);
-              } else if (isArrayBuffer(chunk)) {
-                chunks[i] = bufferClone(chunk);
-              } else {
-                chunks[i] = textEncode(String(chunk));
-              }
-            }
-            this._buffer = global2.Uint8Array ? concatTypedarrays(chunks) : [].concat.apply([], chunks);
-            this.size = this._buffer.length;
-            this.type = opts.type || "";
-            if (/[^\u0020-\u007E]/.test(this.type)) {
-              this.type = "";
-            } else {
-              this.type = this.type.toLowerCase();
-            }
-          }
-          Blob4.prototype.arrayBuffer = function() {
-            return Promise.resolve(this._buffer.buffer || this._buffer);
-          };
-          Blob4.prototype.text = function() {
-            return Promise.resolve(textDecode(this._buffer));
-          };
-          Blob4.prototype.slice = function(start, end, type) {
-            var slice = this._buffer.slice(start || 0, end || this._buffer.length);
-            return new Blob4([slice], { type });
-          };
-          Blob4.prototype.toString = function() {
-            return "[object Blob]";
-          };
-          function File2(chunks, name2, opts) {
-            opts = opts || {};
-            var a = Blob4.call(this, chunks, opts) || this;
-            a.name = name2.replace(/\//g, ":");
-            a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
-            a.lastModified = +a.lastModifiedDate;
-            return a;
-          }
-          File2.prototype = create3(Blob4.prototype);
-          File2.prototype.constructor = File2;
-          if (Object.setPrototypeOf) {
-            Object.setPrototypeOf(File2, Blob4);
-          } else {
-            try {
-              File2.__proto__ = Blob4;
-            } catch (e) {
-            }
-          }
-          File2.prototype.toString = function() {
-            return "[object File]";
-          };
-          function FileReader2() {
-            if (!(this instanceof FileReader2)) {
-              throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
-            }
-            var delegate = document.createDocumentFragment();
-            this.addEventListener = delegate.addEventListener;
-            this.dispatchEvent = function(evt) {
-              var local = this["on" + evt.type];
-              if (typeof local === "function")
-                local(evt);
-              delegate.dispatchEvent(evt);
-            };
-            this.removeEventListener = delegate.removeEventListener;
-          }
-          function _read(fr, blob2, kind) {
-            if (!(blob2 instanceof Blob4)) {
-              throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
-            }
-            fr.result = "";
-            setTimeout(function() {
-              this.readyState = FileReader2.LOADING;
-              fr.dispatchEvent(new Event("load"));
-              fr.dispatchEvent(new Event("loadend"));
-            });
-          }
-          FileReader2.EMPTY = 0;
-          FileReader2.LOADING = 1;
-          FileReader2.DONE = 2;
-          FileReader2.prototype.error = null;
-          FileReader2.prototype.onabort = null;
-          FileReader2.prototype.onerror = null;
-          FileReader2.prototype.onload = null;
-          FileReader2.prototype.onloadend = null;
-          FileReader2.prototype.onloadstart = null;
-          FileReader2.prototype.onprogress = null;
-          FileReader2.prototype.readAsDataURL = function(blob2) {
-            _read(this, blob2, "readAsDataURL");
-            this.result = "data:" + blob2.type + ";base64," + array2base64(blob2._buffer);
-          };
-          FileReader2.prototype.readAsText = function(blob2) {
-            _read(this, blob2, "readAsText");
-            this.result = textDecode(blob2._buffer);
-          };
-          FileReader2.prototype.readAsArrayBuffer = function(blob2) {
-            _read(this, blob2, "readAsText");
-            this.result = (blob2._buffer.buffer || blob2._buffer).slice();
-          };
-          FileReader2.prototype.abort = function() {
-          };
-          URL2.createObjectURL = function(blob2) {
-            return blob2 instanceof Blob4 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
-          };
-          URL2.revokeObjectURL = function(url) {
-            revokeObjectURL && revokeObjectURL.call(URL2, url);
-          };
-          var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-          if (_send) {
-            XMLHttpRequest.prototype.send = function(data) {
-              if (data instanceof Blob4) {
-                this.setRequestHeader("Content-Type", data.type);
-                _send.call(this, textDecode(data._buffer));
-              } else {
-                _send.call(this, data);
-              }
-            };
-          }
-          exports2.Blob = Blob4;
-          exports2.File = File2;
-          exports2.FileReader = FileReader2;
-          exports2.URL = URL2;
-        }
-        function fixFileAndXHR() {
-          var isIE = !!global2.ActiveXObject || "-ms-scroll-limit" in document.documentElement.style && "-ms-ime-align" in document.documentElement.style;
-          var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-          if (isIE && _send) {
-            XMLHttpRequest.prototype.send = function(data) {
-              if (data instanceof Blob) {
-                this.setRequestHeader("Content-Type", data.type);
-                _send.call(this, data);
-              } else {
-                _send.call(this, data);
-              }
-            };
-          }
-          try {
-            new File([], "");
-            exports2.File = global2.File;
-            exports2.FileReader = global2.FileReader;
-          } catch (e) {
-            try {
-              exports2.File = new Function('class File extends Blob {constructor(chunks, name, opts) {opts = opts || {};super(chunks, opts || {});this.name = name.replace(/\\//g, ":");this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();this.lastModified = +this.lastModifiedDate;}};return new File([], ""), File')();
-            } catch (e2) {
-              exports2.File = function(b, d, c) {
-                var blob2 = new Blob(b, c);
-                var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
-                blob2.name = d.replace(/\//g, ":");
-                blob2.lastModifiedDate = t;
-                blob2.lastModified = +t;
-                blob2.toString = function() {
-                  return "[object File]";
-                };
-                if (strTag) {
-                  blob2[strTag] = "File";
-                }
-                return blob2;
-              };
-            }
-          }
-        }
-        if (blobSupported) {
-          fixFileAndXHR();
-          exports2.Blob = blobSupportsArrayBufferView ? global2.Blob : BlobConstructor;
-        } else if (blobBuilderSupported) {
-          fixFileAndXHR();
-          exports2.Blob = BlobBuilderConstructor;
-        } else {
-          FakeBlobBuilder();
-        }
-        if (strTag) {
-          if (!exports2.File.prototype[strTag])
-            exports2.File.prototype[strTag] = "File";
-          if (!exports2.Blob.prototype[strTag])
-            exports2.Blob.prototype[strTag] = "Blob";
-          if (!exports2.FileReader.prototype[strTag])
-            exports2.FileReader.prototype[strTag] = "FileReader";
-        }
-        var blob = exports2.Blob.prototype;
-        var stream;
-        try {
-          new ReadableStream({ type: "bytes" });
-          stream = function stream2() {
-            var position2 = 0;
-            var blob2 = this;
-            return new ReadableStream({
-              type: "bytes",
-              autoAllocateChunkSize: 524288,
-              pull: function(controller) {
-                var v = controller.byobRequest.view;
-                var chunk = blob2.slice(position2, position2 + v.byteLength);
-                return chunk.arrayBuffer().then(function(buffer) {
-                  var uint8array = new Uint8Array(buffer);
-                  var bytesRead = uint8array.byteLength;
-                  position2 += bytesRead;
-                  v.set(uint8array);
-                  controller.byobRequest.respond(bytesRead);
-                  if (position2 >= blob2.size)
-                    controller.close();
-                });
-              }
-            });
-          };
-        } catch (e) {
-          try {
-            new ReadableStream({});
-            stream = function stream2(blob2) {
-              var position2 = 0;
-              return new ReadableStream({
-                pull: function(controller) {
-                  var chunk = blob2.slice(position2, position2 + 524288);
-                  return chunk.arrayBuffer().then(function(buffer) {
-                    position2 += buffer.byteLength;
-                    var uint8array = new Uint8Array(buffer);
-                    controller.enqueue(uint8array);
-                    if (position2 == blob2.size)
-                      controller.close();
-                  });
-                }
-              });
-            };
-          } catch (e2) {
-            try {
-              new Response("").body.getReader().read();
-              stream = function stream2() {
-                return new Response(this).body;
-              };
-            } catch (e3) {
-              stream = function stream2() {
-                throw new Error("Include https://github.com/MattiasBuelens/web-streams-polyfill");
-              };
-            }
-          }
-        }
-        function promisify(obj) {
-          return new Promise(function(resolve3, reject) {
-            obj.onload = obj.onerror = function(evt) {
-              obj.onload = obj.onerror = null;
-              evt.type === "load" ? resolve3(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
-            };
-          });
-        }
-        if (!blob.arrayBuffer) {
-          blob.arrayBuffer = function arrayBuffer() {
-            var fr = new FileReader();
-            fr.readAsArrayBuffer(this);
-            return promisify(fr);
-          };
-        }
-        if (!blob.text) {
-          blob.text = function text2() {
-            var fr = new FileReader();
-            fr.readAsText(this);
-            return promisify(fr);
-          };
-        }
-        if (!blob.stream) {
-          blob.stream = stream;
-        }
-      });
-    })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || exports);
-  }
-});
-
-// src/core/node_modules/cross-blob/browser.js
-var browser_exports2 = {};
-__export(browser_exports2, {
-  default: () => browser_default2
-});
-var import_blob_polyfill2, browser_default2;
-var init_browser2 = __esm({
-  "src/core/node_modules/cross-blob/browser.js"() {
-    import_blob_polyfill2 = __toESM(require_Blob2(), 1);
-    browser_default2 = import_blob_polyfill2.Blob;
-  }
-});
-
-// node_modules/ajv/dist/compile/codegen/code.js
+// src/validate/node_modules/ajv/dist/compile/codegen/code.js
 var require_code = __commonJS({
-  "node_modules/ajv/dist/compile/codegen/code.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/codegen/code.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.regexpCode = exports.getEsmExportName = exports.getProperty = exports.safeStringify = exports.stringify = exports.strConcat = exports.addCodeArg = exports.str = exports._ = exports.nil = exports._Code = exports.Name = exports.IDENTIFIER = exports._CodeOrName = void 0;
@@ -1264,9 +721,9 @@ var require_code = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/codegen/scope.js
+// src/validate/node_modules/ajv/dist/compile/codegen/scope.js
 var require_scope = __commonJS({
-  "node_modules/ajv/dist/compile/codegen/scope.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/codegen/scope.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ValueScope = exports.ValueScopeName = exports.Scope = exports.varKinds = exports.UsedValueState = void 0;
@@ -1409,9 +866,9 @@ var require_scope = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/codegen/index.js
+// src/validate/node_modules/ajv/dist/compile/codegen/index.js
 var require_codegen = __commonJS({
-  "node_modules/ajv/dist/compile/codegen/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/codegen/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.or = exports.and = exports.not = exports.CodeGen = exports.operators = exports.varKinds = exports.ValueScopeName = exports.ValueScope = exports.Scope = exports.Name = exports.regexpCode = exports.stringify = exports.getProperty = exports.nil = exports.strConcat = exports.str = exports._ = void 0;
@@ -2098,9 +1555,9 @@ var require_codegen = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/util.js
+// src/validate/node_modules/ajv/dist/compile/util.js
 var require_util = __commonJS({
-  "node_modules/ajv/dist/compile/util.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/util.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.checkStrictMode = exports.getErrorPath = exports.Type = exports.useFunc = exports.setEvaluated = exports.evaluatedPropsToName = exports.mergeEvaluated = exports.eachItem = exports.unescapeJsonPointer = exports.escapeJsonPointer = exports.escapeFragment = exports.unescapeFragment = exports.schemaRefOrVal = exports.schemaHasRulesButRef = exports.schemaHasRules = exports.checkUnknownRules = exports.alwaysValidSchema = exports.toHash = void 0;
@@ -2265,9 +1722,9 @@ var require_util = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/names.js
+// src/validate/node_modules/ajv/dist/compile/names.js
 var require_names = __commonJS({
-  "node_modules/ajv/dist/compile/names.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/names.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -2293,9 +1750,9 @@ var require_names = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/errors.js
+// src/validate/node_modules/ajv/dist/compile/errors.js
 var require_errors = __commonJS({
-  "node_modules/ajv/dist/compile/errors.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/errors.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.extendErrors = exports.resetErrorsCount = exports.reportExtraError = exports.reportError = exports.keyword$DataError = exports.keywordError = void 0;
@@ -2414,9 +1871,9 @@ var require_errors = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/boolSchema.js
+// src/validate/node_modules/ajv/dist/compile/validate/boolSchema.js
 var require_boolSchema = __commonJS({
-  "node_modules/ajv/dist/compile/validate/boolSchema.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/boolSchema.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.boolOrEmptySchema = exports.topBoolOrEmptySchema = void 0;
@@ -2465,9 +1922,9 @@ var require_boolSchema = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/rules.js
+// src/validate/node_modules/ajv/dist/compile/rules.js
 var require_rules = __commonJS({
-  "node_modules/ajv/dist/compile/rules.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/rules.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getRules = exports.isJSONType = void 0;
@@ -2496,9 +1953,9 @@ var require_rules = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/applicability.js
+// src/validate/node_modules/ajv/dist/compile/validate/applicability.js
 var require_applicability = __commonJS({
-  "node_modules/ajv/dist/compile/validate/applicability.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/applicability.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.shouldUseRule = exports.shouldUseGroup = exports.schemaHasRulesForType = void 0;
@@ -2519,9 +1976,9 @@ var require_applicability = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/dataType.js
+// src/validate/node_modules/ajv/dist/compile/validate/dataType.js
 var require_dataType = __commonJS({
-  "node_modules/ajv/dist/compile/validate/dataType.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/dataType.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.reportTypeError = exports.checkDataTypes = exports.checkDataType = exports.coerceAndCheckDataType = exports.getJSONTypes = exports.getSchemaTypes = exports.DataType = void 0;
@@ -2703,9 +2160,9 @@ var require_dataType = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/defaults.js
+// src/validate/node_modules/ajv/dist/compile/validate/defaults.js
 var require_defaults = __commonJS({
-  "node_modules/ajv/dist/compile/validate/defaults.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/defaults.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.assignDefaults = void 0;
@@ -2740,9 +2197,9 @@ var require_defaults = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/code.js
+// src/validate/node_modules/ajv/dist/vocabularies/code.js
 var require_code2 = __commonJS({
-  "node_modules/ajv/dist/vocabularies/code.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/code.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.validateUnion = exports.validateArray = exports.usePattern = exports.callValidateCode = exports.schemaProperties = exports.allSchemaProperties = exports.noPropertyInData = exports.propertyInData = exports.isOwnProperty = exports.hasPropFunc = exports.reportMissingProp = exports.checkMissingProp = exports.checkReportMissingProp = void 0;
@@ -2872,9 +2329,9 @@ var require_code2 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/keyword.js
+// src/validate/node_modules/ajv/dist/compile/validate/keyword.js
 var require_keyword = __commonJS({
-  "node_modules/ajv/dist/compile/validate/keyword.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/keyword.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.validateKeywordUsage = exports.validSchemaType = exports.funcKeywordCode = exports.macroKeywordCode = void 0;
@@ -2990,9 +2447,9 @@ var require_keyword = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/subschema.js
+// src/validate/node_modules/ajv/dist/compile/validate/subschema.js
 var require_subschema = __commonJS({
-  "node_modules/ajv/dist/compile/validate/subschema.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/subschema.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.extendSubschemaMode = exports.extendSubschemaData = exports.getSubschema = void 0;
@@ -3073,9 +2530,9 @@ var require_subschema = __commonJS({
   }
 });
 
-// node_modules/fast-deep-equal/index.js
+// src/validate/node_modules/fast-deep-equal/index.js
 var require_fast_deep_equal = __commonJS({
-  "node_modules/fast-deep-equal/index.js"(exports, module) {
+  "src/validate/node_modules/fast-deep-equal/index.js"(exports, module) {
     "use strict";
     module.exports = function equal(a, b) {
       if (a === b)
@@ -3118,9 +2575,9 @@ var require_fast_deep_equal = __commonJS({
   }
 });
 
-// node_modules/json-schema-traverse/index.js
+// src/validate/node_modules/json-schema-traverse/index.js
 var require_json_schema_traverse = __commonJS({
-  "node_modules/json-schema-traverse/index.js"(exports, module) {
+  "src/validate/node_modules/json-schema-traverse/index.js"(exports, module) {
     "use strict";
     var traverse = module.exports = function(schema, opts, cb) {
       if (typeof opts == "function") {
@@ -3206,9 +2663,9 @@ var require_json_schema_traverse = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/resolve.js
+// src/validate/node_modules/ajv/dist/compile/resolve.js
 var require_resolve = __commonJS({
-  "node_modules/ajv/dist/compile/resolve.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/resolve.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getSchemaRefs = exports.resolveUrl = exports.normalizeId = exports._getFullPath = exports.getFullPath = exports.inlineRef = void 0;
@@ -3362,9 +2819,9 @@ var require_resolve = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/validate/index.js
+// src/validate/node_modules/ajv/dist/compile/validate/index.js
 var require_validate = __commonJS({
-  "node_modules/ajv/dist/compile/validate/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/validate/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getData = exports.KeywordCxt = exports.validateFunctionCode = void 0;
@@ -3860,9 +3317,9 @@ var require_validate = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/runtime/validation_error.js
+// src/validate/node_modules/ajv/dist/runtime/validation_error.js
 var require_validation_error = __commonJS({
-  "node_modules/ajv/dist/runtime/validation_error.js"(exports) {
+  "src/validate/node_modules/ajv/dist/runtime/validation_error.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ValidationError = class extends Error {
@@ -3876,9 +3333,9 @@ var require_validation_error = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/ref_error.js
+// src/validate/node_modules/ajv/dist/compile/ref_error.js
 var require_ref_error = __commonJS({
-  "node_modules/ajv/dist/compile/ref_error.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/ref_error.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var resolve_1 = require_resolve();
@@ -3893,9 +3350,9 @@ var require_ref_error = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/compile/index.js
+// src/validate/node_modules/ajv/dist/compile/index.js
 var require_compile = __commonJS({
-  "node_modules/ajv/dist/compile/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/compile/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resolveSchema = exports.getCompilingSchema = exports.resolveRef = exports.compileSchema = exports.SchemaEnv = void 0;
@@ -4016,7 +3473,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve3.call(this, root, ref);
+      let _sch = resolve2.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
         const { schemaId } = this.opts;
@@ -4043,7 +3500,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve3(root, ref) {
+    function resolve2(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -4116,9 +3573,9 @@ var require_compile = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/refs/data.json
+// src/validate/node_modules/ajv/dist/refs/data.json
 var require_data = __commonJS({
-  "node_modules/ajv/dist/refs/data.json"(exports, module) {
+  "src/validate/node_modules/ajv/dist/refs/data.json"(exports, module) {
     module.exports = {
       $id: "https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#",
       description: "Meta-schema for $data reference (JSON AnySchema extension proposal)",
@@ -4135,9 +3592,9 @@ var require_data = __commonJS({
   }
 });
 
-// node_modules/uri-js/dist/es5/uri.all.js
+// src/validate/node_modules/uri-js/dist/es5/uri.all.js
 var require_uri_all = __commonJS({
-  "node_modules/uri-js/dist/es5/uri.all.js"(exports, module) {
+  "src/validate/node_modules/uri-js/dist/es5/uri.all.js"(exports, module) {
     (function(global2, factory) {
       typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global2.URI = global2.URI || {});
     })(exports, function(exports2) {
@@ -4865,7 +4322,7 @@ var require_uri_all = __commonJS({
         target.fragment = relative.fragment;
         return target;
       }
-      function resolve3(baseURI, relativeURI, options2) {
+      function resolve2(baseURI, relativeURI, options2) {
         var schemelessOptions = assign({ scheme: "null" }, options2);
         return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
       }
@@ -5133,7 +4590,7 @@ var require_uri_all = __commonJS({
       exports2.removeDotSegments = removeDotSegments;
       exports2.serialize = serialize;
       exports2.resolveComponents = resolveComponents;
-      exports2.resolve = resolve3;
+      exports2.resolve = resolve2;
       exports2.normalize = normalize;
       exports2.equal = equal;
       exports2.escapeComponent = escapeComponent;
@@ -5143,9 +4600,9 @@ var require_uri_all = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/runtime/uri.js
+// src/validate/node_modules/ajv/dist/runtime/uri.js
 var require_uri = __commonJS({
-  "node_modules/ajv/dist/runtime/uri.js"(exports) {
+  "src/validate/node_modules/ajv/dist/runtime/uri.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var uri = require_uri_all();
@@ -5154,9 +4611,9 @@ var require_uri = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/core.js
+// src/validate/node_modules/ajv/dist/core.js
 var require_core = __commonJS({
-  "node_modules/ajv/dist/core.js"(exports) {
+  "src/validate/node_modules/ajv/dist/core.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.CodeGen = exports.Name = exports.nil = exports.stringify = exports.str = exports._ = exports.KeywordCxt = void 0;
@@ -5533,7 +4990,7 @@ var require_core = __commonJS({
       errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
         if (!errors || errors.length === 0)
           return "No errors";
-        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text2, msg) => text2 + separator + msg);
+        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text, msg) => text + separator + msg);
       }
       $dataMetaSchema(metaSchema, keywordsJsonPointers) {
         const rules = this.RULES.all;
@@ -5555,10 +5012,10 @@ var require_core = __commonJS({
         }
         return metaSchema;
       }
-      _removeAllSchemas(schemas, regex3) {
+      _removeAllSchemas(schemas, regex2) {
         for (const keyRef in schemas) {
           const sch = schemas[keyRef];
-          if (!regex3 || regex3.test(keyRef)) {
+          if (!regex2 || regex2.test(keyRef)) {
             if (typeof sch == "string") {
               delete schemas[keyRef];
             } else if (sch && !sch.meta) {
@@ -5752,9 +5209,9 @@ var require_core = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/core/id.js
+// src/validate/node_modules/ajv/dist/vocabularies/core/id.js
 var require_id = __commonJS({
-  "node_modules/ajv/dist/vocabularies/core/id.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/core/id.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var def = {
@@ -5767,9 +5224,9 @@ var require_id = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/core/ref.js
+// src/validate/node_modules/ajv/dist/vocabularies/core/ref.js
 var require_ref = __commonJS({
-  "node_modules/ajv/dist/vocabularies/core/ref.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/core/ref.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.callRef = exports.getValidate = void 0;
@@ -5889,9 +5346,9 @@ var require_ref = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/core/index.js
+// src/validate/node_modules/ajv/dist/vocabularies/core/index.js
 var require_core2 = __commonJS({
-  "node_modules/ajv/dist/vocabularies/core/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/core/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var id_1 = require_id();
@@ -5910,9 +5367,9 @@ var require_core2 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/limitNumber.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/limitNumber.js
 var require_limitNumber = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5942,9 +5399,9 @@ var require_limitNumber = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/multipleOf.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/multipleOf.js
 var require_multipleOf = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -5970,9 +5427,9 @@ var require_multipleOf = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/runtime/ucs2length.js
+// src/validate/node_modules/ajv/dist/runtime/ucs2length.js
 var require_ucs2length = __commonJS({
-  "node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
+  "src/validate/node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function ucs2length(str) {
@@ -5996,9 +5453,9 @@ var require_ucs2length = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/limitLength.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/limitLength.js
 var require_limitLength = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6028,9 +5485,9 @@ var require_limitLength = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/pattern.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/pattern.js
 var require_pattern = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -6056,9 +5513,9 @@ var require_pattern = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/limitProperties.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/limitProperties.js
 var require_limitProperties = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6085,9 +5542,9 @@ var require_limitProperties = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/required.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/required.js
 var require_required = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/required.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/required.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -6167,9 +5624,9 @@ var require_required = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/limitItems.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/limitItems.js
 var require_limitItems = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6196,9 +5653,9 @@ var require_limitItems = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/runtime/equal.js
+// src/validate/node_modules/ajv/dist/runtime/equal.js
 var require_equal = __commonJS({
-  "node_modules/ajv/dist/runtime/equal.js"(exports) {
+  "src/validate/node_modules/ajv/dist/runtime/equal.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var equal = require_fast_deep_equal();
@@ -6207,9 +5664,9 @@ var require_equal = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
 var require_uniqueItems = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var dataType_1 = require_dataType();
@@ -6274,9 +5731,9 @@ var require_uniqueItems = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/const.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/const.js
 var require_const = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/const.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/const.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6303,9 +5760,9 @@ var require_const = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/enum.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/enum.js
 var require_enum = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/enum.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/enum.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6352,9 +5809,9 @@ var require_enum = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/validation/index.js
+// src/validate/node_modules/ajv/dist/vocabularies/validation/index.js
 var require_validation = __commonJS({
-  "node_modules/ajv/dist/vocabularies/validation/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/validation/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var limitNumber_1 = require_limitNumber();
@@ -6385,9 +5842,9 @@ var require_validation = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
 var require_additionalItems = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.validateAdditionalItems = void 0;
@@ -6438,9 +5895,9 @@ var require_additionalItems = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/items.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/items.js
 var require_items = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/items.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/items.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.validateTuple = void 0;
@@ -6495,9 +5952,9 @@ var require_items = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
 var require_prefixItems = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var items_1 = require_items();
@@ -6512,9 +5969,9 @@ var require_prefixItems = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/items2020.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/items2020.js
 var require_items2020 = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6547,9 +6004,9 @@ var require_items2020 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/contains.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/contains.js
 var require_contains = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6641,9 +6098,9 @@ var require_contains = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/dependencies.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/dependencies.js
 var require_dependencies = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.validateSchemaDeps = exports.validatePropertyDeps = exports.error = void 0;
@@ -6729,9 +6186,9 @@ var require_dependencies = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
 var require_propertyNames = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -6772,9 +6229,9 @@ var require_propertyNames = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
 var require_additionalProperties = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -6878,9 +6335,9 @@ var require_additionalProperties = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/properties.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/properties.js
 var require_properties = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var validate_1 = require_validate();
@@ -6936,9 +6393,9 @@ var require_properties = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
 var require_patternProperties = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -7010,9 +6467,9 @@ var require_patternProperties = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/not.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/not.js
 var require_not = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/not.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/not.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var util_1 = require_util();
@@ -7041,9 +6498,9 @@ var require_not = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/anyOf.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/anyOf.js
 var require_anyOf = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var code_1 = require_code2();
@@ -7058,9 +6515,9 @@ var require_anyOf = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/oneOf.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/oneOf.js
 var require_oneOf = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -7116,9 +6573,9 @@ var require_oneOf = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/allOf.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/allOf.js
 var require_allOf = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var util_1 = require_util();
@@ -7143,9 +6600,9 @@ var require_allOf = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/if.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/if.js
 var require_if = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/if.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/if.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -7212,9 +6669,9 @@ var require_if = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/thenElse.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/thenElse.js
 var require_thenElse = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var util_1 = require_util();
@@ -7230,9 +6687,9 @@ var require_thenElse = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/applicator/index.js
+// src/validate/node_modules/ajv/dist/vocabularies/applicator/index.js
 var require_applicator = __commonJS({
-  "node_modules/ajv/dist/vocabularies/applicator/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/applicator/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var additionalItems_1 = require_additionalItems();
@@ -7276,9 +6733,9 @@ var require_applicator = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/format/format.js
+// src/validate/node_modules/ajv/dist/vocabularies/format/format.js
 var require_format = __commonJS({
-  "node_modules/ajv/dist/vocabularies/format/format.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/format/format.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -7366,9 +6823,9 @@ var require_format = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/format/index.js
+// src/validate/node_modules/ajv/dist/vocabularies/format/index.js
 var require_format2 = __commonJS({
-  "node_modules/ajv/dist/vocabularies/format/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/format/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var format_1 = require_format();
@@ -7377,9 +6834,9 @@ var require_format2 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/metadata.js
+// src/validate/node_modules/ajv/dist/vocabularies/metadata.js
 var require_metadata = __commonJS({
-  "node_modules/ajv/dist/vocabularies/metadata.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/metadata.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.contentVocabulary = exports.metadataVocabulary = void 0;
@@ -7400,9 +6857,9 @@ var require_metadata = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/draft7.js
+// src/validate/node_modules/ajv/dist/vocabularies/draft7.js
 var require_draft7 = __commonJS({
-  "node_modules/ajv/dist/vocabularies/draft7.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/draft7.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var core_1 = require_core2();
@@ -7422,9 +6879,9 @@ var require_draft7 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/discriminator/types.js
+// src/validate/node_modules/ajv/dist/vocabularies/discriminator/types.js
 var require_types = __commonJS({
-  "node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DiscrError = void 0;
@@ -7436,9 +6893,9 @@ var require_types = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/vocabularies/discriminator/index.js
+// src/validate/node_modules/ajv/dist/vocabularies/discriminator/index.js
 var require_discriminator = __commonJS({
-  "node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports) {
+  "src/validate/node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var codegen_1 = require_codegen();
@@ -7537,9 +6994,9 @@ var require_discriminator = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/refs/json-schema-draft-07.json
+// src/validate/node_modules/ajv/dist/refs/json-schema-draft-07.json
 var require_json_schema_draft_07 = __commonJS({
-  "node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports, module) {
+  "src/validate/node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports, module) {
     module.exports = {
       $schema: "http://json-schema.org/draft-07/schema#",
       $id: "http://json-schema.org/draft-07/schema#",
@@ -7694,9 +7151,9 @@ var require_json_schema_draft_07 = __commonJS({
   }
 });
 
-// node_modules/ajv/dist/ajv.js
+// src/validate/node_modules/ajv/dist/ajv.js
 var require_ajv = __commonJS({
-  "node_modules/ajv/dist/ajv.js"(exports, module) {
+  "src/validate/node_modules/ajv/dist/ajv.js"(exports, module) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.CodeGen = exports.Name = exports.nil = exports.stringify = exports.str = exports._ = exports.KeywordCxt = void 0;
@@ -7754,9 +7211,9 @@ var require_ajv = __commonJS({
   }
 });
 
-// node_modules/ajv-formats/dist/formats.js
+// src/validate/node_modules/ajv-formats/dist/formats.js
 var require_formats = __commonJS({
-  "node_modules/ajv-formats/dist/formats.js"(exports) {
+  "src/validate/node_modules/ajv-formats/dist/formats.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.formatNames = exports.fastFormats = exports.fullFormats = void 0;
@@ -7776,7 +7233,7 @@ var require_formats = __commonJS({
       hostname: /^(?=.{1,253}\.?$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[-0-9a-z]{0,61}[0-9a-z])?)*\.?$/i,
       ipv4: /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
       ipv6: /^((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))$/i,
-      regex: regex3,
+      regex: regex2,
       uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i,
       "json-pointer": /^(?:\/(?:[^~/]|~0|~1)*)*$/,
       "json-pointer-uri-fragment": /^#(?:\/(?:[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)*$/i,
@@ -7885,7 +7342,7 @@ var require_formats = __commonJS({
       return true;
     }
     var Z_ANCHOR = /[^\\]\\Z/;
-    function regex3(str) {
+    function regex2(str) {
       if (Z_ANCHOR.test(str))
         return false;
       try {
@@ -7898,9 +7355,9 @@ var require_formats = __commonJS({
   }
 });
 
-// node_modules/ajv-formats/dist/limit.js
+// src/validate/node_modules/ajv-formats/dist/limit.js
 var require_limit = __commonJS({
-  "node_modules/ajv-formats/dist/limit.js"(exports) {
+  "src/validate/node_modules/ajv-formats/dist/limit.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.formatLimitDefinition = void 0;
@@ -7970,9 +7427,9 @@ var require_limit = __commonJS({
   }
 });
 
-// node_modules/ajv-formats/dist/index.js
+// src/validate/node_modules/ajv-formats/dist/index.js
 var require_dist = __commonJS({
-  "node_modules/ajv-formats/dist/index.js"(exports, module) {
+  "src/validate/node_modules/ajv-formats/dist/index.js"(exports, module) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var formats_1 = require_formats();
@@ -8107,12 +7564,12 @@ var handleFetch = async (path2, options2 = {}, progressCallback) => {
 };
 var fetchRemote = async (url, options2 = {}, progressCallback) => {
   const response = await globalThis.fetch(url, options2);
-  return new Promise(async (resolve3) => {
+  return new Promise(async (resolve2) => {
     if (response) {
       const type = response.headers.get("Content-Type");
       if (globalThis.REMOTEESM_NODE) {
         const buffer = await response.arrayBuffer();
-        resolve3({ buffer, type });
+        resolve2({ buffer, type });
       } else {
         const reader = response.body.getReader();
         const bytes = parseInt(response.headers.get("Content-Length"), 10);
@@ -8125,7 +7582,7 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
               config2.type = type;
             const blob = new Blob(buffer, config2);
             const ab = await blob.arrayBuffer();
-            resolve3({ buffer: new Uint8Array(ab), type });
+            resolve2({ buffer: new Uint8Array(ab), type });
             return;
           }
           bytesReceived += value.length;
@@ -8139,7 +7596,7 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
       }
     } else {
       console.warn("Response not received!", options2.headers);
-      resolve3(void 0);
+      resolve2(void 0);
     }
   });
 };
@@ -8147,32 +7604,32 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
 // node_modules/remote-esm/index.js
 globalThis.REMOTEESM_TEXT_REFERENCES = {};
 globalThis.REMOTEESM_NODE = false;
-var ready = new Promise(async (resolve3, reject) => {
+var ready = new Promise(async (resolve2, reject) => {
   try {
     if (typeof process === "object") {
       globalThis.REMOTEESM_NODE = true;
       globalThis.fetch = (await import("node-fetch")).default;
       if (typeof globalThis.fetch !== "function")
         globalThis.fetch = fetch;
-      const Blob4 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
-      globalThis.Blob = Blob4;
+      const Blob3 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
+      globalThis.Blob = Blob3;
       if (typeof globalThis.Blob !== "function")
-        globalThis.Blob = Blob4;
-      resolve3(true);
+        globalThis.Blob = Blob3;
+      resolve2(true);
     } else
-      resolve3(true);
+      resolve2(true);
   } catch (err) {
     console.log(err);
     reject(err);
   }
 });
 var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
-var moduleDataURI = (text2, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text2);
-var importFromText = async (text2, path2) => {
+var moduleDataURI = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
+var importFromText = async (text, path2) => {
   const extension = path2.split(".").slice(-1)[0];
   const isJSON = extension === "json";
   let mimeType = isJSON ? "application/json" : "application/javascript";
-  const uri = moduleDataURI(text2, mimeType);
+  const uri = moduleDataURI(text, mimeType);
   let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
     if (e.message.includes("Unexpected token"))
       throw new Error("Failed to fetch");
@@ -8203,22 +7660,22 @@ var safeImport = async (uri, {
   const isJSON = extension === "json";
   let module = !forceImportFromText ? await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
   }) : void 0;
-  let text2;
+  let text;
   if (!module) {
-    text2 = await getText(uri);
+    text = await getText(uri);
     try {
-      module = await importFromText(text2, uri);
+      module = await importFromText(text, uri);
     } catch (e) {
       const base = get("", uri);
       let childBase = base;
       const importInfo = [];
       let m;
       do {
-        m = re.exec(text2);
+        m = re.exec(text);
         if (m == null)
-          m = re.exec(text2);
+          m = re.exec(text);
         if (m) {
-          text2 = text2.replace(m[0], ``);
+          text = text.replace(m[0], ``);
           const wildcard = !!m[1].match(/\*\s+as/);
           const variables = m[1].replace(/\*\s+as/, "").trim();
           importInfo.push({
@@ -8241,13 +7698,13 @@ var safeImport = async (uri, {
           const isJS = extension2.includes("js");
           const newURI = dependentFileWithoutRoot;
           const newText = await blob.text();
-          let importedText = isJS ? await new Promise(async (resolve3) => {
+          let importedText = isJS ? await new Promise(async (resolve2) => {
             await safeImport(newURI, {
               root: uri,
               onImport: (path3, info2) => {
                 onImport(path3, info2);
                 if (path3 == newURI)
-                  resolve3(info2.text);
+                  resolve2(info2.text);
               },
               outputText: true,
               forceImportFromText
@@ -8255,14 +7712,14 @@ var safeImport = async (uri, {
           }) : newText;
           await importFromText(importedText, correctPath);
         }
-        text2 = `import ${wildcard ? "* as " : ""}${variables} from "${globalThis.REMOTEESM_TEXT_REFERENCES[correctPath]}";
-${text2}`;
+        text = `import ${wildcard ? "* as " : ""}${variables} from "${globalThis.REMOTEESM_TEXT_REFERENCES[correctPath]}";
+${text}`;
       }
-      module = await importFromText(text2, uri);
+      module = await importFromText(text, uri);
     }
   }
   onImport(uri, {
-    text: outputText ? text2 ?? await getText(uri) : void 0,
+    text: outputText ? text ?? await getText(uri) : void 0,
     module
   });
   return module;
@@ -8321,106 +7778,2945 @@ var valid = (input, options2, location) => {
   return errors;
 };
 
-// src/core/node_modules/remote-esm/utils/path.js
-var regex2 = new RegExp("https?:", "g");
-var get3 = (path2, rel = "", keepRelativeImports = false) => {
-  const windowLocation = globalThis?.location?.origin;
-  let pathMatch = false;
-  let relMatch = false;
-  if (windowLocation) {
-    relMatch = rel.includes(windowLocation);
-    if (relMatch) {
-      rel = rel.replace(windowLocation, "");
-      if (rel[0] === "/")
-        rel = rel.slice(1);
+// node_modules/es-plugins/dist/index.esm.js
+function parseFunctionFromText(method = "") {
+  let getFunctionBody = (methodString) => {
+    return methodString.replace(/^\W*(function[^{]+\{([\s\S]*)\}|[^=]+=>[^{]*\{([\s\S]*)\}|[^=]+=>(.+))/i, "$2$3$4");
+  };
+  let getFunctionHead = (methodString) => {
+    let startindex = methodString.indexOf("=>") + 1;
+    if (startindex <= 0) {
+      startindex = methodString.indexOf("){");
     }
-    pathMatch = path2.includes(windowLocation);
-    if (pathMatch) {
-      path2 = path2.replace(windowLocation, "");
-      if (path2[0] === "/")
-        path2 = path2.slice(1);
+    if (startindex <= 0) {
+      startindex = methodString.indexOf(") {");
+    }
+    return methodString.slice(0, methodString.indexOf("{", startindex) + 1);
+  };
+  let newFuncHead = getFunctionHead(method);
+  let newFuncBody = getFunctionBody(method);
+  let newFunc;
+  if (newFuncHead.includes("function")) {
+    let varName = newFuncHead.split("(")[1].split(")")[0];
+    newFunc = new Function(varName, newFuncBody);
+  } else {
+    if (newFuncHead.substring(0, 6) === newFuncBody.substring(0, 6)) {
+      let varName = newFuncHead.split("(")[1].split(")")[0];
+      newFunc = new Function(varName, newFuncBody.substring(newFuncBody.indexOf("{") + 1, newFuncBody.length - 1));
+    } else {
+      try {
+        newFunc = (0, eval)(newFuncHead + newFuncBody + "}");
+      } catch {
+      }
     }
   }
-  if (!keepRelativeImports)
-    rel = rel.split("/").filter((v) => v != "..").join("/");
-  if (rel[rel.length - 1] === "/")
-    rel = rel.slice(0, -1);
-  let dirTokens = rel.split("/");
-  if (dirTokens.length === 1 && dirTokens[0] === "")
-    dirTokens = [];
-  const potentialFile = dirTokens.pop();
-  if (potentialFile) {
-    const splitPath2 = potentialFile.split(".");
-    if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
-      dirTokens.push(potentialFile);
-  }
-  const splitPath = path2.split("/");
-  const pathTokens = splitPath.filter((str, i) => {
-    if (splitPath[i - 1] && regex2.test(splitPath[i - 1]))
-      return true;
-    else
-      return !!str;
-  });
-  const extensionTokens = pathTokens.filter((str, i) => {
-    if (str === "..") {
-      dirTokens.pop();
-      return false;
-    } else if (str === ".")
-      return false;
-    else
-      return true;
-  });
-  const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
-  return newPath;
-};
-
-// src/core/node_modules/remote-esm/index.js
-globalThis.REMOTEESM_TEXT_REFERENCES = {};
-globalThis.REMOTEESM_NODE = false;
-var ready2 = new Promise(async (resolve3, reject) => {
-  try {
-    if (typeof process === "object") {
-      globalThis.REMOTEESM_NODE = true;
-      globalThis.fetch = (await import("node-fetch")).default;
-      if (typeof globalThis.fetch !== "function")
-        globalThis.fetch = fetch;
-      const Blob4 = (await Promise.resolve().then(() => (init_browser2(), browser_exports2))).default;
-      globalThis.Blob = Blob4;
-      if (typeof globalThis.Blob !== "function")
-        globalThis.Blob = Blob4;
-      resolve3(true);
+  return newFunc;
+}
+var state = {
+  pushToState: {},
+  data: {},
+  triggers: {},
+  setState(updateObj) {
+    Object.assign(state.data, updateObj);
+    for (const prop of Object.getOwnPropertyNames(updateObj)) {
+      if (state.triggers[prop])
+        state.triggers[prop].forEach((obj) => obj.onchange(state.data[prop]));
+    }
+    return state.data;
+  },
+  subscribeTrigger(key, onchange) {
+    if (key) {
+      if (!state.triggers[key]) {
+        state.triggers[key] = [];
+      }
+      let l = state.triggers[key].length;
+      state.triggers[key].push({ idx: l, onchange });
+      return state.triggers[key].length - 1;
     } else
-      resolve3(true);
-  } catch (err) {
-    console.log(err);
-    reject(err);
+      return void 0;
+  },
+  unsubscribeTrigger(key, sub) {
+    let idx = void 0;
+    let triggers = state.triggers[key];
+    if (triggers) {
+      if (!sub)
+        delete state.triggers[key];
+      else {
+        let obj = triggers.find((o) => {
+          if (o.idx === sub) {
+            return true;
+          }
+        });
+        if (obj)
+          triggers.splice(idx, 1);
+        return true;
+      }
+    }
+  },
+  subscribeTriggerOnce(key, onchange) {
+    let sub;
+    let changed = (value) => {
+      onchange(value);
+      state.unsubscribeTrigger(key, sub);
+    };
+    sub = state.subscribeTrigger(key, changed);
   }
-});
-var moduleDataURI2 = (text2, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text2);
-var importFromText2 = async (text2, path2) => {
-  const extension = path2.split(".").slice(-1)[0];
-  const isJSON = extension === "json";
-  let mimeType = isJSON ? "application/json" : "application/javascript";
-  const uri = moduleDataURI2(text2, mimeType);
-  let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
-    if (e.message.includes("Unexpected token"))
-      throw new Error("Failed to fetch");
-    else
-      throw e;
-  });
-  const ref = {};
-  for (let key in imported) {
-    Object.defineProperty(ref, key, {
-      get: () => imported[key],
-      enumerable: true
-    });
-  }
-  globalThis.REMOTEESM_TEXT_REFERENCES[path2] = uri;
-  return imported;
 };
-var resolve2 = get3;
-
-// src/core/node_modules/es-plugins/src/parse.js
+var GraphNode = class {
+  constructor(properties = {}, parentNode, graph) {
+    this.nodes = /* @__PURE__ */ new Map();
+    this._initial = {};
+    this.state = state;
+    this.isLooping = false;
+    this.isAnimating = false;
+    this.looper = void 0;
+    this.animation = void 0;
+    this.forward = true;
+    this.backward = false;
+    this.runSync = false;
+    this.firstRun = true;
+    this.DEBUGNODE = false;
+    this.operator = (...args) => {
+      return args;
+    };
+    this.runOp = (...args) => {
+      if (this.DEBUGNODE)
+        console.time(this.tag);
+      let result = this.operator(...args);
+      if (result instanceof Promise) {
+        result.then((res) => {
+          if (res !== void 0)
+            this.setState({ [this.tag]: res });
+          if (this.DEBUGNODE) {
+            console.timeEnd(this.tag);
+            if (result !== void 0)
+              console.log(`${this.tag} result:`, result);
+          }
+          ;
+          return res;
+        });
+      } else {
+        if (result !== void 0)
+          this.setState({ [this.tag]: result });
+        if (this.DEBUGNODE) {
+          console.timeEnd(this.tag);
+          if (result !== void 0)
+            console.log(`${this.tag} result:`, result);
+        }
+        ;
+      }
+      return result;
+    };
+    this.setOperator = (operator) => {
+      if (typeof operator !== "function")
+        return operator;
+      this.operator = operator.bind(this);
+      return operator;
+    };
+    this.runAsync = (...args) => {
+      return new Promise((res, rej) => {
+        res(this.run(...args));
+      });
+    };
+    this.transformArgs = (args = []) => args;
+    this.run = (...args) => {
+      if (typeof this.transformArgs === "function")
+        args = this.transformArgs(args, this);
+      if (this.firstRun) {
+        this.firstRun = false;
+        if (!(this.children && this.forward || this.parent && this.backward || this.repeat || this.delay || this.frame || this.recursive || this.branch))
+          this.runSync = true;
+        if (this.animate && !this.isAnimating) {
+          this.runAnimation(this.animation, args);
+        }
+        if (this.loop && typeof this.loop === "number" && !this.isLooping) {
+          this.runLoop(this.looper, args);
+        }
+        if (this.loop || this.animate)
+          return;
+      }
+      if (this.runSync) {
+        let res = this.runOp(...args);
+        return res;
+      }
+      return new Promise(async (resolve2) => {
+        if (this) {
+          let run = (node, tick = 0, ...input) => {
+            return new Promise(async (r) => {
+              tick++;
+              let res = await node.runOp(...input);
+              if (node.repeat) {
+                while (tick < node.repeat) {
+                  if (node.delay) {
+                    setTimeout(async () => {
+                      r(await run(node, tick, ...input));
+                    }, node.delay);
+                    break;
+                  } else if (node.frame && window?.requestAnimationFrame) {
+                    requestAnimationFrame(async () => {
+                      r(await run(node, tick, ...input));
+                    });
+                    break;
+                  } else
+                    res = await node.runOp(...input);
+                  tick++;
+                }
+                if (tick === node.repeat) {
+                  r(res);
+                  return;
+                }
+              } else if (node.recursive) {
+                while (tick < node.recursive) {
+                  if (node.delay) {
+                    setTimeout(async () => {
+                      r(await run(node, tick, ...res));
+                    }, node.delay);
+                    break;
+                  } else if (node.frame && window?.requestAnimationFrame) {
+                    requestAnimationFrame(async () => {
+                      r(await run(node, tick, ...res));
+                    });
+                    break;
+                  } else
+                    res = await node.runOp(...res);
+                  tick++;
+                }
+                if (tick === node.recursive) {
+                  r(res);
+                  return;
+                }
+              } else {
+                r(res);
+                return;
+              }
+            });
+          };
+          let runnode = async () => {
+            let res = await run(this, void 0, ...args);
+            if (res !== void 0) {
+              if (this.backward && this.parent instanceof GraphNode) {
+                if (Array.isArray(res))
+                  await this.runParent(this, ...res);
+                else
+                  await this.runParent(this, res);
+              }
+              if (this.children && this.forward) {
+                if (Array.isArray(res))
+                  await this.runChildren(this, ...res);
+                else
+                  await this.runChildren(this, res);
+              }
+              if (this.branch) {
+                this.runBranch(this, res);
+              }
+            }
+            return res;
+          };
+          if (this.delay) {
+            setTimeout(async () => {
+              resolve2(await runnode());
+            }, this.delay);
+          } else if (this.frame && window?.requestAnimationFrame) {
+            requestAnimationFrame(async () => {
+              resolve2(await runnode());
+            });
+          } else {
+            resolve2(await runnode());
+          }
+        } else
+          resolve2(void 0);
+      });
+    };
+    this.runParent = async (n, ...args) => {
+      if (n.backward && n.parent) {
+        if (typeof n.parent === "string") {
+          if (n.graph && n.graph?.get(n.parent)) {
+            n.parent = n.graph;
+            if (n.parent)
+              this.nodes.set(n.parent.tag, n.parent);
+          } else
+            n.parent = this.nodes.get(n.parent);
+        }
+        if (n.parent instanceof GraphNode)
+          await n.parent.run(...args);
+      }
+    };
+    this.runChildren = async (n, ...args) => {
+      if (typeof n.children === "object") {
+        for (const key in n.children) {
+          if (typeof n.children[key] === "string") {
+            if (n.graph && n.graph?.get(n.children[key])) {
+              n.children[key] = n.graph.get(n.children[key]);
+              if (!n.nodes.get(n.children[key].tag))
+                n.nodes.set(n.children[key].tag, n.children[key]);
+            }
+            if (!n.children[key] && n.nodes.get(n.children[key]))
+              n.children[key] = n.nodes.get(n.children[key]);
+          } else if (typeof n.children[key] === "undefined" || n.children[key] === true) {
+            if (n.graph && n.graph?.get(key)) {
+              n.children[key] = n.graph.get(key);
+              if (!n.nodes.get(n.children[key].tag))
+                n.nodes.set(n.children[key].tag, n.children[key]);
+            }
+            if (!n.children[key] && n.nodes.get(key))
+              n.children[key] = n.nodes.get(key);
+          }
+          if (n.children[key]?.runOp)
+            await n.children[key].run(...args);
+        }
+      }
+    };
+    this.runBranch = async (n, output) => {
+      if (n.branch) {
+        let keys = Object.keys(n.branch);
+        await Promise.all(keys.map(async (k) => {
+          if (typeof n.branch[k].if === "object")
+            n.branch[k].if = stringifyFast(n.branch[k].if);
+          let pass = false;
+          if (typeof n.branch[k].if === "function") {
+            pass = n.branch[k].if(output);
+          } else {
+            if (typeof output === "object") {
+              if (stringifyFast(output) === n.branch[k].if)
+                pass = true;
+            } else if (output === n.branch[k].if)
+              pass = true;
+          }
+          if (pass) {
+            if (n.branch[k].then instanceof GraphNode) {
+              if (Array.isArray(output))
+                await n.branch[k].then.run(...output);
+              else
+                await n.branch[k].then.run(...output);
+            } else if (typeof n.branch[k].then === "function") {
+              if (Array.isArray(output))
+                await n.branch[k].then(...output);
+              else
+                await n.branch[k].then(output);
+            } else if (typeof n.branch[k].then === "string") {
+              if (n.graph)
+                n.branch[k].then = n.graph.nodes.get(n.branch[k].then);
+              else
+                n.branch[k].then = n.nodes.get(n.branch[k].then);
+              if (n.branch[k].then instanceof GraphNode) {
+                if (Array.isArray(output))
+                  await n.branch[k].then.run(...output);
+                else
+                  await n.branch[k].then.run(...output);
+              }
+            }
+          }
+          return pass;
+        }));
+      }
+    };
+    this.runAnimation = (animation = this.animation, args = []) => {
+      this.animation = animation;
+      if (!animation)
+        this.animation = this.operator;
+      if (this.animate && !this.isAnimating && "requestAnimationFrame" in window) {
+        this.isAnimating = true;
+        let anim = async () => {
+          if (this.isAnimating) {
+            if (this.DEBUGNODE)
+              console.time(this.tag);
+            let result = this.animation.call(this, ...args);
+            if (result instanceof Promise) {
+              result = await result;
+            }
+            if (this.DEBUGNODE) {
+              console.timeEnd(this.tag);
+              if (result !== void 0)
+                console.log(`${this.tag} result:`, result);
+            }
+            ;
+            if (result !== void 0) {
+              if (this.tag)
+                this.setState({ [this.tag]: result });
+              if (this.backward && this.parent?.run) {
+                if (Array.isArray(result))
+                  await this.runParent(this, ...result);
+                else
+                  await this.runParent(this, result);
+              }
+              if (this.children && this.forward) {
+                if (Array.isArray(result))
+                  await this.runChildren(this, ...result);
+                else
+                  await this.runChildren(this, result);
+              }
+              if (this.branch) {
+                this.runBranch(this, result);
+              }
+              this.setState({ [this.tag]: result });
+            }
+            requestAnimationFrame(anim);
+          }
+        };
+        requestAnimationFrame(anim);
+      }
+    };
+    this.runLoop = (loop = this.looper, args = [], timeout = this.loop) => {
+      this.looper = loop;
+      if (!loop)
+        this.looper = this.operator;
+      if (typeof timeout === "number" && !this.isLooping) {
+        this.isLooping = true;
+        let looping = async () => {
+          if (this.isLooping) {
+            if (this.DEBUGNODE)
+              console.time(this.tag);
+            let result = this.looper.call(this, ...args);
+            if (result instanceof Promise) {
+              result = await result;
+            }
+            if (this.DEBUGNODE) {
+              console.timeEnd(this.tag);
+              if (result !== void 0)
+                console.log(`${this.tag} result:`, result);
+            }
+            ;
+            if (result !== void 0) {
+              if (this.tag)
+                this.setState({ [this.tag]: result });
+              if (this.backward && this.parent?.run) {
+                if (Array.isArray(result))
+                  await this.runParent(this, ...result);
+                else
+                  await this.runParent(this, result);
+              }
+              if (this.children && this.forward) {
+                if (Array.isArray(result))
+                  await this.runChildren(this, ...result);
+                else
+                  await this.runChildren(this, result);
+              }
+              if (this.branch) {
+                this.runBranch(this, result);
+              }
+              this.setState({ [this.tag]: result });
+            }
+            setTimeout(async () => {
+              await looping();
+            }, timeout);
+          }
+        };
+        looping();
+      }
+    };
+    this.setParent = (parent) => {
+      this.parent = parent;
+      if (this.backward)
+        this.runSync = false;
+    };
+    this.setChildren = (children) => {
+      this.children = children;
+      if (this.forward)
+        this.runSync = false;
+    };
+    this.add = (n = {}) => {
+      if (typeof n === "function")
+        n = { operator: n };
+      if (!(n instanceof GraphNode))
+        n = new GraphNode(n, this, this.graph);
+      this.nodes.set(n.tag, n);
+      if (this.graph) {
+        this.graph.nodes.set(n.tag, n);
+        this.graph.nNodes = this.graph.nodes.size;
+      }
+      return n;
+    };
+    this.remove = (n) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode) {
+        this.nodes.delete(n.tag);
+        if (this.children[n.tag])
+          delete this.children[n.tag];
+        if (this.graph) {
+          this.graph.nodes.delete(n.tag);
+          this.graph.nNodes = this.graph.nodes.size;
+        }
+        this.nodes.forEach((n2) => {
+          if (n2.nodes.get(n2.tag)) {
+            n2.nodes.delete(n2.tag);
+            if (n2.children[n2.tag])
+              delete n2.children[n2.tag];
+            if (n2.parent?.tag === n2.tag)
+              delete n2.parent;
+          }
+        });
+        if (n.ondelete)
+          n.ondelete(n);
+      }
+    };
+    this.append = (n, parentNode2 = this) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode) {
+        parentNode2.addChildren(n);
+        if (n.forward)
+          n.runSync = false;
+      }
+    };
+    this.subscribe = (callback, tag = this.tag) => {
+      if (callback instanceof GraphNode) {
+        return this.subscribeNode(callback);
+      } else
+        return this.state.subscribeTrigger(tag, callback);
+    };
+    this.unsubscribe = (sub, tag = this.tag) => {
+      this.state.unsubscribeTrigger(tag, sub);
+    };
+    this.addChildren = (children) => {
+      if (!this.children)
+        this.children = {};
+      if (typeof children === "object") {
+        Object.assign(this.children, children);
+      }
+      this.convertChildrenToNodes();
+      if (this.forward)
+        this.runSync = false;
+    };
+    this.callParent = (...args) => {
+      if (typeof this.parent === "string") {
+        if (this.graph && this.graph?.get(this.parent)) {
+          this.parent = this.graph;
+          if (this.parent)
+            this.nodes.set(this.parent.tag, this.parent);
+        } else
+          this.parent = this.nodes.get(this.parent);
+      }
+      if (typeof this.parent?.operator === "function")
+        return this.parent.runOp(...args);
+    };
+    this.callChildren = (...args) => {
+      let result;
+      if (typeof this.children === "object") {
+        for (const key in this.children) {
+          if (this.children[key]?.runOp)
+            this.children[key].runOp(...args);
+        }
+      }
+      return result;
+    };
+    this.getProps = (n = this) => {
+      return {
+        tag: n.tag,
+        operator: n.operator,
+        graph: n.graph,
+        children: n.children,
+        parent: n.parent,
+        forward: n.forward,
+        backward: n.bacward,
+        loop: n.loop,
+        animate: n.animate,
+        frame: n.frame,
+        delay: n.delay,
+        recursive: n.recursive,
+        repeat: n.repeat,
+        branch: n.branch,
+        oncreate: n.oncreate,
+        DEBUGNODE: n.DEBUGNODE,
+        ...this._initial
+      };
+    };
+    this.setProps = (props = {}) => {
+      let tmp = Object.assign({}, props);
+      if (tmp.children) {
+        this.addChildren(props.children);
+        delete tmp.children;
+      }
+      if (tmp.operator) {
+        this.setOperator(props.operator);
+        delete tmp.operator;
+      }
+      Object.assign(tmp, props);
+      if (!(this.children && this.forward || this.parent && this.backward || this.repeat || this.delay || this.frame || this.recursive))
+        this.runSync = true;
+    };
+    this.removeTree = (n) => {
+      if (n) {
+        if (typeof n === "string")
+          n = this.nodes.get(n);
+      }
+      if (n instanceof GraphNode) {
+        let checked = {};
+        const recursivelyRemove = (node) => {
+          if (typeof node.children === "object" && !checked[node.tag]) {
+            checked[node.tag] = true;
+            for (const key in node.children) {
+              if (node.children[key].stopNode)
+                node.children[key].stopNode();
+              if (node.children[key].tag) {
+                if (this.nodes.get(node.children[key].tag))
+                  this.nodes.delete(node.children[key].tag);
+                this.nodes.forEach((n2) => {
+                  if (n2.nodes.get(node.children[key].tag))
+                    n2.nodes.delete(node.children[key].tag);
+                  if (n2.children[key] instanceof GraphNode)
+                    delete n2.children[key];
+                });
+                recursivelyRemove(node.children[key]);
+              }
+            }
+          }
+        };
+        if (n.stopNode)
+          n.stopNode();
+        if (n.tag) {
+          this.nodes.delete(n.tag);
+          if (this.children[n.tag])
+            delete this.children[n.tag];
+          if (this.parent?.tag === n.tag)
+            delete this.parent;
+          if (this[n.tag] instanceof GraphNode)
+            delete this[n.tag];
+          this.nodes.forEach((n2) => {
+            if (n2?.tag) {
+              if (n2.nodes.get(n2.tag))
+                n2.nodes.delete(n2.tag);
+              if (n2.children[n2.tag] instanceof GraphNode)
+                delete n2.children[n2.tag];
+            }
+          });
+          recursivelyRemove(n);
+          if (this.graph)
+            this.graph.removeTree(n, checked);
+          else if (n.ondelete)
+            n.ondelete(n);
+        }
+      }
+    };
+    this.checkNodesHaveChildMapped = (n, child, checked = {}) => {
+      let tag = n.tag;
+      if (!tag)
+        tag = n.name;
+      if (!checked[tag]) {
+        checked[tag] = true;
+        if (n.children) {
+          if (child.tag in n.children) {
+            if (n.children[child.tag] instanceof GraphNode) {
+              if (!n.nodes.get(child.tag))
+                n.nodes.set(child.tag, child);
+              n.children[child.tag] = child;
+              if (!n.firstRun)
+                n.firstRun = true;
+            }
+          }
+        }
+        if (n.parent instanceof GraphNode) {
+          if (n.nodes.get(child.tag) && !n.parent.nodes.get(child.tag))
+            n.parent.nodes.set(child.tag, child);
+          if (n.parent.children) {
+            this.checkNodesHaveChildMapped(n.parent, child, checked);
+          } else if (n.nodes) {
+            n.nodes.forEach((n2) => {
+              if (!checked[n2.tag]) {
+                this.checkNodesHaveChildMapped(n2, child, checked);
+              }
+            });
+          }
+        }
+        if (n.graph) {
+          if (n.parent && n.parent.name !== n.graph.name) {
+            n.graph.nodes.forEach((n2) => {
+              if (!checked[n2.tag]) {
+                this.checkNodesHaveChildMapped(n2, child, checked);
+              }
+            });
+          }
+        }
+      }
+    };
+    this.convertChildrenToNodes = (n = this) => {
+      if (n?.children) {
+        for (const key in n.children) {
+          if (!(n.children[key] instanceof GraphNode)) {
+            if (typeof n.children[key] === "object") {
+              if (!n.children[key].tag)
+                n.children[key].tag = key;
+              if (!n.nodes.get(n.children[key].tag)) {
+                n.children[key] = new GraphNode(n.children[key], n, n.graph);
+                this.checkNodesHaveChildMapped(n, n.children[key]);
+              }
+            } else {
+              if (typeof n.children[key] === "undefined" || n.children[key] == true) {
+                n.children[key] = n.graph.get(key);
+                if (!n.children[key])
+                  n.children[key] = n.nodes.get(key);
+              } else if (typeof n.children[key] === "string") {
+                let k = n.children[key];
+                n.children[key] = n.graph.get(k);
+                if (!n.children[key])
+                  n.children[key] = n.nodes.get(key);
+              }
+              if (n.children[key] instanceof GraphNode) {
+                if (n.graph) {
+                  let props = n.children[key].getProps();
+                  delete props.parent;
+                  delete props.graph;
+                  if (n.source instanceof Graph) {
+                    n.children[key] = new GraphNode(props, n, n.source);
+                  } else {
+                    n.children[key] = new GraphNode(props, n, n.graph);
+                  }
+                }
+                n.nodes.set(n.children[key].tag, n.children[key]);
+                this.checkNodesHaveChildMapped(n, n.children[key]);
+                if (!(n.children[key].tag in n))
+                  n[n.children[key].tag] = n.children[key];
+              }
+            }
+          }
+        }
+      }
+      return n.children;
+    };
+    this.stopLooping = (n = this) => {
+      n.isLooping = false;
+    };
+    this.stopAnimating = (n = this) => {
+      n.isAnimating = false;
+    };
+    this.stopNode = (n = this) => {
+      n.stopAnimating(n);
+      n.stopLooping(n);
+    };
+    this.subscribeNode = (n) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n.tag)
+        this.nodes.set(n.tag, n);
+      if (n)
+        return this.state.subscribeTrigger(this.tag, (res) => {
+          if (Array.isArray(res))
+            n.run(...res);
+          else
+            n.run(res);
+        });
+    };
+    this.print = (n = this, printChildren = true, nodesPrinted = []) => {
+      let dummyNode = new GraphNode();
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode) {
+        nodesPrinted.push(n.tag);
+        let jsonToPrint = {
+          tag: n.tag,
+          operator: n.operator.toString()
+        };
+        if (n.parent)
+          jsonToPrint.parent = n.parent.tag;
+        if (typeof n.children === "object") {
+          for (const key in n.children) {
+            if (typeof n.children[key] === "string")
+              return n.children[key];
+            if (nodesPrinted.includes(n.children[key].tag))
+              return n.children[key].tag;
+            else if (!printChildren) {
+              return n.children[key].tag;
+            } else
+              return n.children[key].print(n.children[key], printChildren, nodesPrinted);
+          }
+        }
+        for (const prop in n) {
+          if (prop === "parent" || prop === "children")
+            continue;
+          if (typeof dummyNode[prop] === "undefined") {
+            if (typeof n[prop] === "function") {
+              jsonToPrint[prop] = n[prop].toString();
+            } else if (typeof n[prop] === "object") {
+              jsonToPrint[prop] = JSON.stringifyWithCircularRefs(n[prop]);
+            } else {
+              jsonToPrint[prop] = n[prop];
+            }
+          }
+        }
+        return JSON.stringify(jsonToPrint);
+      }
+    };
+    this.reconstruct = (json2) => {
+      let parsed = reconstructObject(json2);
+      if (parsed)
+        return this.add(parsed);
+    };
+    this.setState = this.state.setState;
+    this.DEBUGNODES = (debugging = true) => {
+      this.DEBUGNODE = debugging;
+      this.nodes.forEach((n) => {
+        if (debugging)
+          n.DEBUGNODE = true;
+        else
+          n.DEBUGNODE = false;
+      });
+    };
+    if (typeof properties === "function") {
+      properties = { operator: properties };
+    }
+    if (typeof properties === "object") {
+      if (properties instanceof GraphNode && properties._initial)
+        Object.assign(properties, properties._initial);
+      if (properties instanceof Graph) {
+        let source = properties;
+        properties = {
+          source,
+          operator: (input) => {
+            if (typeof input === "object") {
+              let result = {};
+              for (const key in input) {
+                if (typeof source[key] === "function") {
+                  if (Array.isArray(input[key]))
+                    result[key] = source[key](...input[key]);
+                  else
+                    result[key] = source[key](input[key]);
+                } else {
+                  source[key] = input[key];
+                  result[key] = source[key];
+                }
+              }
+              return result;
+            }
+            return source;
+          }
+        };
+        if (source.operator)
+          properties.operator = source.operator;
+        if (source.children)
+          properties.children = source.children;
+        if (source.forward)
+          properties.forward = source.forward;
+        if (source.backward)
+          properties.backward = source.backward;
+        if (source.repeat)
+          properties.repeat = source.repeat;
+        if (source.recursive)
+          properties.recursive = source.recursive;
+        if (source.loop)
+          properties.loop = source.loop;
+        if (source.animate)
+          properties.animate = source.animate;
+        if (source.looper)
+          properties.looper = source.looper;
+        if (source.animation)
+          properties.animation = source.animation;
+        if (source.delay)
+          properties.delay = source.delay;
+        if (source.tag)
+          properties.tag = source.tag;
+        if (source.oncreate)
+          properties.oncreate = source.oncreate;
+        if (source.node) {
+          if (source.node._initial)
+            Object.assign(properties, source.node._initial);
+        }
+        if (source._initial)
+          Object.assign(properties, source._initial);
+        this.nodes = source.nodes;
+        source.node = this;
+        if (graph) {
+          source.nodes.forEach((n) => {
+            if (!graph.nodes.get(n.tag)) {
+              graph.nodes.set(n.tag, n);
+              graph.nNodes++;
+            }
+          });
+        }
+      }
+      if (properties.tag && (graph || parentNode)) {
+        let hasnode;
+        if (graph?.nodes) {
+          hasnode = graph.nodes.get(properties.tag);
+        }
+        if (!hasnode && parentNode?.nodes) {
+          hasnode = parentNode.nodes.get(properties.tag);
+        }
+        if (hasnode) {
+          for (let k in hasnode)
+            this[k] = hasnode[k];
+          if (!this.source)
+            this.source = hasnode;
+          let props = hasnode.getProps();
+          delete props.graph;
+          delete props.parent;
+          for (let k in props)
+            properties[k] = props[k];
+        }
+      }
+      if (properties?.operator) {
+        properties.operator = this.setOperator(properties.operator);
+      }
+      if (!properties.tag && graph) {
+        properties.tag = `node${graph.nNodes}`;
+      } else if (!properties.tag) {
+        properties.tag = `node${Math.floor(Math.random() * 1e10)}`;
+      }
+      let keys = Object.getOwnPropertyNames(this);
+      for (const key in properties) {
+        if (!keys.includes(key))
+          this._initial[key] = properties[key];
+      }
+      if (properties.children)
+        this._initial.children = Object.assign({}, properties.children);
+      for (let k in properties)
+        this[k] = properties[k];
+      if (!this.tag) {
+        if (graph) {
+          this.tag = `node${graph.nNodes}`;
+        } else {
+          this.tag = `node${Math.floor(Math.random() * 1e10)}`;
+        }
+      }
+      if (graph) {
+        this.graph = graph;
+        if (graph.nodes.get(this.tag)) {
+          this.tag = `${this.tag}${graph.nNodes + 1}`;
+        }
+        graph.nodes.set(this.tag, this);
+        graph.nNodes++;
+      }
+      if (parentNode) {
+        this.parent = parentNode;
+        if (parentNode instanceof GraphNode || parentNode instanceof Graph)
+          parentNode.nodes.set(this.tag, this);
+      }
+      if (typeof properties.tree === "object") {
+        for (const key in properties.tree) {
+          if (typeof properties.tree[key] === "object") {
+            if ((!properties.tree[key]).tag) {
+              properties.tree[key].tag = key;
+            }
+          }
+          let node = new GraphNode(properties.tree[key], this, graph);
+          this.nodes.set(node.tag, node);
+        }
+      }
+      if (this.children)
+        this.convertChildrenToNodes(this);
+      if (this.parent instanceof GraphNode || this.parent instanceof Graph)
+        this.checkNodesHaveChildMapped(this.parent, this);
+      if (typeof this.oncreate === "function")
+        this.oncreate(this);
+      if (!this.firstRun)
+        this.firstRun = true;
+    } else
+      return properties;
+  }
+};
+var Graph = class {
+  constructor(tree, tag, props) {
+    this.nNodes = 0;
+    this.nodes = /* @__PURE__ */ new Map();
+    this.state = state;
+    this.tree = {};
+    this.add = (n = {}) => {
+      let props2 = n;
+      if (!(n instanceof GraphNode))
+        n = new GraphNode(props2, this, this);
+      else {
+        this.nNodes = this.nodes.size;
+        if (n.tag) {
+          this.tree[n.tag] = props2;
+          this.nodes.set(n.tag, n);
+        }
+      }
+      return n;
+    };
+    this.setTree = (tree2 = this.tree) => {
+      if (!tree2)
+        return;
+      for (const node in tree2) {
+        const n = this.nodes.get(node);
+        if (!n) {
+          if (typeof tree2[node] === "function") {
+            this.add({ tag: node, operator: tree2[node] });
+          } else if (typeof tree2[node] === "object" && !Array.isArray(tree2[node])) {
+            if (!tree2[node].tag)
+              tree2[node].tag = node;
+            let newNode = this.add(tree2[node]);
+            if (tree2[node].aliases) {
+              tree2[node].aliases.forEach((a) => {
+                this.nodes.set(a, newNode);
+              });
+            }
+          } else {
+            this.add({ tag: node, operator: (...args) => {
+              return tree2[node];
+            } });
+          }
+        } else {
+          if (typeof tree2[node] === "function") {
+            n.setOperator(tree2[node]);
+          } else if (typeof tree2[node] === "object") {
+            if (tree2[node] instanceof GraphNode) {
+              this.add(tree2[node]);
+            } else if (tree2[node] instanceof Graph) {
+              let source = tree2[node];
+              let properties = {};
+              if (source.operator)
+                properties.operator = source.operator;
+              if (source.children)
+                properties.children = source.children;
+              if (source.forward)
+                properties.forward = source.forward;
+              if (source.backward)
+                properties.backward = source.backward;
+              if (source.repeat)
+                properties.repeat = source.repeat;
+              if (source.recursive)
+                properties.recursive = source.recursive;
+              if (source.loop)
+                properties.loop = source.loop;
+              if (source.animate)
+                properties.animate = source.animate;
+              if (source.looper)
+                properties.looper = source.looper;
+              if (source.animation)
+                properties.animation = source.animation;
+              if (source.delay)
+                properties.delay = source.delay;
+              if (source.tag)
+                properties.tag = source.tag;
+              if (source.oncreate)
+                properties.oncreate = source.oncreate;
+              if (source.node?._initial)
+                Object.assign(properties, source.node._initial);
+              properties.nodes = source.nodes;
+              properties.source = source;
+              n.setProps(properties);
+            } else {
+              n.setProps(tree2[node]);
+            }
+          }
+        }
+      }
+      this.nodes.forEach((node) => {
+        if (typeof node.children === "object") {
+          for (const key in node.children) {
+            if (typeof node.children[key] === "string") {
+              if (this.nodes.get(node.children[key])) {
+                node.children[key] = this.nodes.get(node.children[key]);
+              }
+            } else if (node.children[key] === true || typeof node.children[key] === "undefined") {
+              if (this.nodes.get(key)) {
+                node.children[key] = this.nodes.get(key);
+              }
+            }
+            if (node.children[key] instanceof GraphNode) {
+              node.checkNodesHaveChildMapped(node, node.children[key]);
+            }
+          }
+        }
+        if (typeof node.parent === "string") {
+          if (this.nodes.get(node.parent)) {
+            node.parent = this.nodes.get(node.parent);
+            node.nodes.set(node.parent.tag, node.parent);
+          }
+        }
+      });
+    };
+    this.get = (tag2) => {
+      return this.nodes.get(tag2);
+    };
+    this.set = (n) => {
+      return this.nodes.set(n.tag, n);
+    };
+    this.run = (n, ...args) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode)
+        return n.run(...args);
+      else
+        return void 0;
+    };
+    this.runAsync = (n, ...args) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode)
+        return new Promise((res, rej) => {
+          res(n.run(...args));
+        });
+      else
+        return new Promise((res, rej) => {
+          res(void 0);
+        });
+    };
+    this.removeTree = (n, checked) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode) {
+        if (!checked)
+          checked = {};
+        const recursivelyRemove = (node) => {
+          if (node.children && !checked[node.tag]) {
+            checked[node.tag] = true;
+            if (Array.isArray(node.children)) {
+              node.children.forEach((c) => {
+                if (c.stopNode)
+                  c.stopNode();
+                if (c.tag) {
+                  if (this.nodes.get(c.tag))
+                    this.nodes.delete(c.tag);
+                }
+                this.nodes.forEach((n2) => {
+                  if (n2.nodes.get(c.tag))
+                    n2.nodes.delete(c.tag);
+                });
+                recursivelyRemove(c);
+              });
+            } else if (typeof node.children === "object") {
+              if (node.stopNode)
+                node.stopNode();
+              if (node.tag) {
+                if (this.nodes.get(node.tag))
+                  this.nodes.delete(node.tag);
+              }
+              this.nodes.forEach((n2) => {
+                if (n2.nodes.get(node.tag))
+                  n2.nodes.delete(node.tag);
+              });
+              recursivelyRemove(node);
+            }
+          }
+        };
+        if (n.stopNode)
+          n.stopNode();
+        if (n.tag) {
+          this.nodes.delete(n.tag);
+          this.nodes.forEach((n2) => {
+            if (n2.nodes.get(n2.tag))
+              n2.nodes.delete(n2.tag);
+          });
+          this.nNodes = this.nodes.size;
+          recursivelyRemove(n);
+        }
+        if (n.ondelete)
+          n.ondelete(n);
+      }
+      return n;
+    };
+    this.remove = (n) => {
+      if (typeof n === "string")
+        n = this.nodes.get(n);
+      if (n instanceof GraphNode) {
+        n.stopNode();
+        if (n?.tag) {
+          if (this.nodes.get(n.tag)) {
+            this.nodes.delete(n.tag);
+            this.nodes.forEach((n2) => {
+              if (n2.nodes.get(n2.tag))
+                n2.nodes.delete(n2.tag);
+            });
+          }
+        }
+        if (n.ondelete)
+          n.ondelete(n);
+      }
+      return n;
+    };
+    this.append = (n, parentNode) => {
+      parentNode.addChildren(n);
+    };
+    this.callParent = async (n, ...args) => {
+      if (n?.parent) {
+        return await n.callParent(...args);
+      }
+    };
+    this.callChildren = async (n, ...args) => {
+      if (n?.children) {
+        return await n.callChildren(...args);
+      }
+    };
+    this.subscribe = (n, callback) => {
+      if (!callback)
+        return;
+      if (n instanceof GraphNode && typeof callback === "function") {
+        return n.subscribe(callback);
+      } else if (callback instanceof GraphNode || typeof callback === "string")
+        return this.subscribeNode(n, callback);
+      else if (typeof n == "string") {
+        return this.state.subscribeTrigger(n, callback);
+      }
+    };
+    this.unsubscribe = (tag2, sub) => {
+      this.state.unsubscribeTrigger(tag2, sub);
+    };
+    this.subscribeNode = (inputNode, outputNode) => {
+      let tag2;
+      if (inputNode?.tag)
+        tag2 = inputNode.tag;
+      else if (typeof inputNode === "string")
+        tag2 = inputNode;
+      if (typeof outputNode === "string")
+        outputNode = this.nodes.get(outputNode);
+      if (inputNode && outputNode) {
+        let sub = this.state.subscribeTrigger(tag2, (res) => {
+          if (Array.isArray(res))
+            outputNode.run(...res);
+          else
+            outputNode.run(res);
+        });
+        return sub;
+      }
+    };
+    this.stopNode = (n) => {
+      if (typeof n === "string") {
+        n = this.nodes.get(n);
+      }
+      if (n instanceof GraphNode) {
+        n.stopNode();
+      }
+    };
+    this.print = (n = void 0, printChildren = true) => {
+      if (n instanceof GraphNode)
+        return n.print(n, printChildren);
+      else {
+        let printed = `{`;
+        this.nodes.forEach((n2) => {
+          printed += `
+"${n2.tag}:${n2.print(n2, printChildren)}"`;
+        });
+        return printed;
+      }
+    };
+    this.reconstruct = (json2) => {
+      let parsed = reconstructObject(json2);
+      if (parsed)
+        return this.add(parsed);
+    };
+    this.create = (operator, parentNode, props2) => {
+      return createNode(operator, parentNode, props2, this);
+    };
+    this.setState = this.state.setState;
+    this.DEBUGNODES = (debugging = true) => {
+      this.nodes.forEach((n) => {
+        if (debugging)
+          n.DEBUGNODE = true;
+        else
+          n.DEBUGNODE = false;
+      });
+    };
+    this.tag = tag ? tag : `graph${Math.floor(Math.random() * 1e11)}`;
+    if (props) {
+      for (let k in props)
+        this[k] = props[k];
+      this._initial = props;
+    }
+    if (tree || Object.keys(this.tree).length > 0)
+      this.setTree(tree);
+  }
+};
+function reconstructObject(json2 = "{}") {
+  try {
+    let parsed = typeof json2 === "string" ? JSON.parse(json2) : json2;
+    const parseObj = (obj) => {
+      for (const prop in obj) {
+        if (typeof obj[prop] === "string") {
+          let funcParsed = parseFunctionFromText(obj[prop]);
+          if (typeof funcParsed === "function") {
+            obj[prop] = funcParsed;
+          }
+        } else if (typeof obj[prop] === "object") {
+          parseObj(obj[prop]);
+        }
+      }
+      return obj;
+    };
+    return parseObj(parsed);
+  } catch (err) {
+    console.error(err);
+    return void 0;
+  }
+}
+var stringifyWithCircularRefs = function() {
+  const refs = /* @__PURE__ */ new Map();
+  const parents = [];
+  const path2 = ["this"];
+  function clear() {
+    refs.clear();
+    parents.length = 0;
+    path2.length = 1;
+  }
+  function updateParents(key, value) {
+    var idx = parents.length - 1;
+    var prev = parents[idx];
+    if (typeof prev === "object") {
+      if (prev[key] === value || idx === 0) {
+        path2.push(key);
+        parents.push(value.pushed);
+      } else {
+        while (idx-- >= 0) {
+          prev = parents[idx];
+          if (typeof prev === "object") {
+            if (prev[key] === value) {
+              idx += 2;
+              parents.length = idx;
+              path2.length = idx;
+              --idx;
+              parents[idx] = value;
+              path2[idx] = key;
+              break;
+            }
+          }
+          idx--;
+        }
+      }
+    }
+  }
+  function checkCircular(key, value) {
+    if (value != null) {
+      if (typeof value === "object") {
+        if (key) {
+          updateParents(key, value);
+        }
+        let other = refs.get(value);
+        if (other) {
+          return "[Circular Reference]" + other;
+        } else {
+          refs.set(value, path2.join("."));
+        }
+      }
+    }
+    return value;
+  }
+  return function stringifyWithCircularRefs2(obj, space) {
+    try {
+      parents.push(obj);
+      return JSON.stringify(obj, checkCircular, space);
+    } finally {
+      clear();
+    }
+  };
+}();
+if (JSON.stringifyWithCircularRefs === void 0) {
+  JSON.stringifyWithCircularRefs = stringifyWithCircularRefs;
+}
+var stringifyFast = function() {
+  const refs = /* @__PURE__ */ new Map();
+  const parents = [];
+  const path2 = ["this"];
+  function clear() {
+    refs.clear();
+    parents.length = 0;
+    path2.length = 1;
+  }
+  function updateParents(key, value) {
+    var idx = parents.length - 1;
+    if (parents[idx]) {
+      var prev = parents[idx];
+      if (typeof prev === "object") {
+        if (prev[key] === value || idx === 0) {
+          path2.push(key);
+          parents.push(value.pushed);
+        } else {
+          while (idx-- >= 0) {
+            prev = parents[idx];
+            if (typeof prev === "object") {
+              if (prev[key] === value) {
+                idx += 2;
+                parents.length = idx;
+                path2.length = idx;
+                --idx;
+                parents[idx] = value;
+                path2[idx] = key;
+                break;
+              }
+            }
+            idx++;
+          }
+        }
+      }
+    }
+  }
+  function checkValues(key, value) {
+    let val;
+    if (value != null) {
+      if (typeof value === "object") {
+        let c = value.constructor.name;
+        if (key && c === "Object") {
+          updateParents(key, value);
+        }
+        let other = refs.get(value);
+        if (other) {
+          return "[Circular Reference]" + other;
+        } else {
+          refs.set(value, path2.join("."));
+        }
+        if (c === "Array") {
+          if (value.length > 20) {
+            val = value.slice(value.length - 20);
+          } else
+            val = value;
+        } else if (c.includes("Set")) {
+          val = Array.from(value);
+        } else if (c !== "Object" && c !== "Number" && c !== "String" && c !== "Boolean") {
+          val = "instanceof_" + c;
+        } else if (c === "Object") {
+          let obj = {};
+          for (const prop in value) {
+            if (value[prop] == null) {
+              obj[prop] = value[prop];
+            } else if (Array.isArray(value[prop])) {
+              if (value[prop].length > 20)
+                obj[prop] = value[prop].slice(value[prop].length - 20);
+              else
+                obj[prop] = value[prop];
+            } else if (value[prop].constructor.name === "Object") {
+              obj[prop] = {};
+              for (const p in value[prop]) {
+                if (Array.isArray(value[prop][p])) {
+                  if (value[prop][p].length > 20)
+                    obj[prop][p] = value[prop][p].slice(value[prop][p].length - 20);
+                  else
+                    obj[prop][p] = value[prop][p];
+                } else {
+                  if (value[prop][p] != null) {
+                    let con = value[prop][p].constructor.name;
+                    if (con.includes("Set")) {
+                      obj[prop][p] = Array.from(value[prop][p]);
+                    } else if (con !== "Number" && con !== "String" && con !== "Boolean") {
+                      obj[prop][p] = "instanceof_" + con;
+                    } else {
+                      obj[prop][p] = value[prop][p];
+                    }
+                  } else {
+                    obj[prop][p] = value[prop][p];
+                  }
+                }
+              }
+            } else {
+              let con = value[prop].constructor.name;
+              if (con.includes("Set")) {
+                obj[prop] = Array.from(value[prop]);
+              } else if (con !== "Number" && con !== "String" && con !== "Boolean") {
+                obj[prop] = "instanceof_" + con;
+              } else {
+                obj[prop] = value[prop];
+              }
+            }
+          }
+          val = obj;
+        } else {
+          val = value;
+        }
+      } else {
+        val = value;
+      }
+    }
+    return val;
+  }
+  return function stringifyFast2(obj, space) {
+    parents.push(obj);
+    let res = JSON.stringify(obj, checkValues, space);
+    clear();
+    return res;
+  };
+}();
+if (JSON.stringifyFast === void 0) {
+  JSON.stringifyFast = stringifyFast;
+}
+function createNode(operator, parentNode, props, graph) {
+  if (typeof props === "object") {
+    props.operator = operator;
+    return new GraphNode(props, parentNode, graph);
+  }
+  return new GraphNode({ operator }, parentNode, graph);
+}
+var DOMElement = class extends HTMLElement {
+  template = function(self2 = this, props) {
+    return `<div> Custom Fragment Props: ${JSON.stringify(props)} </div>`;
+  };
+  props = {};
+  useShadow = false;
+  styles;
+  oncreate;
+  onresize;
+  ondelete;
+  onchanged;
+  renderonchanged = false;
+  FRAGMENT;
+  STYLE;
+  attachedShadow = false;
+  obsAttributes = ["props", "options", "onchanged", "onresize", "ondelete", "oncreate", "template"];
+  get observedAttributes() {
+    return this.obsAttributes;
+  }
+  get obsAttributes() {
+    return this.obsAttributes;
+  }
+  set obsAttributes(att) {
+    if (typeof att === "string") {
+      this.obsAttributes.push(att);
+    } else if (Array.isArray(att))
+      this.obsAttributes = att;
+  }
+  static get tag() {
+    return this.name.toLowerCase() + "-";
+  }
+  static addElement(tag = this.tag, cls = this, extend = void 0) {
+    addCustomElement(cls, tag, extend);
+  }
+  attributeChangedCallback = (name2, old, val) => {
+    if (name2 === "onchanged") {
+      let onchanged = val;
+      if (typeof onchanged === "string")
+        onchanged = parseFunctionFromText2(onchanged);
+      if (typeof onchanged === "function") {
+        this.onchanged = onchanged;
+        this.state.data.props = this.props;
+        this.state.unsubscribeTrigger("props");
+        this.state.subscribeTrigger("props", this.onchanged);
+        let changed = new CustomEvent("changed", { detail: { props: this.props, self: this } });
+        this.state.subscribeTrigger("props", () => {
+          this.dispatchEvent(changed);
+        });
+      }
+    } else if (name2 === "onresize") {
+      let onresize = val;
+      if (typeof onresize === "string")
+        onresize = parseFunctionFromText2(onresize);
+      if (typeof onresize === "function") {
+        if (this.ONRESIZE) {
+          try {
+            window.removeEventListener("resize", this.ONRESIZE);
+          } catch (err) {
+          }
+        }
+        this.ONRESIZE = (ev) => {
+          this.onresize(this.props, this);
+        };
+        this.onresize = onresize;
+        window.addEventListener("resize", this.ONRESIZE);
+      }
+    } else if (name2 === "ondelete") {
+      let ondelete = val;
+      if (typeof ondelete === "string")
+        ondelete = parseFunctionFromText2(ondelete);
+      if (typeof ondelete === "function") {
+        this.ondelete = () => {
+          if (this.ONRESIZE)
+            window.removeEventListener("resize", this.ONRESIZE);
+          this.state.unsubscribeTrigger("props");
+          if (ondelete)
+            ondelete(this.props, this);
+        };
+      }
+    } else if (name2 === "oncreate") {
+      let oncreate2 = val;
+      if (typeof oncreate2 === "string")
+        oncreate2 = parseFunctionFromText2(oncreate2);
+      if (typeof oncreate2 === "function") {
+        this.oncreate = oncreate2;
+      }
+    } else if (name2 === "renderonchanged") {
+      let rpc = val;
+      if (typeof this.renderonchanged === "number")
+        this.unsubscribeTrigger(this.renderonchanged);
+      if (typeof rpc === "string")
+        rpc = parseFunctionFromText2(rpc);
+      if (typeof rpc === "function") {
+        this.renderonchanged = this.state.subscribeTrigger("props", (p) => {
+          this.render(p);
+          rpc(this, p);
+        });
+      } else if (rpc != false)
+        this.renderonchanged = this.state.subscribeTrigger("props", this.render);
+    } else if (name2 === "props") {
+      let newProps = val;
+      if (typeof newProps === "string")
+        newProps = JSON.parse(newProps);
+      Object.assign(this.props, newProps);
+      this.state.setState({ props: this.props });
+    } else if (name2 === "template") {
+      let template = val;
+      this.template = template;
+      this.render(this.props);
+      let created = new CustomEvent("created", { detail: { props: this.props } });
+      this.dispatchEvent(created);
+    } else {
+      let parsed = val;
+      if (name2.includes("eval_")) {
+        name2 = name2.split("_");
+        name2.shift();
+        name2 = name2.join();
+        parsed = parseFunctionFromText2(val);
+      } else if (typeof val === "string") {
+        try {
+          parsed = JSON.parse(val);
+        } catch (err) {
+          parsed = val;
+        }
+      }
+      this[name2] = parsed;
+      if (name2 !== "props" && this.props)
+        this.props[name2] = parsed;
+    }
+  };
+  connectedCallback() {
+    if (!this.props)
+      this.props = {};
+    let newProps = this.getAttribute("props");
+    if (typeof newProps === "string")
+      newProps = JSON.parse(newProps);
+    Object.assign(this.props, newProps);
+    this.state.setState({ props: this.props });
+    Array.from(this.attributes).forEach((att) => {
+      let name2 = att.name;
+      let parsed = att.value;
+      if (name2.includes("eval_") || name2.includes("()")) {
+        if (name2.includes("eval_"))
+          name2 = name2.split("_");
+        else if (name2.includes("()"))
+          name2 = name2.substring(0, name2.indexOf("("));
+        name2.shift();
+        name2 = name2.join();
+        parsed = parseFunctionFromText2(att.value);
+      } else if (typeof att.value === "string") {
+        try {
+          parsed = JSON.parse(att.value);
+        } catch (err) {
+          parsed = att.value;
+        }
+      }
+      if (!this[name2]) {
+        Object.defineProperties(this, att, {
+          value: parsed,
+          writable: true,
+          get() {
+            return this[name2];
+          },
+          set(val) {
+            this.setAttribute(name2, val);
+          }
+        });
+      }
+      this[name2] = parsed;
+      if (name2 !== "props")
+        this.props[name2] = parsed;
+      this.obsAttributes.push(name2);
+    });
+    let resizeevent = new CustomEvent("resized", { detail: { props: this.props, self: this } });
+    let changed = new CustomEvent("changed", { detail: { props: this.props, self: this } });
+    let deleted = new CustomEvent("deleted", { detail: { props: this.props, self: this } });
+    let created = new CustomEvent("created", { detail: { props: this.props, self: this } });
+    this.render(this.props);
+    this.dispatchEvent(created);
+    this.state.subscribeTrigger("props", () => {
+      this.dispatchEvent(changed);
+    });
+    if (typeof this.onresize === "function") {
+      if (this.ONRESIZE) {
+        try {
+          window.removeEventListener("resize", this.ONRESIZE);
+        } catch (err) {
+        }
+      }
+      this.ONRESIZE = (ev) => {
+        this.onresize(this, this.props);
+        this.dispatchEvent(resizeevent);
+      };
+      window.addEventListener("resize", this.ONRESIZE);
+    }
+    if (typeof this.ondelete === "function") {
+      let ondelete = this.ondelete;
+      this.ondelete = (props = this.props) => {
+        if (this.ONRESIZE)
+          window.removeEventListener("resize", this.ONRESIZE);
+        this.state.unsubscribeTrigger("props");
+        this.dispatchEvent(deleted);
+        ondelete(this, props);
+      };
+    }
+    if (typeof this.onchanged === "function") {
+      this.state.data.props = this.props;
+      this.state.subscribeTrigger("props", this.onchanged);
+    }
+    if (this.renderonchanged) {
+      let rpc = this.renderonchanged;
+      if (typeof this.renderonchanged === "number")
+        this.unsubscribeTrigger(this.renderonchanged);
+      if (typeof rpc === "string")
+        rpc = parseFunctionFromText2(rpc);
+      if (typeof rpc === "function") {
+        this.renderonchanged = this.state.subscribeTrigger("props", (p) => {
+          this.render(p);
+          rpc(this, p);
+        });
+      } else if (rpc !== false)
+        this.renderonchanged = this.state.subscribeTrigger("props", this.render);
+    }
+  }
+  constructor() {
+    super();
+  }
+  delete = () => {
+    this.remove();
+    if (typeof this.ondelete === "function")
+      this.ondelete(this.props);
+  };
+  render = (props = this.props) => {
+    if (typeof this.template === "function")
+      this.templateResult = this.template(this, props);
+    else
+      this.templateResult = this.template;
+    if (this.styles)
+      this.templateResult = `<style>${this.styles}</style>${this.templateResult}`;
+    const t = document.createElement("template");
+    if (typeof this.templateResult === "string")
+      t.innerHTML = this.templateResult;
+    else if (this.templateResult instanceof HTMLElement) {
+      if (this.templateResult.parentNode) {
+        this.templateResult.parentNode.removeChild(this.templateResult);
+      }
+      t.appendChild(this.templateResult);
+    }
+    const fragment = t.content;
+    if (this.FRAGMENT) {
+      if (this.useShadow) {
+        if (this.STYLE)
+          this.shadowRoot.removeChild(this.STYLE);
+        this.shadowRoot.removeChild(this.FRAGMENT);
+      } else
+        this.removeChild(this.FRAGMENT);
+    }
+    if (this.useShadow) {
+      if (!this.attachedShadow) {
+        this.attachShadow({ mode: "open" }).innerHTML = "<slot></slot>";
+        this.attachedShadow = true;
+      }
+      if (this.styles) {
+        let style = document.createElement("style");
+        style.textContent = this.styles;
+        this.shadowRoot.prepend(style);
+        this.STYLE = style;
+      }
+      this.shadowRoot.prepend(fragment);
+      this.FRAGMENT = this.shadowRoot.childNodes[0];
+    } else {
+      this.prepend(fragment);
+      this.FRAGMENT = this.childNodes[0];
+    }
+    let rendered = new CustomEvent("rendered", { detail: { props: this.props, self: this } });
+    this.dispatchEvent(rendered);
+    if (this.oncreate)
+      this.oncreate(this, props);
+  };
+  state = {
+    pushToState: {},
+    data: {},
+    triggers: {},
+    setState(updateObj) {
+      Object.assign(this.pushToState, updateObj);
+      if (Object.keys(this.triggers).length > 0) {
+        for (const prop of Object.getOwnPropertyNames(this.triggers)) {
+          if (this.pushToState[prop]) {
+            this.data[prop] = this.pushToState[prop];
+            delete this.pushToState[prop];
+            this.triggers[prop].forEach((obj) => {
+              obj.onchanged(this.data[prop]);
+            });
+          }
+        }
+      }
+      return this.pushToState;
+    },
+    subscribeTrigger(key, onchanged = (res) => {
+    }) {
+      if (key) {
+        if (!this.triggers[key]) {
+          this.triggers[key] = [];
+        }
+        let l = this.triggers[key].length;
+        this.triggers[key].push({ idx: l, onchanged });
+        return this.triggers[key].length - 1;
+      } else
+        return void 0;
+    },
+    unsubscribeTrigger(key, sub) {
+      let idx = void 0;
+      let triggers = this.triggers[key];
+      if (triggers) {
+        if (!sub)
+          delete this.triggers[key];
+        else {
+          let obj = triggers.find((o) => {
+            if (o.idx === sub) {
+              return true;
+            }
+          });
+          if (obj)
+            triggers.splice(idx, 1);
+          return true;
+        }
+      }
+    },
+    subscribeTriggerOnce(key = void 0, onchanged = (value) => {
+    }) {
+      let sub;
+      let changed = (value) => {
+        onchanged(value);
+        this.unsubscribeTrigger(key, sub);
+      };
+      sub = this.subscribeTrigger(key, changed);
+    }
+  };
+  get props() {
+    return this.props;
+  }
+  set props(newProps = {}) {
+    this.setAttribute("props", newProps);
+  }
+  get template() {
+    return this.template;
+  }
+  set template(template) {
+    this.setAttribute("template", template);
+  }
+  get render() {
+    return this.render;
+  }
+  get delete() {
+    return this.delete;
+  }
+  get state() {
+    return this.state;
+  }
+  get onchanged() {
+    return this.onchanged;
+  }
+  set onchanged(onchanged) {
+    this.setAttribute("onchanged", onchanged);
+  }
+  get styles() {
+    return this.styles;
+  }
+  set styles(templateStr) {
+    this.styles = templateStr;
+    if (this.querySelector("style")) {
+      this.querySelector("style").innerHTML = templateStr;
+    } else {
+      this.render();
+    }
+  }
+  get renderonchanged() {
+    return this.renderonchanged;
+  }
+  set renderonchanged(onchanged) {
+    this.setAttribute("renderonchanged", onchanged);
+  }
+  get onresize() {
+    return this.props;
+  }
+  set onresize(onresize) {
+    this.setAttribute("onresize", onresize);
+  }
+  get ondelete() {
+    return this.props;
+  }
+  set ondelete(ondelete) {
+    this.setAttribute("ondelete", ondelete);
+  }
+  get oncreate() {
+    return this.oncreate;
+  }
+  set oncreate(oncreate2) {
+    this.setAttribute("oncreated", oncreate2);
+  }
+};
+function addCustomElement(cls, tag, extend = null) {
+  try {
+    if (extend) {
+      if (tag)
+        window.customElements.define(tag, cls, { extends: extend });
+      else
+        window.customElements.define(cls.name.toLowerCase() + "-", cls, { extends: extend });
+    } else {
+      if (tag)
+        window.customElements.define(tag, cls);
+      else
+        window.customElements.define(cls.name.toLowerCase() + "-", cls);
+    }
+  } catch (err) {
+  }
+}
+function parseFunctionFromText2(method) {
+  let getFunctionBody = (methodString) => {
+    return methodString.replace(/^\W*(function[^{]+\{([\s\S]*)\}|[^=]+=>[^{]*\{([\s\S]*)\}|[^=]+=>(.+))/i, "$2$3$4");
+  };
+  let getFunctionHead = (methodString) => {
+    let startindex = methodString.indexOf(")");
+    return methodString.slice(0, methodString.indexOf("{", startindex) + 1);
+  };
+  let newFuncHead = getFunctionHead(method);
+  let newFuncBody = getFunctionBody(method);
+  let newFunc;
+  try {
+    if (newFuncHead.includes("function")) {
+      let varName = newFuncHead.split("(")[1].split(")")[0];
+      newFunc = new Function(varName, newFuncBody);
+    } else {
+      if (newFuncHead.substring(0, 6) === newFuncBody.substring(0, 6)) {
+        let varName = newFuncHead.split("(")[1].split(")")[0];
+        newFunc = new Function(varName, newFuncBody.substring(newFuncBody.indexOf("{") + 1, newFuncBody.length - 1));
+      } else {
+        try {
+          newFunc = (0, eval)(newFuncHead + newFuncBody + "}");
+        } catch (err) {
+          newFunc = (0, eval)(method);
+        }
+      }
+    }
+  } catch (err) {
+  }
+  return newFunc;
+}
+var Service = class extends Graph {
+  constructor(options2 = {}) {
+    super(void 0, options2.name ? options2.name : `service${Math.floor(Math.random() * 1e14)}`, options2.props);
+    this.routes = {};
+    this.loadDefaultRoutes = false;
+    this.keepState = true;
+    this.firstLoad = true;
+    this.init = (options3) => {
+      if (options3)
+        options3 = Object.assign({}, options3);
+      else
+        options3 = {};
+      if (options3.customRoutes)
+        Object.assign(options3.customRoutes, this.customRoutes);
+      else
+        options3.customRoutes = this.customRoutes;
+      if (options3.customChildren)
+        Object.assign(options3.customChildren, this.customChildren);
+      else
+        options3.customChildren = this.customChildren;
+      if (Array.isArray(options3.routes)) {
+        options3.routes.forEach((r) => {
+          this.load(r, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren);
+        });
+      } else if (options3.routes || (Object.keys(this.routes).length > 0 || this.loadDefaultRoutes) && this.firstLoad)
+        this.load(options3.routes, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren);
+    };
+    this.load = (routes, includeClassName = true, routeFormat = ".", customRoutes, customChildren) => {
+      if (!routes && !this.loadDefaultRoutes && (Object.keys(this.routes).length > 0 || this.firstLoad))
+        return;
+      if (this.firstLoad)
+        this.firstLoad = false;
+      if (customRoutes)
+        customRoutes = Object.assign(this.customRoutes, customRoutes);
+      else
+        customRoutes = this.customRoutes;
+      if (customChildren)
+        customChildren = Object.assign(this.customChildren, customChildren);
+      let service;
+      let allRoutes = {};
+      if (routes) {
+        if (!(routes instanceof Graph) && routes?.name) {
+          if (routes.module) {
+            let mod = routes;
+            routes = {};
+            Object.getOwnPropertyNames(routes.module).forEach((prop) => {
+              if (includeClassName)
+                routes[mod.name + routeFormat + prop] = routes.module[prop];
+              else
+                routes[prop] = routes.module[prop];
+            });
+          } else if (typeof routes === "function") {
+            service = new routes({ loadDefaultRoutes: this.loadDefaultRoutes });
+            service.load();
+            routes = service.routes;
+          }
+        } else if (routes instanceof Graph || routes.source instanceof Graph) {
+          service = routes;
+          routes = {};
+          let name2;
+          if (includeClassName) {
+            name2 = service.name;
+            if (!name2) {
+              name2 = service.tag;
+              service.name = name2;
+            }
+            if (!name2) {
+              name2 = `graph${Math.floor(Math.random() * 1e15)}`;
+              service.name = name2;
+              service.tag = name2;
+            }
+          }
+          if (service.customRoutes && !this.customRoutes)
+            this.customRoutes = service.customRoutes;
+          else if (service.customRoutes && this.customRoutes)
+            Object.assign(this.customRoutes, service.customRoutes);
+          if (service.customChildren && !this.customChildren)
+            this.customChildren = service.customChildren;
+          else if (service.customChildren && this.customChildren)
+            Object.assign(this.customChildren, service.customChildren);
+          service.nodes.forEach((node) => {
+            routes[node.tag] = node;
+            let checked = {};
+            let checkChildGraphNodes = (nd, par) => {
+              if (!checked[nd.tag] || par && includeClassName && !checked[par?.tag + routeFormat + nd.tag]) {
+                if (!par)
+                  checked[nd.tag] = true;
+                else
+                  checked[par.tag + routeFormat + nd.tag] = true;
+                if (nd instanceof Graph || nd.source instanceof Graph) {
+                  if (includeClassName) {
+                    let nm = nd.name;
+                    if (!nm) {
+                      nm = nd.tag;
+                      nd.name = nm;
+                    }
+                    if (!nm) {
+                      nm = `graph${Math.floor(Math.random() * 1e15)}`;
+                      nd.name = nm;
+                      nd.tag = nm;
+                    }
+                  }
+                  nd.nodes.forEach((n) => {
+                    if (includeClassName && !routes[nd.tag + routeFormat + n.tag])
+                      routes[nd.tag + routeFormat + n.tag] = n;
+                    else if (!routes[n.tag])
+                      routes[n.tag] = n;
+                    checkChildGraphNodes(n, nd);
+                  });
+                }
+              }
+            };
+            checkChildGraphNodes(node);
+          });
+        } else if (typeof routes === "object") {
+          let name2 = routes.constructor.name;
+          if (name2 === "Object") {
+            name2 = Object.prototype.toString.call(routes);
+            if (name2)
+              name2 = name2.split(" ")[1];
+            if (name2)
+              name2 = name2.split("]")[0];
+          }
+          if (name2 && name2 !== "Object") {
+            let module = routes;
+            routes = {};
+            Object.getOwnPropertyNames(module).forEach((route) => {
+              if (includeClassName)
+                routes[name2 + routeFormat + route] = module[route];
+              else
+                routes[route] = module[route];
+            });
+          }
+        }
+        if (service instanceof Graph && service.name && includeClassName) {
+          routes = Object.assign({}, routes);
+          for (const prop in routes) {
+            let route = routes[prop];
+            delete routes[prop];
+            routes[service.name + routeFormat + prop] = route;
+          }
+        }
+      }
+      if (this.loadDefaultRoutes) {
+        let rts = Object.assign({}, this.defaultRoutes);
+        if (routes) {
+          Object.assign(rts, this.routes);
+          routes = Object.assign(rts, routes);
+        } else
+          routes = Object.assign(rts, this.routes);
+        this.loadDefaultRoutes = false;
+      }
+      if (!routes)
+        routes = this.routes;
+      let incr = 0;
+      for (const tag in routes) {
+        incr++;
+        let childrenIter = (route, routeKey) => {
+          if (typeof route === "object") {
+            if (!route.tag)
+              route.tag = routeKey;
+            if (typeof route?.children === "object") {
+              nested:
+                for (const key in route.children) {
+                  incr++;
+                  if (typeof route.children[key] === "object") {
+                    let rt = route.children[key];
+                    if (rt.tag && allRoutes[rt.tag])
+                      continue;
+                    if (customChildren) {
+                      for (const k2 in customChildren) {
+                        rt = customChildren[k2](rt, key, route, routes, allRoutes);
+                        if (!rt)
+                          continue nested;
+                      }
+                    }
+                    if (rt.id && !rt.tag) {
+                      rt.tag = rt.id;
+                    }
+                    let k;
+                    if (rt.tag) {
+                      if (allRoutes[rt.tag]) {
+                        let randkey = `${rt.tag}${incr}`;
+                        allRoutes[randkey] = rt;
+                        rt.tag = randkey;
+                        childrenIter(allRoutes[randkey], key);
+                        k = randkey;
+                      } else {
+                        allRoutes[rt.tag] = rt;
+                        childrenIter(allRoutes[rt.tag], key);
+                        k = rt.tag;
+                      }
+                    } else {
+                      if (allRoutes[key]) {
+                        let randkey = `${key}${incr}`;
+                        allRoutes[randkey] = rt;
+                        rt.tag = randkey;
+                        childrenIter(allRoutes[randkey], key);
+                        k = randkey;
+                      } else {
+                        allRoutes[key] = rt;
+                        childrenIter(allRoutes[key], key);
+                        k = key;
+                      }
+                    }
+                    if (service?.name && includeClassName) {
+                      allRoutes[service.name + routeFormat + k] = rt;
+                      delete allRoutes[k];
+                    } else
+                      allRoutes[k] = rt;
+                  }
+                }
+            }
+          }
+        };
+        allRoutes[tag] = routes[tag];
+        childrenIter(routes[tag], tag);
+      }
+      top:
+        for (const route in allRoutes) {
+          if (typeof allRoutes[route] === "object") {
+            let r = allRoutes[route];
+            if (typeof r === "object") {
+              if (customRoutes) {
+                for (const key in customRoutes) {
+                  r = customRoutes[key](r, route, allRoutes);
+                  if (!r)
+                    continue top;
+                }
+              }
+              if (r.get) {
+                if (typeof r.get == "object") {
+                }
+              }
+              if (r.post) {
+              }
+              if (r.delete) {
+              }
+              if (r.put) {
+              }
+              if (r.head) {
+              }
+              if (r.patch) {
+              }
+              if (r.options) {
+              }
+              if (r.connect) {
+              }
+              if (r.trace) {
+              }
+              if (r.post && !r.operator) {
+                allRoutes[route].operator = r.post;
+              } else if (!r.operator && typeof r.get == "function") {
+                allRoutes[route].operator = r.get;
+              }
+            }
+          }
+        }
+      for (const route in routes) {
+        if (typeof routes[route] === "object") {
+          if (this.routes[route]) {
+            if (typeof this.routes[route] === "object")
+              Object.assign(this.routes[route], routes[route]);
+            else
+              this.routes[route] = routes[route];
+          } else
+            this.routes[route] = routes[route];
+        } else if (this.routes[route]) {
+          if (typeof this.routes[route] === "object")
+            Object.assign(this.routes[route], routes[route]);
+          else
+            this.routes[route] = routes[route];
+        } else
+          this.routes[route] = routes[route];
+      }
+      if (service) {
+        for (const key in this.routes) {
+          if (this.routes[key] instanceof GraphNode) {
+            this.nodes.set(key, this.routes[key]);
+            this.nNodes = this.nodes.size;
+          }
+        }
+      } else
+        this.setTree(this.routes);
+      for (const prop in this.routes) {
+        if (this.routes[prop]?.aliases) {
+          let aliases = this.routes[prop].aliases;
+          aliases.forEach((a) => {
+            if (service?.name && includeClassName)
+              routes[service.name + routeFormat + a] = this.routes[prop];
+            else
+              routes[a] = this.routes[prop];
+          });
+        }
+      }
+      return this.routes;
+    };
+    this.unload = (routes = this.routes) => {
+      if (!routes)
+        return;
+      let service;
+      if (!(routes instanceof Service) && typeof routes === "function") {
+        service = new Service();
+        routes = service.routes;
+      } else if (routes instanceof Service) {
+        routes = routes.routes;
+      }
+      for (const r in routes) {
+        delete this.routes[r];
+        if (this.nodes.get(r))
+          this.remove(r);
+      }
+      return this.routes;
+    };
+    this.handleMethod = (route, method, args) => {
+      let m = method.toLowerCase();
+      if (m === "get" && this.routes[route]?.get?.transform instanceof Function) {
+        if (Array.isArray(args))
+          return this.routes[route].get.transform(...args);
+        else
+          return this.routes[route].get.transform(args);
+      }
+      if (this.routes[route]?.[m]) {
+        if (!(this.routes[route][m] instanceof Function)) {
+          if (args)
+            this.routes[route][m] = args;
+          return this.routes[route][m];
+        } else
+          return this.routes[route][m](args);
+      } else
+        return this.handleServiceMessage({ route, args, method });
+    };
+    this.transmit = (...args) => {
+      if (typeof args[0] === "object") {
+        if (args[0].method) {
+          return this.handleMethod(args[0].route, args[0].method, args[0].args);
+        } else if (args[0].route) {
+          return this.handleServiceMessage(args[0]);
+        } else if (args[0].node) {
+          return this.handleGraphNodeCall(args[0].node, args[0].args);
+        } else if (this.keepState) {
+          if (args[0].route)
+            this.setState({ [args[0].route]: args[0].args });
+          if (args[0].node)
+            this.setState({ [args[0].node]: args[0].args });
+        }
+        return args;
+      } else
+        return args;
+    };
+    this.receive = (...args) => {
+      if (args[0]) {
+        if (typeof args[0] === "string") {
+          let substr = args[0].substring(0, 8);
+          if (substr.includes("{") || substr.includes("[")) {
+            if (substr.includes("\\"))
+              args[0] = args[0].replace(/\\/g, "");
+            if (args[0][0] === '"') {
+              args[0] = args[0].substring(1, args[0].length - 1);
+            }
+            ;
+            args[0] = JSON.parse(args[0]);
+          }
+        }
+      }
+      if (typeof args[0] === "object") {
+        if (args[0].method) {
+          return this.handleMethod(args[0].route, args[0].method, args[0].args);
+        } else if (args[0].route) {
+          return this.handleServiceMessage(args[0]);
+        } else if (args[0].node) {
+          return this.handleGraphNodeCall(args[0].node, args[0].args);
+        } else if (this.keepState) {
+          if (args[0].route)
+            this.setState({ [args[0].route]: args[0].args });
+          if (args[0].node)
+            this.setState({ [args[0].node]: args[0].args });
+        }
+        return args;
+      } else
+        return args;
+    };
+    this.pipe = (source, destination, endpoint, method, callback) => {
+      if (source instanceof GraphNode) {
+        if (callback)
+          return source.subscribe((res) => {
+            let mod = callback(res);
+            if (mod !== void 0)
+              this.transmit({ route: destination, args: mod, method });
+            else
+              this.transmit({ route: destination, args: res, method }, endpoint);
+          });
+        else
+          return this.subscribe(source, (res) => {
+            this.transmit({ route: destination, args: res, method }, endpoint);
+          });
+      } else if (typeof source === "string")
+        return this.subscribe(source, (res) => {
+          this.transmit({ route: destination, args: res, method }, endpoint);
+        });
+    };
+    this.pipeOnce = (source, destination, endpoint, method, callback) => {
+      if (source instanceof GraphNode) {
+        if (callback)
+          return source.state.subscribeTriggerOnce(source.tag, (res) => {
+            let mod = callback(res);
+            if (mod !== void 0)
+              this.transmit({ route: destination, args: mod, method });
+            else
+              this.transmit({ route: destination, args: res, method }, endpoint);
+          });
+        else
+          return this.state.subscribeTriggerOnce(source.tag, (res) => {
+            this.transmit({ route: destination, args: res, method }, endpoint);
+          });
+      } else if (typeof source === "string")
+        return this.state.subscribeTriggerOnce(source, (res) => {
+          this.transmit({ route: destination, args: res, method }, endpoint);
+        });
+    };
+    this.terminate = (...args) => {
+      this.nodes.forEach((n) => {
+        n.stopNode();
+      });
+    };
+    this.recursivelyAssign = (target, obj) => {
+      for (const key in obj) {
+        if (typeof obj[key] === "object") {
+          if (typeof target[key] === "object")
+            this.recursivelyAssign(target[key], obj[key]);
+          else
+            target[key] = this.recursivelyAssign({}, obj[key]);
+        } else
+          target[key] = obj[key];
+      }
+      return target;
+    };
+    this.defaultRoutes = {
+      "/": {
+        get: () => {
+          return this.print();
+        },
+        aliases: [""]
+      },
+      ping: () => {
+        console.log("ping");
+        return "pong";
+      },
+      echo: (...args) => {
+        this.transmit(...args);
+        return args;
+      },
+      assign: (source) => {
+        if (typeof source === "object") {
+          Object.assign(this, source);
+          return true;
+        }
+        return false;
+      },
+      recursivelyAssign: (source) => {
+        if (typeof source === "object") {
+          this.recursivelyAssign(this, source);
+          return true;
+        }
+        return false;
+      },
+      log: {
+        post: (...args) => {
+          console.log("Log: ", ...args);
+        },
+        aliases: ["info"]
+      },
+      error: (message) => {
+        let er = new Error(message);
+        console.error(message);
+        return er;
+      },
+      state: (key) => {
+        if (key) {
+          return this.state.data[key];
+        } else
+          return this.state.data;
+      },
+      printState: (key) => {
+        if (key) {
+          return stringifyWithCircularRefs(this.state.data[key]);
+        } else
+          return stringifyWithCircularRefs(this.state.data);
+      },
+      spliceTypedArray: this.spliceTypedArray,
+      transmit: this.transmit,
+      receive: this.receive,
+      load: this.load,
+      unload: this.unload,
+      pipe: this.pipe,
+      terminate: this.terminate,
+      run: this.run,
+      _run: this._run,
+      subscribe: this.subscribe,
+      subscribeNode: this.subscribeNode,
+      unsubscribe: this.unsubscribe,
+      stopNode: this.stopNode,
+      get: this.get,
+      add: this.add,
+      remove: this.remove,
+      setTree: this.setTree,
+      setState: this.setState,
+      print: this.print,
+      reconstruct: this.reconstruct,
+      handleMethod: this.handleMethod,
+      handleServiceMessage: this.handleServiceMessage,
+      handleGraphNodeCall: this.handleGraphNodeCall
+    };
+    if (options2.name)
+      this.name = options2.name;
+    else
+      options2.name = this.tag;
+    if ("loadDefaultRoutes" in options2) {
+      this.loadDefaultRoutes = options2.loadDefaultRoutes;
+      this.routes = Object.assign(this.defaultRoutes, this.routes);
+    }
+    if (options2 || Object.keys(this.routes).length > 0)
+      this.init(options2);
+  }
+  handleServiceMessage(message) {
+    let call2;
+    if (typeof message === "object") {
+      if (message.route)
+        call2 = message.route;
+      else if (message.node)
+        call2 = message.node;
+    }
+    if (call2) {
+      if (Array.isArray(message.args))
+        return this.run(call2, ...message.args);
+      else
+        return this.run(call2, message.args);
+    } else
+      return message;
+  }
+  handleGraphNodeCall(route, args) {
+    if (!route)
+      return args;
+    if (args?.args) {
+      this.handleServiceMessage(args);
+    } else if (Array.isArray(args))
+      return this.run(route, ...args);
+    else
+      return this.run(route, args);
+  }
+  isTypedArray(x) {
+    return ArrayBuffer.isView(x) && Object.prototype.toString.call(x) !== "[object DataView]";
+  }
+  spliceTypedArray(arr, start, end) {
+    let s = arr.subarray(0, start);
+    let e;
+    if (end) {
+      e = arr.subarray(end + 1);
+    }
+    let n;
+    if (s.length > 0 || e?.length > 0)
+      n = new arr.constructor(s.length + e.length);
+    if (s.length > 0)
+      n.set(s);
+    if (e && e.length > 0)
+      n.set(e, s.length);
+    return n;
+  }
+};
+var DOMService = class extends Service {
+  constructor(options2, parentNode, interpreters) {
+    super({ props: options2?.props, name: options2?.name ? options2.name : `dom${Math.floor(Math.random() * 1e15)}` });
+    this.loadDefaultRoutes = false;
+    this.keepState = true;
+    this.parentNode = document.body;
+    this.interpreters = {
+      md: (template, options3) => {
+        if (typeof markdownit === "undefined") {
+          document.head.insertAdjacentHTML("beforeend", `
+                    <script src='https://unpkg.com/markdown-it@latest/dist/markdown-it.min.js'><\/script>`);
+        }
+        let md = globalThis.markdownit();
+        let html = md.render(template);
+        options3.template = html;
+      },
+      jsx: (template, options3) => {
+        if (!options3.parentNode)
+          options3.parentNode = this.parentNode;
+        if (typeof options3.parentNode === "string")
+          options3.parentNode = document.getElementById(options3.parentNode);
+        if (typeof ReactDOM === "undefined") {
+          document.head.insertAdjacentHTML("beforeend", `
+                    <script src='https://unpkg.com/react@latest/umd/react.production.min.js'><\/script>
+                    <script src='https://unpkg.com/react-dom@latest/umd/react-dom.production.min.js'><\/script>`);
+        }
+        options3.template = "";
+        let onrender = options3.onrender;
+        options3.onrender = (self2, info) => {
+          const modal = ReactDOM.createPortal(template, options3.id);
+          onrender(self2, info);
+        };
+      }
+    };
+    this.customRoutes = {
+      "dom": (r, route, routes) => {
+        if (r.template) {
+          if (!r.tag)
+            r.tag = route;
+          this.addComponent(r, r.generateChildElementNodes);
+        } else if (r.context) {
+          if (!r.tag)
+            r.tag = route;
+          this.addCanvasComponent(r);
+        } else if (r.tagName || r.element) {
+          if (!r.tag)
+            r.tag = route;
+          this.addElement(r, r.generateChildElementNodes);
+        }
+        return r;
+      }
+    };
+    this.customChildren = {
+      "dom": (rt, routeKey, route, routes, checked) => {
+        if ((route.tag || route.id) && (route.template || route.context || route.tagName || route.element) && (rt.template || rt.context || rt.tagName || rt.element) && !rt.parentNode) {
+          if (route.tag)
+            rt.parentNode = route.tag;
+          if (route.id)
+            rt.parentNode = route.id;
+        }
+        return rt;
+      }
+    };
+    this.elements = {};
+    this.components = {};
+    this.templates = {};
+    this.resolveNode = (element, options3) => {
+      let node;
+      if (this.nodes.get(options3.id)?.element?.parentNode?.id === options3.parentNode || this.nodes.get(options3.id)?.parentNode === options3.parentNode) {
+        node = this.nodes.get(options3.id);
+        node.element = element;
+      } else {
+        node = new GraphNode(options3, options3.parentNode ? this.nodes.get(options3.parentNode) : this.parentNode, this);
+      }
+      const initialOptions = options3._initial ?? options3;
+      for (let key in initialOptions) {
+        if (typeof initialOptions[key] === "function")
+          initialOptions[key] = initialOptions[key].bind(node);
+        else if (key === "attributes") {
+          for (let key2 in initialOptions.attributes) {
+            if (typeof initialOptions.attributes[key2] === "function") {
+              initialOptions.attributes[key2] = initialOptions.attributes[key2].bind(node);
+            }
+          }
+        }
+      }
+      return node;
+    };
+    this.addElement = (options3, generateChildElementNodes = false) => {
+      let elm = this.createElement(options3);
+      let oncreate2 = options3.onrender;
+      if (!options3.element)
+        options3.element = elm;
+      if (!options3.operator)
+        options3.operator = function(props) {
+          if (typeof props === "object")
+            for (const key in props) {
+              if (this.element) {
+                if (typeof this.element[key] === "function" && typeof props[key] !== "function") {
+                  if (Array.isArray(props[key]))
+                    this.element[key](...props[key]);
+                  else
+                    this.element[key](props[key]);
+                } else if (key === "style") {
+                  Object.assign(this.element[key], props[key]);
+                } else
+                  this.element[key] = props[key];
+              }
+            }
+          return props;
+        };
+      let node = this.resolveNode(elm, options3);
+      elm.node = node;
+      let divs = Array.from(elm.querySelectorAll("*"));
+      if (generateChildElementNodes) {
+        divs = divs.map((d, i) => this.addElement({ element: d }));
+      }
+      this.elements[options3.id] = { element: elm, node, parentNode: options3.parentNode, divs };
+      if (!node.ondelete)
+        node.ondelete = (node2) => {
+          elm.remove();
+          if (options3.onremove)
+            options3.onremove(elm, this.elements[options3.id]);
+        };
+      if (options3.onresize) {
+        let onresize = options3.onresize;
+        options3.onresize = (ev) => {
+          onresize(ev, elm, this.elements[options3.id]);
+        };
+        window.addEventListener("resize", options3.onresize);
+      }
+      this.resolveParentNode(elm, options3, oncreate2);
+      return this.elements[options3.id];
+    };
+    this.createElement = (options3) => {
+      let elm;
+      if (options3.element) {
+        if (typeof options3.element === "string") {
+          elm = document.querySelector(options3.element);
+          if (!elm)
+            elm = document.getElementById(options3.element);
+        } else
+          elm = options3.element;
+      } else if (options3.tagName)
+        elm = document.createElement(options3.tagName);
+      else if (options3.id && document.getElementById(options3.id))
+        elm = document.getElementById(options3.id);
+      if (!elm)
+        return void 0;
+      this.updateOptions(options3, elm);
+      return elm;
+    };
+    this.updateOptions = (options3, element) => {
+      if (!options3.id && options3.tag)
+        options3.id = options3.tag;
+      if (!options3.tag && options3.id)
+        options3.tag = options3.id;
+      if (!options3.id)
+        options3.id = `${options3.tagName ?? "element"}${Math.floor(Math.random() * 1e15)}`;
+      if (typeof options3.parentNode === "string" && document.getElementById(options3.parentNode))
+        options3.parentNode = document.getElementById(options3.parentNode);
+      if (!options3.parentNode) {
+        if (!this.parentNode)
+          this.parentNode = document.body;
+        options3.parentNode = this.parentNode;
+      }
+      element.id = options3.id;
+      if (options3.style)
+        Object.assign(element.style, options3.style);
+      if (options3.attributes) {
+        for (let key in options3.attributes) {
+          if (typeof options3.attributes[key] === "function")
+            element[key] = (...args) => options3.attributes[key](...args);
+          else
+            element[key] = options3.attributes[key];
+        }
+      }
+      return options3;
+    };
+    this.addComponent = (options3, generateChildElementNodes = true) => {
+      if (options3.onrender) {
+        let oncreate2 = options3.onrender;
+        options3.onrender = (self2) => {
+          oncreate2(self2, options3);
+        };
+      }
+      if (options3.onresize) {
+        let onresize = options3.onresize;
+        options3.onresize = (self2) => {
+          onresize(self2, options3);
+        };
+      }
+      if (options3.onremove) {
+        let ondelete = options3.onremove;
+        options3.onremove = (self2) => {
+          ondelete(self2, options3);
+        };
+      }
+      if (typeof options3.renderonchanged === "function") {
+        let renderonchanged = options3.renderonchanged;
+        options3.renderonchanged = (self2) => {
+          renderonchanged(self2, options3);
+        };
+      }
+      if (options3.interpreter && options3.interpreter !== "wc") {
+        this.interpreters[options3.interpreter](options3.template, options3);
+      }
+      class CustomElement extends DOMElement {
+        constructor() {
+          super(...arguments);
+          this.props = options3.props;
+          this.styles = options3.styles;
+          this.useShadow = options3.useShadow;
+          this.template = options3.template;
+          this.oncreate = options3.onrender;
+          this.onresize = options3.onresize;
+          this.ondelete = options3.onremove;
+          this.renderonchanged = options3.renderonchanged;
+        }
+      }
+      if (!options3.tagName)
+        options3.tagName = `custom-element${Math.random() * 1e15}`;
+      CustomElement.addElement(options3.tagName);
+      let elm = document.createElement(options3.tagName);
+      let completeOptions = this.updateOptions(options3, elm);
+      this.templates[completeOptions.id] = completeOptions;
+      let divs = Array.from(elm.querySelectorAll("*"));
+      if (generateChildElementNodes) {
+        divs = divs.map((d) => this.addElement({ element: d }));
+      }
+      if (!options3.element)
+        options3.element = elm;
+      if (!options3.operator)
+        options3.operator = function op(props) {
+          if (typeof props === "object")
+            for (const key in props) {
+              if (this.element) {
+                if (typeof this.element[key] === "function" && typeof props[key] !== "function") {
+                  if (Array.isArray(props[key]))
+                    this.element[key](...props[key]);
+                  else
+                    this.element[key](props[key]);
+                } else if (key === "style") {
+                  Object.assign(this.element[key], props[key]);
+                } else
+                  this.element[key] = props[key];
+              }
+            }
+          return props;
+        };
+      let node = this.resolveNode(elm, options3);
+      if (!node.ondelete)
+        node.ondelete = (node2) => {
+          elm.delete();
+        };
+      elm.node = node;
+      this.components[completeOptions.id] = {
+        element: elm,
+        class: CustomElement,
+        node,
+        divs,
+        ...completeOptions
+      };
+      this.resolveParentNode(elm, options3);
+      return this.components[completeOptions.id];
+    };
+    this.addCanvasComponent = (options3) => {
+      if (!options3.canvas) {
+        options3.template = `<canvas `;
+        if (options3.width)
+          options3.template += `width="${options3.width}"`;
+        if (options3.height)
+          options3.template += `height="${options3.height}"`;
+        options3.template += ` ></canvas>`;
+      } else
+        options3.template = options3.canvas;
+      if (options3.onrender) {
+        let oncreate2 = options3.onrender;
+        options3.onrender = (self2) => {
+          oncreate2(self2, options3);
+        };
+      }
+      if (options3.onresize) {
+        let onresize = options3.onresize;
+        options3.onresize = (self2) => {
+          onresize(self2, options3);
+        };
+      }
+      if (options3.ondelete) {
+        let ondelete = options3.onremove;
+        options3.onremove = (self2) => {
+          ondelete(self2, options3);
+        };
+      }
+      if (typeof options3.renderonchanged === "function") {
+        let renderonchanged = options3.renderonchanged;
+        options3.renderonchanged = (self2) => {
+          renderonchanged(self2, options3);
+        };
+      }
+      class CustomElement extends DOMElement {
+        constructor() {
+          super(...arguments);
+          this.props = options3.props;
+          this.styles = options3.styles;
+          this.template = options3.template;
+          this.oncreate = options3.onrender;
+          this.onresize = options3.onresize;
+          this.ondelete = options3.onremove;
+          this.renderonchanged = options3.renderonchanged;
+        }
+      }
+      if (!options3.tagName)
+        options3.tagName = `custom-element${Math.random() * 1e15}`;
+      CustomElement.addElement(options3.tagName);
+      let elm = document.createElement(options3.tagName);
+      const completeOptions = this.updateOptions(options3, elm);
+      let animation = () => {
+        if (this.components[completeOptions.id]?.animating) {
+          this.components[completeOptions.id].draw(this.components[completeOptions.id].element, this.components[completeOptions.id]);
+          requestAnimationFrame(animation);
+        }
+      };
+      this.templates[completeOptions.id] = completeOptions;
+      if (!options3.element)
+        options3.element = elm;
+      if (!options3.operator)
+        options3.operator = function op(props) {
+          if (typeof props === "object")
+            for (const key in props) {
+              if (this.element) {
+                if (typeof this.element[key] === "function" && typeof props[key] !== "function") {
+                  if (Array.isArray(props[key]))
+                    this.element[key](...props[key]);
+                  else
+                    this.element[key](props[key]);
+                } else if (key === "style") {
+                  Object.assign(this.element[key], props[key]);
+                } else
+                  this.element[key] = props[key];
+              }
+            }
+          return props;
+        };
+      let node = this.resolveNode(elm, options3);
+      elm.node = node;
+      if (!node.ondelete)
+        node.ondelete = (node2) => {
+          elm.delete();
+        };
+      let canvas = elm.querySelector("canvas");
+      if (completeOptions.style)
+        Object.assign(canvas.style, completeOptions.style);
+      let context;
+      if (typeof completeOptions.context === "object")
+        context = options3.context;
+      else if (typeof completeOptions.context === "string")
+        context = canvas.getContext(completeOptions.context);
+      this.components[completeOptions.id] = {
+        element: elm,
+        class: CustomElement,
+        template: completeOptions.template,
+        canvas,
+        node,
+        ...completeOptions
+      };
+      this.components[completeOptions.id].context = context;
+      elm.canvas = canvas;
+      elm.context = context;
+      node.canvas = canvas;
+      node.context = context;
+      this.resolveParentNode(elm, options3);
+      node.runAnimation(animation);
+      return this.components[completeOptions.id];
+    };
+    this.resolveParentNode = (elm, options3, oncreate2) => {
+      if (!elm.parentNode) {
+        setTimeout(() => {
+          if (typeof options3.parentNode === "string")
+            options3.parentNode = document.getElementById(options3.parentNode);
+          if (typeof options3.parentNode === "object") {
+            options3.parentNode.appendChild(elm);
+          }
+          if (oncreate2)
+            oncreate2(elm, this.elements[options3.id]);
+        }, 0.01);
+      }
+    };
+    this.terminate = (element) => {
+      if (typeof element === "object") {
+        if (element.animating)
+          element.animating = false;
+        if (element.element)
+          element = element.element;
+      } else if (typeof element === "string" && this.components[element]) {
+        if (this.components[element].node.isAnimating)
+          this.components[element].node.stopNode();
+        if (this.components[element].divs)
+          this.components[element].divs.forEach((d) => this.terminate(d));
+        let temp = this.components[element].element;
+        delete this.components[element];
+        element = temp;
+      } else if (typeof element === "string" && this.elements[element]) {
+        if (this.elements[element].divs)
+          this.elements[element].divs.forEach((d) => this.terminate(d));
+        let temp = this.elements[element].element;
+        if (this.elements[element].onresize)
+          window.removeEventListener("resize", this.elements[element].onresize);
+        if (this.elements[element].ondelete)
+          this.elements[element].ondelete(temp, this.elements[element]);
+        delete this.elements[element];
+        element = temp;
+      }
+      if (element) {
+        if (this.nodes.get(element.id)) {
+          this.removeTree(element.id);
+        }
+        if (element instanceof DOMElement)
+          element.delete();
+        else if (element?.parentNode) {
+          element.parentNode.removeChild(element);
+        }
+        return true;
+      }
+      return false;
+    };
+    this.defaultRoutes = {
+      addElement: this.addElement,
+      addComponent: this.addComponent,
+      addCanvasComponent: this.addCanvasComponent,
+      terminate: this.terminate
+    };
+    if (options2?.parentNode)
+      parentNode = options2.parentNode;
+    if (typeof parentNode === "string")
+      parentNode = document.getElementById(parentNode);
+    if (parentNode instanceof HTMLElement)
+      this.parentNode = parentNode;
+    if (interpreters) {
+      Object.assign(this.interpreters, interpreters);
+    }
+    this.init(options2);
+  }
+};
+var transform_default = (tag, node) => {
+  const args = node.arguments;
+  const instanceTree = {};
+  Array.from(args.entries()).forEach(([arg], i) => {
+    instanceTree[arg] = {
+      tag: arg,
+      operator: (input) => {
+        const o = args.get(arg);
+        o.state = input;
+        if (i === 0)
+          return node.run();
+        return input;
+      }
+    };
+  });
+  const originalOperator = node.operator;
+  node.operator = function(...argsArr) {
+    let updatedArgs = [];
+    let i = 0;
+    args.forEach((o, k) => {
+      const argO = args.get(k);
+      const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
+      let update3 = currentArg !== void 0 ? currentArg : o.state;
+      argO.state = update3;
+      if (!argO.spread)
+        update3 = [update3];
+      updatedArgs.push(...update3);
+      i++;
+    });
+    return originalOperator.call(this, ...updatedArgs);
+  };
+  const graph = new Graph(instanceTree, tag, node);
+  return graph;
+};
 var ARGUMENT_NAMES = /([^,]*)/g;
 function getFnParamInfo(fn) {
   var fstr = fn.toString();
@@ -8463,230 +10759,121 @@ function getFnParamInfo(fn) {
   return info;
 }
 var parse_default = getFnParamInfo;
-
-// src/core/node_modules/es-plugins/src/index.js
 var isNode = "process" in globalThis;
 var ESPlugin = class {
-  tag;
-  graph;
-  parent;
-  element;
-  parentNode;
-  children = {};
-  tagName;
-  style;
-  attributes;
-  #toRun = false;
-  #resolveReady;
-  #ready = new Promise((resolve3) => this.#resolveReady = resolve3);
+  #initial;
+  #instance;
+  #graphscript;
+  get initial() {
+    return this.#initial;
+  }
+  get instance() {
+    return this.#instance;
+  }
+  get graphscript() {
+    return this.#graphscript;
+  }
+  set graphscript(v) {
+    this.#graphscript = v;
+  }
   constructor(node, options2 = {}) {
-    let parentNode;
-    Object.defineProperty(this, "parentNode", {
-      get: () => parentNode,
-      set: (el) => {
-        parentNode = el;
-        if (el) {
-          if (this.element) {
-            parentNode.appendChild(this.element);
-            if (typeof this.onrender === "function")
-              this.onrender();
-          } else {
-          }
-        } else if (this.element)
-          this.element.remove();
-      },
-      enumerable: true
-    });
-    let element;
-    Object.defineProperty(this, "element", {
-      get: () => element,
-      set: (el) => {
-        element = el;
-        if (this.parentNode) {
-          this.parentNode.appendChild(el);
-          if (typeof this.onrender === "function")
-            this.onrender();
-        }
-      },
-      enumerable: true
-    });
-    this.tag = options2.tag ?? "graph";
-    Object.assign(this, node);
-    this.parent = options2.parent;
-    const getParentNode = () => options2.parentNode ?? this.parent?.parentNode;
-    this.parentNode = getParentNode();
-    if (this.graph) {
-      for (let tag in this.graph.nodes) {
-        const node2 = this.graph.nodes[tag];
+    this.#initial = node;
+    do {
+      this.#initial = this.initial.initial ?? this.initial;
+    } while (this.initial instanceof ESPlugin);
+    const isFunction = typeof this.initial === "function";
+    const hasDefault = "default" in this.initial;
+    let hasGraph = !!node.graph;
+    if (!hasDefault && !hasGraph) {
+      let newNode = { graph: { nodes: {} } };
+      for (let namedExport in node)
+        newNode.graph.nodes[namedExport] = { default: node[namedExport] };
+      this.#initial = newNode;
+      hasGraph = true;
+    }
+    if (hasDefault || isFunction)
+      this.graphscript = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
+    if (hasGraph) {
+      for (let tag in this.initial.graph.nodes) {
+        const node2 = this.initial.graph.nodes[tag];
         if (!(node2 instanceof ESPlugin)) {
           const clonedOptions = Object.assign({}, Object.assign(options2));
-          this.graph.nodes[tag] = new ESPlugin(node2, Object.assign(clonedOptions, {
-            tag,
-            parent: this
-          }));
+          this.initial.graph.nodes[tag] = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
           if (typeof options2.onPlugin === "function")
-            options2.onPlugin(this.graph.nodes[tag]);
+            options2.onPlugin(this.initial.graph.nodes[tag]);
         } else {
-          node2.tag = tag;
-          node2.parent = this;
+          console.error("Gotta compensate");
+          const got = this.graphscript.nodes.get(tag);
+          if (got)
+            node2.graphscript = got;
         }
       }
-    }
-    if ("default" in this) {
-      if (options2._arguments !== false) {
-        const args = parse_default(node.default) ?? /* @__PURE__ */ new Map();
-        if (args.size === 0)
-          args.set("default", {});
-        const input = args.keys().next().value;
-        if (this.arguments) {
-          for (let key in this.arguments) {
-            const o = args.get(key);
-            o.state = this.arguments[key];
-            if (input === key)
-              this.#toRun = true;
-          }
-        }
-        this.arguments = args;
-        this.graph = {
-          nodes: {},
-          ports: {
-            input,
-            output: input
-          }
-        };
-        Array.from(args.entries()).forEach(([arg], i) => {
-          const module = {
-            default: async (input2) => {
-              const o = args.get(arg);
-              o.state = input2;
-              if (i === 0) {
-                const res = await this.run();
-                return res;
-              } else
-                return input2;
-            }
-          };
-          const clonedOptions = Object.assign({}, Object.assign(options2));
-          this.graph.nodes[arg] = new ESPlugin(module, Object.assign(clonedOptions, {
-            tag: arg,
-            parent: this,
-            _arguments: false
-          }));
-          if (typeof options2.onPlugin === "function")
-            options2.onPlugin(this.graph.nodes[arg]);
-        });
-        const originalDefault = this.default.bind(this);
-        this.default = async (...argsArr) => {
-          let updatedArgs = [];
-          let i = 0;
-          args.forEach((o, k) => {
-            const argO = args.get(k);
-            const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
-            let update3 = currentArg !== void 0 ? currentArg : o.state;
-            argO.state = update3;
-            if (!argO.spread)
-              update3 = [update3];
-            updatedArgs.push(...update3);
-            i++;
-          });
-          const res = await originalDefault(...updatedArgs);
-          return res;
-        };
+      let tree = {};
+      for (let tag in this.initial.graph.nodes) {
+        const innerNode = this.#create(tag, this.initial.graph.nodes[tag]);
+        tree[tag] = innerNode.graphscript ?? innerNode;
       }
-    }
-    if (options2.activate !== false) {
-      if (typeof this.oncreate === "function")
-        this.oncreate();
-      if (this.loop) {
-        setInterval(() => {
-          this.run();
-        }, this.loop);
+      const edges = this.initial.graph.edges;
+      for (let output in edges) {
+        const outNode = tree[output];
+        if (!outNode.children)
+          outNode.children = {};
+        for (let input in edges[output])
+          outNode.children[input] = true;
       }
-      if (isNode) {
-      } else {
-        if (this.tagName)
-          this.element = document.createElement(this.tagName);
-        this.parentNode = getParentNode() ?? document.body;
-        if (this.element) {
-          if (this.attributes) {
-            for (let attribute in this.attributes) {
-              const value = this.attributes[attribute];
-              if (typeof value === "function") {
-                const boundValue = value.bind(this);
-                this.element[attribute] = (ev) => boundValue(ev);
-              } else
-                this.element[attribute] = value;
-            }
-          }
-        }
-      }
+      const props = this.#instance ?? node;
+      this.graphscript = isNode ? new Graph(tree, options2.tag, props) : new DOMService({ routes: tree, name: options2.tag, props }, options2.parentNode);
     }
+    Object.defineProperty(this, "tag", {
+      get: () => this.graphscript?.tag,
+      enumerable: true
+    });
   }
-  init = async () => {
-    const edgesTarget = this.parent;
-    const runIfMatch = async (target, tag) => {
-      const newTag = target.tag ? tag ? `${target.tag}.${tag}` : target.tag : tag;
-      if (target?.graph?.edges) {
-        const splitTags = tag.split(".");
-        let isOutput = target;
-        for (let i in splitTags.slice(0, -1)) {
-          const str = splitTags[i];
-          const innerPorts = target.graph.nodes[str]?.graph?.ports;
-          const plusOne = Number.parseInt(i) + 1;
-          if (innerPorts?.output === splitTags[plusOne])
-            isOutput = target.graph.nodes[str];
-          else {
-            isOutput = void 0;
-            break;
-          }
-        }
-        const found = target.graph.edges[tag] ?? target.graph.edges[newTag] ?? (isOutput ? target.graph.edges[splitTags[0]] : void 0);
-        for (let tag2 in found) {
-          let toRun = target;
-          tag2.split(".").forEach((str) => toRun = toRun.graph.nodes[str]);
-          this.children[tag2] = toRun;
+  #create = (tag, info) => {
+    if (typeof info === "function")
+      info = { default: info };
+    if (!("default" in info) || info instanceof Graph)
+      return info;
+    else {
+      let activeInfo;
+      if (info instanceof ESPlugin) {
+        activeInfo = info.instance;
+        info = info.initial;
+      }
+      const args = parse_default(info.default) ?? /* @__PURE__ */ new Map();
+      if (args.size === 0)
+        args.set("default", {});
+      const input = args.keys().next().value;
+      if (info.arguments) {
+        for (let key in info.arguments) {
+          const o = args.get(key);
+          o.state = info.arguments[key];
+          if (input === key)
+            this.run();
         }
       }
-      if (target.parent)
-        await runIfMatch(target.parent, newTag);
-    };
-    if (edgesTarget)
-      await runIfMatch(edgesTarget, this.tag);
-    this.#resolveReady(true);
-    if (this.#toRun)
-      this.run();
-  };
-  run = async (...args) => {
-    let results = {
-      default: {},
-      children: {}
-    };
-    await this.#ready;
-    if (!("default" in this) && this.graph) {
-      const input = this.graph.ports?.input;
-      if (input) {
-        const output = this.graph.ports?.output;
-        const outputFallback = this.graph.nodes[output].graph?.ports ? `${output}.${this.graph.nodes[output].graph.ports.input}` : output;
-        const node = this.graph.nodes[input];
-        const res = await node.run(...args);
-        results.children = Object.assign(results.children, res.children);
-        results.default = (res.children[output] ?? res.children[outputFallback]).default;
+      const gsIn = {
+        arguments: args,
+        operator: info.default,
+        tag
+      };
+      var props = Object.getOwnPropertyNames(info);
+      const onActive = ["arguments", "default", "tag", "operator"];
+      props.forEach((key) => {
+        if (!onActive.includes(key))
+          gsIn[key] = info[key];
+      });
+      if (activeInfo) {
+        for (let key in activeInfo) {
+          if (!onActive.includes(key))
+            gsIn[key] = activeInfo[key];
+        }
       }
-    } else {
-      results.default = await this.default(...args);
+      this.#instance = gsIn;
+      return transform_default(tag, gsIn);
     }
-    if (results.default !== void 0) {
-      for (let tag in this.children) {
-        const args2 = !Array.isArray(results.default) ? [results.default] : results.default;
-        const res = await this.children[tag].run(...args2);
-        results.children[tag] = "default" in res ? res.default : res;
-        for (let child in res.children)
-          results.children[child] = res.children[child];
-      }
-    }
-    this.#toRun = false;
-    return results;
   };
+  run = async (...args) => await this.graphscript.run(...args);
 };
 var src_default = ESPlugin;
 
@@ -8747,9 +10934,63 @@ var getWithErrorLog = async (...args) => {
     file: path2
   }, o));
 };
-var getSrc = async (target, info, options2, graph = {}) => {
+var loaded = {};
+async function loadPlugins(node, info, options2, id, debug = false) {
+  if (node.plugins) {
+    for (let nestedName in node.plugins) {
+      const nestedNode = node.src.graph?.nodes?.[nestedName];
+      if (node.plugins) {
+        for (let key in node.plugins[nestedName]) {
+          const newInfo = node.plugins[nestedName][key];
+          if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
+            const ogSrc = newInfo.src;
+            let newInfoForNode;
+            if (id)
+              newInfoForNode = loaded[id]?.[key];
+            if (!newInfoForNode) {
+              const optsCopy = Object.assign({}, options2);
+              if (key === "graph")
+                optsCopy._deleteSrc = false;
+              else
+                optsCopy._deleteSrc = true;
+              newInfoForNode = await getSrc({ [key]: newInfo }, info, optsCopy, {
+                nodes: newInfo
+              });
+              if (id) {
+                if (!loaded[id])
+                  loaded[id] = {};
+                loaded[id][key] = newInfoForNode;
+              }
+            }
+            if (nestedNode) {
+              const newVal = newInfoForNode[key];
+              if (newVal) {
+                let chosenVal = newVal.src ?? newVal;
+                if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
+                  chosenVal = chosenVal.default;
+                if (nestedNode)
+                  nestedNode[key] = chosenVal;
+              } else {
+                onError({ message: `Could not resolve ${ogSrc}` }, options2);
+              }
+            }
+          } else if (nestedNode)
+            nestedNode[key] = newInfo;
+        }
+      }
+      if (node.src?.graph && !nestedNode) {
+        onError({
+          message: `Plugin target '${nestedName}' does not exist`,
+          node: name
+        }, options2);
+      }
+    }
+  }
+}
+async function getSrc(target, info, options2, graph = {}, debug = false) {
   const nodes2 = graph.nodes;
   const edges = graph.edges;
+  const id = Symbol();
   let {
     relativeToResolved,
     mainPath,
@@ -8761,6 +11002,7 @@ var getSrc = async (target, info, options2, graph = {}) => {
   for (let name2 in target) {
     const node = target[name2];
     const isObj = node && typeof node === "object" && !Array.isArray(node);
+    await loadPlugins(node, info, options2, id, debug);
     if (isObj) {
       let ogSrc = node.src ?? "";
       if (isSrc(ogSrc) || nodes2 && edges && !ogSrc) {
@@ -8772,7 +11014,7 @@ var getSrc = async (target, info, options2, graph = {}) => {
           fullPath = ogSrc;
           _remote = ogSrc;
         } catch {
-          fullPath = relativeToResolved ? resolve2(ogSrc, mainPath) : resolve2(ogSrc);
+          fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
         }
         if (isImportMode) {
           node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
@@ -8780,10 +11022,10 @@ var getSrc = async (target, info, options2, graph = {}) => {
             if (!node.src) {
               const got = await getSrc([node], info, options2, { nodes: [node] });
               node.src = got[0].src ?? got[0];
-              passToNested = resolve2(ogSrc);
+              passToNested = resolve(ogSrc);
             }
           }
-          passToNested = resolve2(ogSrc, url, true);
+          passToNested = resolve(ogSrc, url, true);
           if (!node.src)
             remove(ogSrc, fullPath, name2, target);
         } else {
@@ -8826,9 +11068,9 @@ var getSrc = async (target, info, options2, graph = {}) => {
             const language = node.src.language;
             if (!language || js.includes(language)) {
               if (node.src.text) {
-                const esmImport = async (text2) => {
+                const esmImport = async (text) => {
                   try {
-                    let imported = await importFromText2(text2);
+                    let imported = await importFromText(text);
                     if (imported.default && Object.keys(imported).length === 1)
                       imported = imported.default;
                     return imported;
@@ -8876,8 +11118,9 @@ var getSrc = async (target, info, options2, graph = {}) => {
             }
           } else if (node[key] && typeof node[key] === "object" && !Array.isArray(node[key])) {
             const optsCopy = Object.assign({}, options2);
-            optsCopy._deleteSrc = true;
-            await getSrc(node[key], info, optsCopy, { nodes: node[key] });
+            optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
+            const includesPlayer = Object.keys(node[key]).includes("player");
+            await getSrc(node[key], info, optsCopy, { nodes: node[key] }, includesPlayer);
           }
         }
       }
@@ -8897,43 +11140,9 @@ var getSrc = async (target, info, options2, graph = {}) => {
           }, options2);
         }
       }
-      if (node.src.graph) {
-        for (let nestedName in node.plugins) {
-          const nestedNode = node.src.graph.nodes[nestedName];
-          if (nestedNode) {
-            if (node.plugins) {
-              for (let key in node.plugins[nestedName]) {
-                const newInfo = node.plugins[nestedName][key];
-                if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
-                  const optsCopy = Object.assign({}, options2);
-                  optsCopy._deleteSrc = true;
-                  const ogSrc = newInfo.src;
-                  const newInfoForNode = await getSrc({ [key]: newInfo }, info, optsCopy, {
-                    nodes: newInfo
-                  });
-                  const newVal = newInfoForNode[key];
-                  if (newVal) {
-                    let chosenVal = newVal.src ?? newVal;
-                    if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
-                      chosenVal = chosenVal.default;
-                    nestedNode[key] = chosenVal;
-                  } else {
-                    onError({
-                      message: `Could not resolve ${ogSrc}`
-                    }, options2);
-                  }
-                } else
-                  nestedNode[key] = newInfo;
-              }
-            }
-          } else {
-            onError({
-              message: `Plugin target '${nestedName}' does not exist`,
-              node: name2
-            }, options2);
-          }
-        }
-      } else if (edges) {
+      if (node.src.graph)
+        await loadPlugins(node, info, options2, id, debug);
+      else if (edges) {
         if (!("default" in node.src)) {
           onError({
             message: "No default export.",
@@ -8945,7 +11154,7 @@ var getSrc = async (target, info, options2, graph = {}) => {
     }
   }
   return target;
-};
+}
 var load = async (urlOrObject, options2 = {}, urlArg = "") => {
   const clonedOptions = Object.assign({ errors: [], warnings: [], files: {} }, options2);
   let {
@@ -8968,7 +11177,7 @@ var load = async (urlOrObject, options2 = {}, urlArg = "") => {
     object = Object.assign({}, urlOrObject);
     delete clonedOptions.relativeTo;
     if (typeof internalLoadCall === "string")
-      relativeToResolved = resolve2(internalLoadCall, clonedOptions.relativeTo);
+      relativeToResolved = resolve(internalLoadCall, clonedOptions.relativeTo);
   }
   try {
     new URL(url);
@@ -8978,23 +11187,23 @@ var load = async (urlOrObject, options2 = {}, urlArg = "") => {
   }
   errors.push(...valid(urlOrObject, clonedOptions, "load"));
   let pkg;
-  const mainPath = await resolve2(url, relativeToResolved);
+  const mainPath = await resolve(url, relativeToResolved);
   if (url) {
     const main = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
-    const pkgUrl = resolve2(basePkgPath, mainPath, true);
+    const pkgUrl = resolve(basePkgPath, mainPath, true);
     pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
     if (pkg)
       object = Object.assign(pkg, main);
   } else {
     if (clonedOptions.filesystem) {
-      const pkgPath = resolve2(basePkgPath, relativeToResolved);
+      const pkgPath = resolve(basePkgPath, relativeToResolved);
       pkg = checkFiles(pkgPath, clonedOptions.filesystem);
       if (pkg)
         object = Object.assign(pkg, isString ? {} : object);
       else
         remove(basePkgPath, pkgPath);
     } else {
-      const pkgPath = resolve2(basePkgPath, mainPath);
+      const pkgPath = resolve(basePkgPath, mainPath);
       if (relativeToResolved) {
         pkg = await getWithErrorLog(pkgPath, { errors, warnings });
         if (pkg)
@@ -9059,8 +11268,6 @@ var load = async (urlOrObject, options2 = {}, urlArg = "") => {
         parentNode: clonedOptions.parentNode
       });
       drillToTest(object);
-      for (let i in plugins)
-        await plugins[i].init();
     }
     return object;
   }
@@ -9409,9 +11616,9 @@ var validate = async (urlOrObject, options2 = {}) => {
       errors.push(...ajvValidate.errors);
     if (inputIsValid && !clone._internal) {
       clone._internal = true;
-      const loaded = await core_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
-      if (loaded)
-        schemaValid = await validate(loaded, clone);
+      const loaded2 = await core_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
+      if (loaded2)
+        schemaValid = await validate(loaded2, clone);
     }
   }
   return schemaValid && inputIsValid;
@@ -9425,25 +11632,6 @@ var index_wasl_default = {
       phaser: {
         src: "src/index.wasl.json",
         plugins: {
-          player: {
-            position: {
-              x: 400,
-              y: 200
-            },
-            size: {
-              offset: {
-                height: -8
-              }
-            },
-            bounce: 0.2,
-            collideWorldBounds: false,
-            create: {
-              src: "scripts/player/create.js"
-            },
-            update: {
-              src: "scripts/player/update.js"
-            }
-          },
           game: {
             preload: {
               setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
@@ -9475,6 +11663,50 @@ var index_wasl_default = {
                   src: "scripts/create.js"
                 }
               }
+            },
+            graph: {
+              nodes: {
+                player: {
+                  src: "src/plugins/player/index.js",
+                  position: {
+                    x: 200,
+                    y: 200
+                  },
+                  size: {
+                    offset: {
+                      height: -8
+                    }
+                  },
+                  bounce: 0.2,
+                  collideWorldBounds: false,
+                  create: {
+                    src: "scripts/player/create.js"
+                  },
+                  update: {
+                    src: "scripts/player/update.js"
+                  }
+                },
+                player2: {
+                  src: "src/plugins/player/index.js",
+                  position: {
+                    x: 400,
+                    y: 200
+                  },
+                  size: {
+                    offset: {
+                      height: -8
+                    }
+                  },
+                  bounce: 0.2,
+                  collideWorldBounds: false,
+                  create: {
+                    src: "scripts/player/create.js"
+                  },
+                  update: {
+                    src: "scripts/player/update.js"
+                  }
+                }
+              }
             }
           }
         }
@@ -9491,16 +11723,12 @@ var index_wasl_default2 = {
       game: {
         src: "plugins/game/index.js"
       },
-      player: {
-        src: "plugins/player/index.js"
-      },
       cursors: {
         src: "plugins/cursors/index.js"
       }
     },
     edges: {
       game: {
-        player: {},
         cursors: {}
       }
     }
@@ -9602,9 +11830,9 @@ if (!("Phaser" in window)) {
       nodes[tag].run();
   };
 }
-var call = (func, context, ...args) => {
+var call = (func, ctx, ...args) => {
   if (typeof func === "function")
-    func.call(context, args);
+    func.call(ctx, args);
 };
 var preload = [];
 var config = phaser_config_default;
@@ -9616,12 +11844,13 @@ function oncreate() {
 }
 async function game_default() {
   const instance = this;
-  const Phaser = window.Phaser ?? await new Promise((resolve3) => onResolve = resolve3);
+  const Phaser = window.Phaser ?? await new Promise((resolve2) => onResolve = resolve2);
   let cfg = typeof this.config === "function" ? this.config(window.Phaser) : this.config;
   let defaultCfg = typeof config === "function" ? config(window.Phaser) : config;
   let mergedConfig = merge_default(defaultCfg, cfg);
-  mergedConfig.parent = instance.parentNode;
-  return new Promise((resolve3) => {
+  console.log(instance);
+  mergedConfig.parent = instance.parent.parentNode;
+  return new Promise((resolve2) => {
     const originalUpdate = mergedConfig.scene.update;
     const originalCreate = mergedConfig.scene.create;
     const originalPreload = mergedConfig.scene.preload;
@@ -9638,15 +11867,19 @@ async function game_default() {
     };
     mergedConfig.scene.create = function() {
       call(originalCreate, this);
-      resolve3(this);
+      this.context = this;
+      instance.nodes.forEach((n) => {
+        if (typeof n.ongame === "function")
+          n.ongame(this.context);
+      });
+      resolve2(this.context);
     };
     mergedConfig.scene.update = function() {
       call(originalUpdate, this);
-      for (let tag in instance.children) {
-        const c = instance.children[tag];
-        if (typeof c.update === "function")
-          c.update(this, instance.children);
-      }
+      instance.nodes.forEach((n) => {
+        if (typeof n.update === "function")
+          n.update(this, Object.fromEntries(instance.nodes));
+      });
     };
     const game = new Phaser.Game(mergedConfig);
   });
@@ -9669,6 +11902,7 @@ __export(player_exports, {
   collideWorldBounds: () => collideWorldBounds,
   create: () => create,
   default: () => player_default,
+  ongame: () => ongame,
   position: () => position,
   size: () => size,
   update: () => update
@@ -9679,13 +11913,17 @@ var size = {};
 var position = {};
 var create;
 var update;
-function player_default(context) {
-  this.ref = context.physics.add.sprite(this.position.x, this.position.y, "player");
-  this.ref.setBounce(this.bounce);
-  this.ref.setCollideWorldBounds(this.collideWorldBounds);
-  this.ref.body.setSize((this.size.width ?? this.ref.width) + this.size.offset.width, (this.size.height ?? this.ref.height) + this.size.offset.height);
-  if (typeof this.create === "function")
-    this.create.call(context, this.ref);
+function ongame(game) {
+  if (game) {
+    this.ref = game.physics.add.sprite(this.position.x, this.position.y, "player");
+    this.ref.setBounce(this.bounce);
+    this.ref.setCollideWorldBounds(this.collideWorldBounds);
+    this.ref.body.setSize((this.size.width ?? this.ref.width) + this.size.offset.width, (this.size.height ?? this.ref.height) + this.size.offset.height);
+    if (typeof this.create === "function")
+      this.create.call(game, this.ref);
+  }
+}
+function player_default() {
   return this.ref;
 }
 
@@ -9701,22 +11939,29 @@ function create2() {
   const groundLayer = map.createLayer("World", groundTiles, 0, 0);
   groundLayer.setCollisionByExclusion([-1]);
   const coinTiles = map.addTilesetImage("coin");
-  const coinLayer2 = map.createLayer("Coins", coinTiles, 0, 0);
+  const coinLayer = map.createLayer("Coins", coinTiles, 0, 0);
   this.physics.world.bounds.width = groundLayer.width;
   this.physics.world.bounds.height = groundLayer.height;
-  coinLayer2.setTileIndexCallback(17, collectCoin, this);
+  coinLayer.setTileIndexCallback(17, (sprite, tile) => {
+    removeTile(coinLayer, tile);
+    score = incrementScore(score, text);
+  }, this);
   this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
   this.cameras.main.setBackgroundColor("#ccccff");
-  const text2 = this.add.text(20, 570, "0", {
+  const text = this.add.text(20, 570, "0", {
     fontSize: "20px",
     fill: "#ffffff"
   });
-  text2.setScrollFactor(0);
+  text.setScrollFactor(0);
 }
-function collectCoin(sprite, tile) {
-  coinLayer.removeTileAt(tile.x, tile.y);
-  score++;
-  text.setText(score);
+function incrementScore(score2, text) {
+  score2++;
+  if (text)
+    text.setText(score2);
+  return score2;
+}
+function removeTile(layer, tile) {
+  layer.removeTileAt(tile.x, tile.y);
   return false;
 }
 var create_default = create2;
@@ -9732,8 +11977,8 @@ var getLayer = (name2, context) => {
 function createPlayer(player) {
   const groundLayer = getLayer("World", this);
   this.physics.add.collider(groundLayer, player);
-  const coinLayer2 = getLayer("Coins", this);
-  this.physics.add.overlap(player, coinLayer2);
+  const coinLayer = getLayer("Coins", this);
+  this.physics.add.overlap(player, coinLayer);
   this.cameras.main.startFollow(player);
   this.anims.create({
     key: "walk",
@@ -9759,12 +12004,12 @@ var update_exports = {};
 __export(update_exports, {
   default: () => update2
 });
-function update2(context, otherChildren) {
-  if (otherChildren.cursors.ref.left.isDown) {
+function update2(context, peers) {
+  if (peers.cursors.ref.left.isDown) {
     this.ref.body.setVelocityX(-200);
     this.ref.anims.play("walk", true);
     this.ref.flipX = true;
-  } else if (otherChildren.cursors.ref.right.isDown) {
+  } else if (peers.cursors.ref.right.isDown) {
     this.ref.body.setVelocityX(200);
     this.ref.anims.play("walk", true);
     this.ref.flipX = false;
