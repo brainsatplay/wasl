@@ -1,6 +1,6 @@
 {
   "name": "wasl-validate",
-  "version": "0.0.0",
+  "version": "0.0.10",
   "description": "A validator for the Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
