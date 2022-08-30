@@ -1,6 +1,6 @@
 {
   "name": "wasl-validate",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A validator for the Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,8 +23,7 @@
   "devDependencies": {
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
-    "json-schema-to-typescript": "^11.0.2",
-    "wasl": "*"
+    "json-schema-to-typescript": "^11.0.2"
   },
   "peerDependencies": {
     "wasl": "*"
