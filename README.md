@@ -66,6 +66,8 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 
 
  ### Backlog
+ - **Make sure that adding ports from the top-level graph does not curb execution... (see [tests/0/0.0/0.0.0/basic/broken.wasl.json](tests/0/0.0/0.0.0/broken.wasl.json))**
+ - Fix inconsistencies loading the basic example in import vs reference mode.
  - Validate ports
  - Nested html source tags that determine execution (using a custom component)
 

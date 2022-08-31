@@ -2,11 +2,15 @@
 import wasl from "./src/core/index"
 import validate from "./src/validate/index"
 
-// import { path, main, options } from './demos/0.0.0.js'
+// import { path, main, options } from './demos/external/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
-import { path, main, options } from './demos/phaser.js'
-// import { path, main, options } from './demos/signals.js'
+// import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/remote.js'
+// import { path, main, options } from './demos/signals.js'
+
+// Broken
+// import { path, main, options } from './demos/basic/0.0.0.js'
+import { path, main, options } from './demos/external/0.0.0.js'
 
 const printError = (arr, type, severity='Error') => {
     arr.forEach(e => {
@@ -20,15 +24,21 @@ const startExecution = async () => {
 
     options.activate = true // use internal graph system
     options.parentNode = document.getElementById('container') // set parent node
+    options.wasl = wasl
 
     // Option #1: Import Mode
     console.log('------------------ IMPORT MODE ------------------')
-    const importOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
+    const importOptions = Object.assign({errors: [], warnings: []}, options)
     const res = await validate(path, importOptions)
     console.log('validate (import)', res)
+    
     if (res) {
-        const o = await wasl(path, importOptions)
+        const o = new wasl(path, importOptions)
+        await o.init()
+        await o.start()
         console.log('load (import)', o)
+        importOptions.errors = o.errors
+        importOptions.warnings = o.warnings
     }
 
     printError(importOptions.errors, 'import')
@@ -37,12 +47,16 @@ const startExecution = async () => {
     // Option #2: Reference Mode (not possible for remote files in Node.js)
     if (main){
         console.log('------------------ REFERENCE MODE ------------------')
-        const refOptions = Object.assign({errors: [], warnings: [], files: {}}, options)
+        const refOptions = Object.assign({errors: [], warnings: []}, options)
         const res = await validate(main, refOptions)
         console.log('validate (reference)', res)
         if (res) {
-            const o = await wasl(main, refOptions)
+            const o = new wasl(main, refOptions)
+            await o.init()
+            await o.start()
             console.log('load (reference)', o)
+            refOptions.errors = o.errors
+            refOptions.warnings = o.warnings
         }
         printError(refOptions.errors, 'reference')
         printError(refOptions.warnings, 'reference', 'Warning')

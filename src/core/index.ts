@@ -1,111 +1,102 @@
 import { LatestWASL, Options } from "../common/types"
 import * as languages from '../common/utils/languages'
-import * as path from '../common/utils/path'
 import get from '../common/get'
 import * as check from '../common/utils/check'
+import * as utils from './utils'
 
 import * as remoteImport from 'remote-esm'
 import ESPlugin from "es-plugins/dist/index.esm"
 
-const isSrc = (str) => {
-    return typeof str === 'string' && Object.values(languages).find(arr => arr.includes(str.split('.').slice(-1)[0])) // Has supported extension
-}
+const basePkgPath = './package.json'
 
-const merge = (main, override, deleteSrc=false) => {
+class WASL {
 
-    const copy = Object.assign({}, main)
-    if (override){
-        if (deleteSrc) {
-            const ogSrc = override.src ?? override
-            delete override.src
-            if ('default' in ogSrc) return ogSrc.default // default export
+    errors: any[] = []
+    warnings: any[] = []
+    files: { [x: string]: any } = {}
+    plugin?: ESPlugin
+    original?: { [x: string]: any } = {}
+
+    #filesystem: Options['filesystem']
+
+    #input = {}
+    #options = {}
+    #url = undefined
+    #cache = {}
+    #main = ''
+    #mode = 'import'
+
+    #onImport = (path, info) => this.files[path] = info
+
+    #throw = (e) => {
+        const item = {
+            message: e.message,
+            file: e.file, 
+            node: e.node,
         }
 
-        const keys = Object.keys(copy)
-        const newKeys = new Set(Object.keys(override))
-
-        keys.forEach(k => {
-            newKeys.delete(k)
-            if (typeof override[k] === 'object' && !Array.isArray(override[k])) copy[k] = merge(copy[k], override[k])
-            else if (k in override) copy[k] = override[k] // replace values and arrays
-        })
-
-        newKeys.forEach(k => {
-            copy[k] = override[k]
-        })
+        const arr = (e.type === 'warning') ? this.warnings : this.errors
+        arr.push(item)
     }
-    
-    return copy // named exports
-}
 
-const checkFiles = (key, filesystem) => {
-    const isJSON = path.suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
-    return output;
-}
+    constructor(
+        urlOrObject: string | LatestWASL,
+        options: Options = {},
+        url?: string
+    ) {
 
-var remove = (original, search, key=original, o?)=> {
-    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ''}${o ? `Automatically removing ${key} from the WASL file.` : ''}`);
-    if (o) delete o[key];
-  }
+        this.#input = urlOrObject
+        this.#options = options
+        this.#url = url
 
-  const basePkgPath = './package.json'
-  const onError = (e, {errors, warnings}) => {
-      const item = {
-          message: e.message, 
-          file: e.file,
-          node: e.node,
-      }
-      
-      const arr = (e.type === 'warning') ? warnings : errors
-      arr.push(item)
-  }
+    }
 
-  const getWithErrorLog = async (...args) => {
-    const o = args.slice(-1)[0]
-    const path = args[0]
-    args = args.slice(0, -1)
+    get = async (...args) => {
+        const path = args[0]
 
-    return await get(...args).catch((e) => onError({
-        message: e.message,
-        file: path
-    }, o))
-  }
+        return await get(args[0], args[1], this.#onImport).catch((e) => this.#throw({
+            message: e.message,
+            file: path
+        }))
+    }
 
-  let loaded:any = {}
-  async function loadPlugins(node, info, options, id?:Symbol, debug = false){
-    if (node.plugins) {
-    for (let nestedName in node.plugins){
+
+    // Load the internal "plugins" field in a WASL file to the dependent node
+    load = async (node, info, options, id?: any) => {
+
+        if (node.plugins) {
+            for (let nestedName in node.plugins) {
 
                 const nestedNode = node.src.graph?.nodes?.[nestedName]
-                if (node.plugins) {
-                    for (let key in node.plugins[nestedName]){
+                if (node.plugins) {           
+                    for (let key in node.plugins[nestedName]) {
                         const newInfo = node.plugins[nestedName][key]
-                                              
+
                         if (typeof newInfo === 'object' && !Array.isArray(newInfo)) {
 
                             const ogSrc = newInfo.src
                             let newInfoForNode;
-                            if (id) newInfoForNode = loaded[id]?.[key] // check cache
-                            if (!newInfoForNode){
+                            if (id) newInfoForNode = this.#cache[id]?.[key] // check cache
+
+                            if (!newInfoForNode) {
 
                                 // Properly merge the resolved src info
                                 const optsCopy = Object.assign({}, options) as Options
                                 if (key === 'graph') optsCopy._deleteSrc = false // keep all node imports
-                                else optsCopy._deleteSrc = true // keep all node imports
+                                else optsCopy._deleteSrc = true 
 
-                                newInfoForNode = (await getSrc({[key]: newInfo}, info, optsCopy, {
+                                newInfoForNode = (await this.resolve({ [key]: newInfo }, info, optsCopy, {
                                     nodes: newInfo
                                 }))
 
                                 if (id) {
-                                    if (!loaded[id]) loaded[id] = {}
-                                    loaded[id][key] = newInfoForNode // cache
+                                    if (!this.#cache[id]) this.#cache[id] = {}
+                                    this.#cache[id][key] = newInfoForNode // cache
                                 }
                             }
 
                             // Only With Node Resolved
-                            if (nestedNode){
+                            if (nestedNode) {
                                 const newVal = newInfoForNode[key]
 
                                 if (newVal) {
@@ -114,420 +105,435 @@ var remove = (original, search, key=original, o?)=> {
                                     if ('default' in chosenVal && Object.keys(chosenVal).length === 1) chosenVal = chosenVal.default
                                     if (nestedNode) nestedNode[key] = chosenVal // MERGE BY REPLACEMENT
                                 } else {
-                                    onError({ message: `Could not resolve ${ogSrc}` }, options)
+                                    this.#throw({ message: `Could not resolve ${ogSrc}` })
+                                }
                             }
-                        }
 
                         } else if (nestedNode) nestedNode[key] = newInfo // MERGE BY REPLACEMENT
                     }
                 }
-            
-            // Source is Resolved but Node is Not
-            if  (node.src?.graph && !nestedNode){
-                onError({
-                    message: `Plugin target '${nestedName}' does not exist`,
-                    node: name
-                }, options)
+
+                // Source is Resolved but Node is Not
+                if (node.src.graph && !nestedNode) {
+                    this.#throw({
+                        message: `Plugin target '${nestedName}' does not exist`,
+                        node: name
+                    })
+                }
             }
+        }
     }
-}
-  }
 
-  async function getSrc(target, info, options, graph:any = {}, debug = false){
-    const nodes = graph.nodes as any
-    const edges = graph.edges as any
+    // --------- Main WASL Resolution Function ---------
+    // This method resolves all the src fields in the WASL file
+    resolve = async (target, info, options, graph: any = {}) => {
+        const nodes = graph.nodes as any
+        const edges = graph.edges as any
 
-    const id = Symbol()
+        const id = Symbol('unique')
 
-    let {
-        relativeToResolved,
-        mainPath,
-        // object,
-        url,
-        onImport,
-    } = info
+        let {url} = info
 
-    const isImportMode = !!url
+        const mainPath = info.mainPath || this.#main // use base main if not specified
 
-    relativeToResolved = options._remote ?? relativeToResolved
+        // const innerTopLevel = options._top === true
 
-    for (let name in target) {
+        for (let name in target) {
 
-        const node = target[name]
-        const isObj = node && typeof node === 'object' && !Array.isArray(node)
+            const node = target[name]
+            const isObj = node && typeof node === 'object' && !Array.isArray(node)
 
-        await loadPlugins(node, info, options, id, debug) // before loading make sure graph is not specified at a higher level
+            if (isObj) {
+                await this.load(node, info, options, id) // before loading make sure graph is not specified at a higher level
+                let ogSrc = node.src ?? '';
+                if (utils.isSrc(ogSrc) || (nodes && edges && !ogSrc)) {
+                    node.src = null
 
-        if (isObj){
-        let ogSrc = node.src ?? '';
-
-        if (isSrc(ogSrc) || (nodes && edges && !ogSrc)){
-
-            node.src = null
-            // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
-            let passToNested:any = null
-            let fullPath, _remote = options._remote
-            try {
-              new URL(ogSrc);
-              fullPath = ogSrc
-              _remote = ogSrc;
-            } catch {
-              fullPath = relativeToResolved ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
-            }
-
-            //Import Mode
-            if (isImportMode) {
-                node.src = await getWithErrorLog(fullPath, undefined, onImport, options) as LatestWASL
-                if (_remote) {
-                    if (!node.src){
-                        const got = (await getSrc([node], info, options, {nodes: [node]}))
-                        node.src = got[0].src ?? got[0]
-                        passToNested = remoteImport.resolve(ogSrc)
+                    // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
+                    let _internal: string | true = '' // don't mistake for user call
+                    let fullPath
+                    try {
+                        new URL(ogSrc);
+                        _internal = fullPath = ogSrc
+                    } catch {
+                        if (ogSrc) fullPath = mainPath ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
+                        else fullPath = mainPath
                     }
-                } 
-                passToNested = remoteImport.resolve(ogSrc, url, true)
+                    
+                    //Import Mode
+                    if (this.#mode === 'import') {
+                        let res = await this.get(fullPath, undefined) as LatestWASL
+                        if (res) node.src = res
+                        else console.error('Could not get node source.', name)
 
-                if (!node.src) remove(ogSrc, fullPath, name, target)
-            } 
-            
-            // Reference Mode
-            else {
-                if (options.filesystem) {
-                    const res = checkFiles(fullPath, options.filesystem)
-                    if (res) {
+                        if (!_internal) _internal = (ogSrc) ? remoteImport.resolve(ogSrc, url, true) : true // only set if not already present (e.g. for remote cases)
+                        if (!node.src  && !node.graph) utils.remove(ogSrc, fullPath, name, target) // remove if no source and no graph
+                    }
 
-                        if (res.default || fullPath.includes('.json')) node.src = passToNested = res
-                        else {
-                            onError({
-                                type: 'warning',
-                                message: `Node (${name}) at ${fullPath} does not have a default export.`,
+                    // Reference Mode
+                    else {
+                        if (this.#filesystem) {
+
+                            let res;
+
+                            res = utils.checkFiles(fullPath, this.#filesystem)
+
+                            if (res) {
+
+                                // Handle Node Specifications
+                                if (
+                                    res.default // has a default export
+                                    || fullPath.includes('.json') // importing a wasl file
+                                ) node.src = res
+                                // Handle Errors
+                                else {
+                                    this.#throw({
+                                        type: 'warning',
+                                        message: `Node (${name}) at ${fullPath} does not have a default export.`,
+                                        file: ogSrc
+                                    })
+                                    node.src = { default: res }
+                                }
+
+                                _internal = fullPath 
+                            }
+                            else if (ogSrc) utils.remove(ogSrc, fullPath, name, target)
+
+                        } else {
+                            this.#throw({
+                                message: 'No options.filesystem field to get JavaScript objects',
                                 file: ogSrc
-                            }, options)
-                            node.src = passToNested = {default: res}
+                            })
                         }
                     }
-                    else remove(ogSrc, fullPath, name, target)
+                    
 
-                } else {
-                    onError({
-                        message: 'No options.filesystem field to get JavaScript objects',
-                        file: ogSrc
-                    }, options)
-                }
-            } 
-            
-            // drill into nested graphs
-            if (node.src && node.src.graph) node.src = await load(passToNested, {
-                relativeTo: relativeToResolved || options.relativeTo,
-                filesystem: options.filesystem,
-                errors: options.errors,
-                warnings: options.warnings,
-                files: options.files,
-                _internal: ogSrc,
-                _deleteSrc: options._deleteSrc,
-                _remote,
-            }) 
-
-        } else {
-
-            for (let key in node) {
-
-                    if (key === 'src' && node.src) {
-
-                        const language = node.src.language
-                        if (!language || languages.js.includes(language)){
-
-                        // Option #2: Import full ESM text in JSON object
-                        if (node.src.text) {
-                            const esmImport = async (text) => {
-                                try {
-                                    let imported = await remoteImport.importFromText(text)
-
-                                    // NOTE: getting default may be wrong
-                                    if (imported.default && Object.keys(imported).length === 1) imported = imported.default
-                                    return imported
-                                } catch (e) {
-                                    console.error('Import did not work. Probably relies on something...')
-                                    onError({
-                                        message: e.message,
-                                        file:name // NOTE: Is wrong...
-                                    }, options)
-                                }
-                            }
-                            
-                            const esm = await esmImport(node.src.text)
-                            if (esm) {
-                                delete node.src.text
-                                if (typeof esm === 'object') node.src = {default: Object.assign(node.src, esm)}
-                                else node.src = esm
-                            } else {
-                                onError({
-                                    message: 'Could not import this text as ESM',
-                                    file: node.src
-                                }, options)
-                            }
-                        } 
-
-                        // Option #3: Activate JS functions in JSON object
-                        else {
-
-                            const expectedFunctions = ['default', 'oncreate', 'onrender']
-                            for (let key in node.src){
-                                try {
-                                    if (expectedFunctions.includes(key) && typeof node.src[key] === 'string') node.src[key] = (0, eval)(`(${node.src[key]})`)
-                                } catch (e) {
-                                    onError({
-                                        message: `Field ${key} could not be parsed`,
-                                        file: node.src[key]
-                                    }, options)
-                                }
-                            }
-                        }  
+                    let _top = false
+                    if (node.graph) {
+                        _top = true
+                        if (!node.src) node.src = {}
+                        node.src.graph = node.graph
                     }
 
-                    // Option #4: Allow downstream application to parse non-JS text
-                    else {
-                        console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
-                        onError({
-                            message: `Source is in ${language}. Currently only JavaScript is supported.`,
-                            file: ogSrc
-                        }, options)
+                    // drill into nested graphs
+                    if (node.src && node.src.graph) {
+                        await this.init(node.src, {
+                            _internal,
+                            _deleteSrc: options._deleteSrc,
+                            _top
+                        })
                     }
                 } 
-                
-                // Drill other object keys to replace and merge src...
-                else if (node[key] && typeof node[key] === 'object' && !Array.isArray(node[key])) {
-                    const optsCopy = Object.assign({}, options) as Options
-                    optsCopy._deleteSrc = key !== 'nodes' && name !== 'graph' // NOTE: Restricted progression
-                    const includesPlayer = Object.keys(node[key]).includes('player')
-                    await getSrc(node[key], info, optsCopy, {nodes: node[key]}, includesPlayer) // check for src to merge
+                // else {
+
+                    for (let key in node) {
+
+                        if (
+                            !isObj // Alternative Loading Scheme
+                            && key === 'src' 
+                            && node.src) {
+
+                            const language = node.src.language
+                            if (!language || languages.js.includes(language)) {
+
+                                // Option #2: Import full ESM text in JSON object
+                                if (node.src.text) {
+                                    const esmImport = async (text) => {
+                                        try {
+                                            let imported = await remoteImport.importFromText(text)
+
+                                            // NOTE: getting default may be wrong
+                                            if (imported.default && Object.keys(imported).length === 1) imported = imported.default
+                                            return imported
+                                        } catch (e) {
+                                            console.error('Import did not work. Probably relies on something...')
+                                            this.#throw({
+                                                message: e.message,
+                                                file: name // NOTE: Is wrong...
+                                            })
+                                        }
+                                    }
+
+                                    const esm = await esmImport(node.src.text)
+                                    if (esm) {
+                                        delete node.src.text
+                                        if (typeof esm === 'object') node.src = { default: Object.assign(node.src, esm) }
+                                        else node.src = esm
+                                    } else {
+                                        this.#throw({
+                                            message: 'Could not import this text as ESM',
+                                            file: node.src
+                                        })
+                                    }
+                                }
+
+                                // Option #3: Activate JS functions in JSON object
+                                else {
+
+                                    const expectedFunctions = ['default', 'oncreate', 'onrender']
+                                    for (let key in node.src) {
+                                        try {
+                                            if (expectedFunctions.includes(key) && typeof node.src[key] === 'string') node.src[key] = (0, eval)(`(${node.src[key]})`)
+                                        } catch (e) {
+                                            this.#throw({
+                                                message: `Field ${key} could not be parsed`,
+                                                file: node.src[key]
+                                            })
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Option #4: Allow downstream application to parse non-JS text
+                            else {
+                                console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
+                                this.#throw({
+                                    message: `Source is in ${language}. Currently only JavaScript is supported.`,
+                                    file: ogSrc
+                                })
+                            }
+                        }
+
+                        // Drill other object keys to replace and merge src...
+                        // NOTE: Sometimes duplicates a check because of looking at name === 'graph' again
+                        else if (node[key]) {
+                            if (typeof node[key] === 'object' && !Array.isArray(node[key])){
+                                const optsCopy = Object.assign({}, options) as Options
+                                optsCopy._deleteSrc = key !== 'nodes' && name !== 'graph' // NOTE: Restricted progression
+                                await this.resolve(node[key], info, optsCopy, { nodes: node[key] }) // check for src to merge
+                            } 
+                        }
                 }
             }
         }
-        }
-    }
 
-    
+
         // Search the nodes that are produced for .src fields
         // to modify it
 
         // NOTE: If accompanied by an edges object, this is a full graph
         // and should throw errors
 
-        for (let name in nodes){
+        for (let name in nodes) {
             const node = nodes[name]
 
             // Merge and validate plugins
-            if 
-            (
-                node?.src && 
+            if
+                (
+                node?.src &&
                 typeof node?.src === 'object' // Successfully loaded
             ) {
 
-                // Check if stateless
-                if (node.src.default){
-                    const fnString = node.src.default.toString()
-                    const keyword = 'function'
-                    if (fnString.slice(0, keyword.length) === keyword){
-                        onError({
-                            type: 'warning',
-                            message: `Default export may be stateful.`,
-                            node: name
-                        }, options)
-                    }
-                }
-
                 // Merge node.plugins info with the actual node (i.e. instance) information
+                if (node.src.graph) await this.load(node, info, options, id) // attach to graph
 
-                if (node.src.graph) await loadPlugins(node, info, options, id, debug) // attach to graph
-                
                 // Only run if parent is a complete graph (i.e. you're an actual node)
                 else if (edges) {
 
                     // VALIDATE: Source files must have a default export
-                    if (!('default' in node.src)){
-                        onError({
+                    if (!('default' in node.src)) {
+                        this.#throw({
                             message: 'No default export.',
                             node: name
-                        }, options)
-                    } 
+                        })
+                    }
 
                 }
 
-                nodes[name] = merge(node.src, node, options._deleteSrc)
+                nodes[name] = utils.merge(node.src, node, options._deleteSrc)
             }
         }
 
-    return target
-  }
-
-const load = async (
-    urlOrObject: string | LatestWASL, 
-    options: Options = {},
-    urlArg: string = ''
-) => {
-
-
-    const clonedOptions = Object.assign({errors: [], warnings: [], files: {}}, options) as Options & {errors: any, warnings: any, files: any}
-
-    let { 
-        relativeTo, 
-        errors,
-        warnings
-    } = clonedOptions
-
-    const internalLoadCall = clonedOptions._internal
-
-    const onImport = (path, info) => {
-        clonedOptions.files[path] = info
+        return target
     }
 
-    
+    // --------- Main WASL Initialization Function ---------
+    // This method loads and merges all the src files
+    init = async (
+        urlOrObject: string | LatestWASL = this.#input,
+        options: Options = this.#options,
+        url: string = ''
+    ) => {
 
-    const isString = typeof urlOrObject === 'string'
+        this.#input = urlOrObject
+        this.#options = options
 
-    // Resolve remote URLs
-    let object, url = urlArg, relativeToResolved:any = ''; // catch internal calls
-    if (url || (isString)) {
-        if (!url) url = urlOrObject // Import Mode
-        delete clonedOptions.filesystem
-        relativeToResolved = relativeTo
-    } else if (typeof urlOrObject === 'object') {
-        object = Object.assign({}, urlOrObject) // Reference Mode
-        delete clonedOptions.relativeTo
-        if (typeof internalLoadCall === 'string') relativeToResolved = remoteImport.resolve(internalLoadCall, clonedOptions.relativeTo)
-    }
+        const internalLoadCall = options._internal
 
-    try {
-        new URL(url)
-        clonedOptions._remote = url
-        // onError({
-        //     message: 'Remote not supported for import mode.'
-        // }, {errors, warnings})
-        // return undefined
-        relativeToResolved = relativeTo = ''
-    } catch {}
+        const isFromValidator = this.#main === undefined && internalLoadCall
+        // Original User Call
+        if (!this.#filesystem) this.#filesystem = options.filesystem 
+        if (!internalLoadCall) {
+            if (!url)  url = this.#url // only use for the top-level call
 
-    errors.push(...check.valid(urlOrObject, clonedOptions, 'load'))
+            // Scrub Options for Remote
+            try {
+                new URL(url ?? urlOrObject)
+                options.relativeTo = ''
+            } catch { }
+            
+        }
+        else if (internalLoadCall === true) url = this.#main // use for internal unspecified calls
+        else if (isFromValidator) url = this.#main = internalLoadCall // validator input for import syntax
 
+        const clonedOptions = Object.assign({}, options) as Options
+        // const isTopLevel = clonedOptions._top !== false
+        const innerTopLevel = clonedOptions._top === true
+        const isString = typeof urlOrObject === 'string'
 
+        let mode, object, mainPath; // catch internal calls
 
-    let pkg; 
+        // ----------------------- Local Mode Handling -----------------------
+        if (typeof urlOrObject === 'object') {
+            object = Object.assign({}, urlOrObject)
+            if (typeof internalLoadCall === 'string') url = mainPath = remoteImport.resolve(internalLoadCall) // use internal call as base
+            mode = 'reference'
+        }  else if (url || (isString)) {
+            if (!url) url = remoteImport.resolve(urlOrObject, options.relativeTo ?? '')
+            mode = 'import'
+        } 
+        else console.error('Mode is not supported...')
 
+        if (!internalLoadCall) this.#mode = mode // set global mode
 
-    const mainPath = await remoteImport.resolve(url, relativeToResolved) // maintain a reference to the main path (already resolved)
+        // Check if input is valid
+        this.errors.push(...check.valid(urlOrObject, clonedOptions, 'load'))
 
-    // Import Mode
-    if (url) {
-        const main = await getWithErrorLog(mainPath, undefined, onImport, {errors, warnings}) as LatestWASL
+        // maintain a reference to the main path
 
-        const pkgUrl = remoteImport.resolve(basePkgPath, mainPath, true)
-        pkg = await getWithErrorLog(pkgUrl, undefined, onImport, {errors, warnings})
-
-        if (pkg) object = Object.assign(pkg, main) as any
-    } 
-    
-    // Reference Mode
-    else {
-
-        if (clonedOptions.filesystem) {
-            const pkgPath = remoteImport.resolve(basePkgPath, relativeToResolved)
-            pkg = checkFiles(pkgPath, clonedOptions.filesystem)
-            if (pkg) object = Object.assign(pkg, isString ? {} : object) as any
-            else remove(basePkgPath, pkgPath)
+        // ------------------- Merge package.json and (optionally) resolve object-------------------
+        switch (this.#mode) {
+            case 'reference': 
+                if (!innerTopLevel){
+                    if (this.#filesystem) {
+                        const pkgPath = remoteImport.resolve(basePkgPath, url)
+                        const pkg = utils.checkFiles(pkgPath, this.#filesystem)
+                        if (pkg) object = Object.assign(pkg, isString ? {} : object) as any
+                        else utils.remove(basePkgPath, pkgPath)
+                    }
+                }
+            default:
+                if (!object){
+                    mainPath = await remoteImport.resolve(url) 
+                    object = await this.get(mainPath, undefined) as LatestWASL
+                    if (!innerTopLevel){
+                        const pkgUrl = remoteImport.resolve(basePkgPath, mainPath, true)
+                        const pkg = await this.get(pkgUrl, undefined)
+                        if (pkg) object = Object.assign(pkg, object) as any
+                    }
+                }
         }
 
-        // Try Loose Import Mode
-        else {
-            const pkgPath = remoteImport.resolve(basePkgPath, mainPath)
-            if (relativeToResolved){
-                pkg = await getWithErrorLog(pkgPath, {errors, warnings})
-                if (pkg) object = Object.assign(pkg,  isString ? {} : object) as any
+        if (!internalLoadCall) this.#main = mainPath // save global main path
+        else if (this.#mode === 'reference' && this.#main === undefined) this.#main = '' // ensures root scope
+
+
+        if (this.errors.length === 0) {
+
+            // replace src with actual source text
+            const nodes = object.graph.nodes
+
+            await this.resolve(nodes, {
+                mainPath,
+                url,
+                object,
+            }, clonedOptions, object.graph)
+
+
+            // convert valid nodes to ES Plugins
+            const drill = (parent, callback) => {
+                const nodes = parent.graph.nodes
+                for (let tag in nodes) {
+                    const res = callback(nodes[tag], {
+                        tag,
+                        parent,
+                        options: clonedOptions
+                    })
+                    if (res) nodes[tag] = res
+                }
             }
-        }
-    }
 
-    if (errors.length === 0) {
-
-        // replace src with actual source text
-        const nodes = object.graph.nodes
-
-        await getSrc(nodes, {
-            mainPath,
-            relativeToResolved,
-            url,
-            object,
-            onImport
-        }, clonedOptions, object.graph)
-
-
-        // convert valid nodes to ES Plugins
-        const drill = (parent, callback) => {
-            const nodes = parent.graph.nodes
-            for (let tag in nodes) {
-                const res = callback(nodes[tag], {
-                    tag,
-                    parent,
-                    options: clonedOptions
-                })
-                if (res) nodes[tag] = res
-            }
-        }
-
-        // -------------------------- convert valid nodes to ES Plugins --------------------------
-        const plugins = []
-
-        // -------------------------- do plugin-dependent tests --------------------------
-        const drillToTest = (target) => {
-            drill(target, (node, info) => {
+            // -------------------------- do plugin-dependent tests --------------------------
+            const drillToTest = (target) => {
+                drill(target, (node, info) => {
 
                     // VALIDATE: Check that all edges point to valid nodes
                     const edges = info.parent.graph.edges
-                    for (let output in edges){
+                    for (let output in edges) {
 
-                        const getTarget = (o,str) => {
-                            return o.graph?.nodes?.[str] ?? o[str]
-                        }
+                        const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str]
 
                         let outTarget = info.parent.graph.nodes
-                        output.split('.').forEach((str) =>  outTarget = getTarget(outTarget,str))
+                        output.split('.').forEach((str) => outTarget = getTarget(outTarget, str))
 
                         if (!outTarget) {
-                            onError({
+                            this.#throw({
                                 message: `Node '${output}' (output) does not exist to create an edge.`,
                                 file: url,
-                            }, info.options)
+                            })
                         }
 
-                        for (let input in edges[output]){
+                        for (let input in edges[output]) {
                             let inTarget = nodes
-                            input.split('.').forEach((str) => inTarget =  getTarget(inTarget, str))
+                            input.split('.').forEach((str) => inTarget = getTarget(inTarget, str))
                             if (!inTarget) {
-                                onError({
+                                this.#throw({
                                     message: `Node '${input}' (input) does not exist to create an edge.`,
                                     file: url,
-                                }, info.options)
+                                })
                             }
                         }
+                    }
+
+                })
+            }
+
+            // -------------------------- initialize plugins --------------------------
+            if (internalLoadCall === undefined) {
+                if (clonedOptions.output !== 'object') {
+
+                    this.plugin = new ESPlugin(object, {
+                        activate: clonedOptions.activate,
+                        parentNode: clonedOptions.parentNode
+                    }) // convert
+
+                    // Derive Original Input
+                    this.original = Object.assign({}, this.plugin.initial)
+                    let drillCopy = (target) => {
+                        if (target?.graph){
+                            let graph = Object.assign({}, target.graph)
+                            let nodes = graph.nodes = Object.assign({}, graph.nodes)
+                            if (nodes){
+                                for (let k in nodes) {
+                                    nodes[k] = Object.assign({}, nodes[k].initial)
+                                    drillCopy(nodes[k])
+                                }
+                            }
+                            target.graph = graph
+                        }
+                    }
+                    drillCopy(this.original)
+
+                    return this.plugin
                 }
 
-            })
+                drillToTest(object) // test
+            }
+
+            return object
         }
-
-        // -------------------------- initialize plugins --------------------------
-        if (!internalLoadCall) {
-            new ESPlugin(object, {
-                activate: clonedOptions.activate,
-                onPlugin: (o) => plugins.push(o),
-                parentNode: clonedOptions.parentNode
-            }) // convert
-
-            drillToTest(object) // test
-        }
-
-        return object
     }
+
+    start = async () => {
+        if (this.plugin) return await this.plugin.start()
+    }
+
+    stop = async () => {
+        if (this.plugin) return await this.plugin.stop()
+    }
+
+
 }
 
 
-export default load
+export default WASL

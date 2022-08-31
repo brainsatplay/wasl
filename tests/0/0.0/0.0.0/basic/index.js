@@ -1,5 +1,5 @@
-import * as logPlugin from '../../plugins/log.js' // simple plugin
-import * as pluginPlugin from '../../plugins/index.js' // complex plugin
+import * as logPlugin from '../../../plugins/log.js' // simple plugin
+import * as pluginPlugin from '../../../plugins/index.js' // complex plugin
 
 import pkg from './package.json' assert {type: "json"} // complex plugin
 import graph from './index.wasl' assert {type: "json"} // complex plugin

@@ -1,5 +1,7 @@
 // import { Plugin } from '../../versions/0.0.0/component.schema'
 
+import WASL from "src/core"
+
 export type LatestWASL = any //Plugin
 
 export type ActiveSrc = {
@@ -14,12 +16,15 @@ export type Options = {
         [x:string]: LatestWASL
     },
 
-    errors?: any[],
-    warnings?: any[],
-    files?: {[x:string]: any},
+    output?: 'plugin' | 'object'
+    fromValidator?: boolean
+    wasl?: WASL
+
+   
     _internal?: string | boolean
     _deleteSrc?: boolean
     _remote?: string
+    _top?: boolean
 
     // ES Components
     activate?: boolean

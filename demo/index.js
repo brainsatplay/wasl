@@ -31,6 +31,24 @@
     return to;
   };
   var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+  var __accessCheck = (obj, member, msg) => {
+    if (!member.has(obj))
+      throw TypeError("Cannot " + msg);
+  };
+  var __privateGet = (obj, member, getter) => {
+    __accessCheck(obj, member, "read from private field");
+    return getter ? getter.call(obj) : member.get(obj);
+  };
+  var __privateAdd = (obj, member, value) => {
+    if (member.has(obj))
+      throw TypeError("Cannot add the same private member more than once");
+    member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+  };
+  var __privateSet = (obj, member, value, setter) => {
+    __accessCheck(obj, member, "write to private field");
+    setter ? setter.call(obj, value) : member.set(obj, value);
+    return value;
+  };
 
   // node_modules/blob-polyfill/Blob.js
   var require_Blob = __commonJS({
@@ -118,9 +136,9 @@
                 tlen += 8;
                 tlen *= 1 + pos / string.length * 2;
                 tlen = tlen >> 3 << 3;
-                var update3 = new Uint8Array(tlen);
-                update3.set(target);
-                target = update3;
+                var update = new Uint8Array(tlen);
+                update.set(target);
+                target = update;
               }
               if ((value & 4294967168) === 0) {
                 target[at++] = value;
@@ -242,7 +260,7 @@
               }
               return output.join("");
             }
-            var create3 = Object.create || function(a) {
+            var create = Object.create || function(a) {
               function c() {
               }
               c.prototype = a;
@@ -276,12 +294,12 @@
               return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
             }
             function concatTypedarrays(chunks) {
-              var size2 = 0;
+              var size = 0;
               var j = chunks.length;
               while (j--) {
-                size2 += chunks[j].length;
+                size += chunks[j].length;
               }
-              var b = new Uint8Array(size2);
+              var b = new Uint8Array(size);
               var offset = 0;
               for (var i = 0; i < chunks.length; i++) {
                 var chunk = chunks[i];
@@ -337,7 +355,7 @@
               a.lastModified = +a.lastModifiedDate;
               return a;
             }
-            File2.prototype = create3(Blob3.prototype);
+            File2.prototype = create(Blob3.prototype);
             File2.prototype.constructor = File2;
             if (Object.setPrototypeOf) {
               Object.setPrototypeOf(File2, Blob3);
@@ -481,21 +499,21 @@
           try {
             new ReadableStream({ type: "bytes" });
             stream = function stream2() {
-              var position2 = 0;
+              var position = 0;
               var blob2 = this;
               return new ReadableStream({
                 type: "bytes",
                 autoAllocateChunkSize: 524288,
                 pull: function(controller) {
                   var v = controller.byobRequest.view;
-                  var chunk = blob2.slice(position2, position2 + v.byteLength);
+                  var chunk = blob2.slice(position, position + v.byteLength);
                   return chunk.arrayBuffer().then(function(buffer) {
                     var uint8array = new Uint8Array(buffer);
                     var bytesRead = uint8array.byteLength;
-                    position2 += bytesRead;
+                    position += bytesRead;
                     v.set(uint8array);
                     controller.byobRequest.respond(bytesRead);
-                    if (position2 >= blob2.size)
+                    if (position >= blob2.size)
                       controller.close();
                   });
                 }
@@ -505,15 +523,15 @@
             try {
               new ReadableStream({});
               stream = function stream2(blob2) {
-                var position2 = 0;
+                var position = 0;
                 return new ReadableStream({
                   pull: function(controller) {
-                    var chunk = blob2.slice(position2, position2 + 524288);
+                    var chunk = blob2.slice(position, position + 524288);
                     return chunk.arrayBuffer().then(function(buffer) {
-                      position2 += buffer.byteLength;
+                      position += buffer.byteLength;
                       var uint8array = new Uint8Array(buffer);
                       controller.enqueue(uint8array);
-                      if (position2 == blob2.size)
+                      if (position == blob2.size)
                         controller.close();
                     });
                   }
@@ -575,9 +593,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/codegen/code.js
+  // node_modules/ajv/dist/compile/codegen/code.js
   var require_code = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/codegen/code.js"(exports) {
+    "node_modules/ajv/dist/compile/codegen/code.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.regexpCode = exports.getEsmExportName = exports.getProperty = exports.safeStringify = exports.stringify = exports.strConcat = exports.addCodeArg = exports.str = exports._ = exports.nil = exports._Code = exports.Name = exports.IDENTIFIER = exports._CodeOrName = void 0;
@@ -729,9 +747,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/codegen/scope.js
+  // node_modules/ajv/dist/compile/codegen/scope.js
   var require_scope = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/codegen/scope.js"(exports) {
+    "node_modules/ajv/dist/compile/codegen/scope.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.ValueScope = exports.ValueScopeName = exports.Scope = exports.varKinds = exports.UsedValueState = void 0;
@@ -874,9 +892,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/codegen/index.js
+  // node_modules/ajv/dist/compile/codegen/index.js
   var require_codegen = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/codegen/index.js"(exports) {
+    "node_modules/ajv/dist/compile/codegen/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.or = exports.and = exports.not = exports.CodeGen = exports.operators = exports.varKinds = exports.ValueScopeName = exports.ValueScope = exports.Scope = exports.Name = exports.regexpCode = exports.stringify = exports.getProperty = exports.nil = exports.strConcat = exports.str = exports._ = void 0;
@@ -1046,38 +1064,38 @@
         }
       };
       var ParentNode = class extends Node {
-        constructor(nodes2 = []) {
+        constructor(nodes = []) {
           super();
-          this.nodes = nodes2;
+          this.nodes = nodes;
         }
         render(opts) {
           return this.nodes.reduce((code, n) => code + n.render(opts), "");
         }
         optimizeNodes() {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i].optimizeNodes();
+            const n = nodes[i].optimizeNodes();
             if (Array.isArray(n))
-              nodes2.splice(i, 1, ...n);
+              nodes.splice(i, 1, ...n);
             else if (n)
-              nodes2[i] = n;
+              nodes[i] = n;
             else
-              nodes2.splice(i, 1);
+              nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         optimizeNames(names, constants) {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i];
+            const n = nodes[i];
             if (n.optimizeNames(names, constants))
               continue;
             subtractNames(names, n.names);
-            nodes2.splice(i, 1);
+            nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         get names() {
           return this.nodes.reduce((names, n) => addNames(names, n.names), {});
@@ -1094,8 +1112,8 @@
       };
       Else.kind = "else";
       var If = class extends BlockNode {
-        constructor(condition, nodes2) {
-          super(nodes2);
+        constructor(condition, nodes) {
+          super(nodes);
           this.condition = condition;
         }
         render(opts) {
@@ -1563,9 +1581,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/util.js
+  // node_modules/ajv/dist/compile/util.js
   var require_util = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/util.js"(exports) {
+    "node_modules/ajv/dist/compile/util.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.checkStrictMode = exports.getErrorPath = exports.Type = exports.useFunc = exports.setEvaluated = exports.evaluatedPropsToName = exports.mergeEvaluated = exports.eachItem = exports.unescapeJsonPointer = exports.escapeJsonPointer = exports.escapeFragment = exports.unescapeFragment = exports.schemaRefOrVal = exports.schemaHasRulesButRef = exports.schemaHasRules = exports.checkUnknownRules = exports.alwaysValidSchema = exports.toHash = void 0;
@@ -1730,9 +1748,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/names.js
+  // node_modules/ajv/dist/compile/names.js
   var require_names = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/names.js"(exports) {
+    "node_modules/ajv/dist/compile/names.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -1758,9 +1776,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/errors.js
+  // node_modules/ajv/dist/compile/errors.js
   var require_errors = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/errors.js"(exports) {
+    "node_modules/ajv/dist/compile/errors.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.extendErrors = exports.resetErrorsCount = exports.reportExtraError = exports.reportError = exports.keyword$DataError = exports.keywordError = void 0;
@@ -1879,9 +1897,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/boolSchema.js
+  // node_modules/ajv/dist/compile/validate/boolSchema.js
   var require_boolSchema = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/boolSchema.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/boolSchema.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.boolOrEmptySchema = exports.topBoolOrEmptySchema = void 0;
@@ -1930,9 +1948,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/rules.js
+  // node_modules/ajv/dist/compile/rules.js
   var require_rules = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/rules.js"(exports) {
+    "node_modules/ajv/dist/compile/rules.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.getRules = exports.isJSONType = void 0;
@@ -1961,9 +1979,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/applicability.js
+  // node_modules/ajv/dist/compile/validate/applicability.js
   var require_applicability = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/applicability.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/applicability.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.shouldUseRule = exports.shouldUseGroup = exports.schemaHasRulesForType = void 0;
@@ -1984,9 +2002,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/dataType.js
+  // node_modules/ajv/dist/compile/validate/dataType.js
   var require_dataType = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/dataType.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/dataType.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.reportTypeError = exports.checkDataTypes = exports.checkDataType = exports.coerceAndCheckDataType = exports.getJSONTypes = exports.getSchemaTypes = exports.DataType = void 0;
@@ -2168,9 +2186,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/defaults.js
+  // node_modules/ajv/dist/compile/validate/defaults.js
   var require_defaults = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/defaults.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/defaults.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.assignDefaults = void 0;
@@ -2205,9 +2223,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/code.js
+  // node_modules/ajv/dist/vocabularies/code.js
   var require_code2 = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/code.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/code.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.validateUnion = exports.validateArray = exports.usePattern = exports.callValidateCode = exports.schemaProperties = exports.allSchemaProperties = exports.noPropertyInData = exports.propertyInData = exports.isOwnProperty = exports.hasPropFunc = exports.reportMissingProp = exports.checkMissingProp = exports.checkReportMissingProp = void 0;
@@ -2337,9 +2355,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/keyword.js
+  // node_modules/ajv/dist/compile/validate/keyword.js
   var require_keyword = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/keyword.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/keyword.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.validateKeywordUsage = exports.validSchemaType = exports.funcKeywordCode = exports.macroKeywordCode = void 0;
@@ -2455,9 +2473,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/subschema.js
+  // node_modules/ajv/dist/compile/validate/subschema.js
   var require_subschema = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/subschema.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/subschema.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.extendSubschemaMode = exports.extendSubschemaData = exports.getSubschema = void 0;
@@ -2538,9 +2556,9 @@
     }
   });
 
-  // src/validate/node_modules/fast-deep-equal/index.js
+  // node_modules/fast-deep-equal/index.js
   var require_fast_deep_equal = __commonJS({
-    "src/validate/node_modules/fast-deep-equal/index.js"(exports, module) {
+    "node_modules/fast-deep-equal/index.js"(exports, module) {
       "use strict";
       module.exports = function equal(a, b) {
         if (a === b)
@@ -2583,9 +2601,9 @@
     }
   });
 
-  // src/validate/node_modules/json-schema-traverse/index.js
+  // node_modules/json-schema-traverse/index.js
   var require_json_schema_traverse = __commonJS({
-    "src/validate/node_modules/json-schema-traverse/index.js"(exports, module) {
+    "node_modules/json-schema-traverse/index.js"(exports, module) {
       "use strict";
       var traverse = module.exports = function(schema, opts, cb) {
         if (typeof opts == "function") {
@@ -2671,9 +2689,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/resolve.js
+  // node_modules/ajv/dist/compile/resolve.js
   var require_resolve = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/resolve.js"(exports) {
+    "node_modules/ajv/dist/compile/resolve.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.getSchemaRefs = exports.resolveUrl = exports.normalizeId = exports._getFullPath = exports.getFullPath = exports.inlineRef = void 0;
@@ -2827,9 +2845,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/validate/index.js
+  // node_modules/ajv/dist/compile/validate/index.js
   var require_validate = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/validate/index.js"(exports) {
+    "node_modules/ajv/dist/compile/validate/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.getData = exports.KeywordCxt = exports.validateFunctionCode = void 0;
@@ -3325,9 +3343,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/runtime/validation_error.js
+  // node_modules/ajv/dist/runtime/validation_error.js
   var require_validation_error = __commonJS({
-    "src/validate/node_modules/ajv/dist/runtime/validation_error.js"(exports) {
+    "node_modules/ajv/dist/runtime/validation_error.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var ValidationError = class extends Error {
@@ -3341,9 +3359,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/ref_error.js
+  // node_modules/ajv/dist/compile/ref_error.js
   var require_ref_error = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/ref_error.js"(exports) {
+    "node_modules/ajv/dist/compile/ref_error.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var resolve_1 = require_resolve();
@@ -3358,9 +3376,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/compile/index.js
+  // node_modules/ajv/dist/compile/index.js
   var require_compile = __commonJS({
-    "src/validate/node_modules/ajv/dist/compile/index.js"(exports) {
+    "node_modules/ajv/dist/compile/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.resolveSchema = exports.getCompilingSchema = exports.resolveRef = exports.compileSchema = exports.SchemaEnv = void 0;
@@ -3581,9 +3599,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/refs/data.json
+  // node_modules/ajv/dist/refs/data.json
   var require_data = __commonJS({
-    "src/validate/node_modules/ajv/dist/refs/data.json"(exports, module) {
+    "node_modules/ajv/dist/refs/data.json"(exports, module) {
       module.exports = {
         $id: "https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#",
         description: "Meta-schema for $data reference (JSON AnySchema extension proposal)",
@@ -3600,9 +3618,9 @@
     }
   });
 
-  // src/validate/node_modules/uri-js/dist/es5/uri.all.js
+  // node_modules/uri-js/dist/es5/uri.all.js
   var require_uri_all = __commonJS({
-    "src/validate/node_modules/uri-js/dist/es5/uri.all.js"(exports, module) {
+    "node_modules/uri-js/dist/es5/uri.all.js"(exports, module) {
       (function(global2, factory) {
         typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global2.URI = global2.URI || {});
       })(exports, function(exports2) {
@@ -4608,9 +4626,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/runtime/uri.js
+  // node_modules/ajv/dist/runtime/uri.js
   var require_uri = __commonJS({
-    "src/validate/node_modules/ajv/dist/runtime/uri.js"(exports) {
+    "node_modules/ajv/dist/runtime/uri.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var uri = require_uri_all();
@@ -4619,9 +4637,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/core.js
+  // node_modules/ajv/dist/core.js
   var require_core = __commonJS({
-    "src/validate/node_modules/ajv/dist/core.js"(exports) {
+    "node_modules/ajv/dist/core.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.CodeGen = exports.Name = exports.nil = exports.stringify = exports.str = exports._ = exports.KeywordCxt = void 0;
@@ -5217,9 +5235,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/core/id.js
+  // node_modules/ajv/dist/vocabularies/core/id.js
   var require_id = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/core/id.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/core/id.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var def = {
@@ -5232,9 +5250,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/core/ref.js
+  // node_modules/ajv/dist/vocabularies/core/ref.js
   var require_ref = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/core/ref.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/core/ref.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.callRef = exports.getValidate = void 0;
@@ -5354,9 +5372,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/core/index.js
+  // node_modules/ajv/dist/vocabularies/core/index.js
   var require_core2 = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/core/index.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/core/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var id_1 = require_id();
@@ -5375,9 +5393,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/limitNumber.js
+  // node_modules/ajv/dist/vocabularies/validation/limitNumber.js
   var require_limitNumber = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/limitNumber.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5407,9 +5425,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/multipleOf.js
+  // node_modules/ajv/dist/vocabularies/validation/multipleOf.js
   var require_multipleOf = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/multipleOf.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5435,9 +5453,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/runtime/ucs2length.js
+  // node_modules/ajv/dist/runtime/ucs2length.js
   var require_ucs2length = __commonJS({
-    "src/validate/node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
+    "node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       function ucs2length(str) {
@@ -5461,9 +5479,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/limitLength.js
+  // node_modules/ajv/dist/vocabularies/validation/limitLength.js
   var require_limitLength = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/limitLength.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5493,9 +5511,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/pattern.js
+  // node_modules/ajv/dist/vocabularies/validation/pattern.js
   var require_pattern = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/pattern.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var code_1 = require_code2();
@@ -5521,9 +5539,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/limitProperties.js
+  // node_modules/ajv/dist/vocabularies/validation/limitProperties.js
   var require_limitProperties = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/limitProperties.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5550,9 +5568,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/required.js
+  // node_modules/ajv/dist/vocabularies/validation/required.js
   var require_required = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/required.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/required.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var code_1 = require_code2();
@@ -5632,9 +5650,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/limitItems.js
+  // node_modules/ajv/dist/vocabularies/validation/limitItems.js
   var require_limitItems = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/limitItems.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5661,9 +5679,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/runtime/equal.js
+  // node_modules/ajv/dist/runtime/equal.js
   var require_equal = __commonJS({
-    "src/validate/node_modules/ajv/dist/runtime/equal.js"(exports) {
+    "node_modules/ajv/dist/runtime/equal.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var equal = require_fast_deep_equal();
@@ -5672,9 +5690,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
+  // node_modules/ajv/dist/vocabularies/validation/uniqueItems.js
   var require_uniqueItems = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/uniqueItems.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var dataType_1 = require_dataType();
@@ -5739,9 +5757,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/const.js
+  // node_modules/ajv/dist/vocabularies/validation/const.js
   var require_const = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/const.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/const.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5768,9 +5786,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/enum.js
+  // node_modules/ajv/dist/vocabularies/validation/enum.js
   var require_enum = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/enum.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/enum.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -5817,9 +5835,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/validation/index.js
+  // node_modules/ajv/dist/vocabularies/validation/index.js
   var require_validation = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/validation/index.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/validation/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var limitNumber_1 = require_limitNumber();
@@ -5850,9 +5868,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
+  // node_modules/ajv/dist/vocabularies/applicator/additionalItems.js
   var require_additionalItems = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/additionalItems.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.validateAdditionalItems = void 0;
@@ -5903,9 +5921,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/items.js
+  // node_modules/ajv/dist/vocabularies/applicator/items.js
   var require_items = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/items.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/items.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.validateTuple = void 0;
@@ -5960,9 +5978,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
+  // node_modules/ajv/dist/vocabularies/applicator/prefixItems.js
   var require_prefixItems = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/prefixItems.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var items_1 = require_items();
@@ -5977,9 +5995,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/items2020.js
+  // node_modules/ajv/dist/vocabularies/applicator/items2020.js
   var require_items2020 = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/items2020.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6012,9 +6030,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/contains.js
+  // node_modules/ajv/dist/vocabularies/applicator/contains.js
   var require_contains = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/contains.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6106,9 +6124,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/dependencies.js
+  // node_modules/ajv/dist/vocabularies/applicator/dependencies.js
   var require_dependencies = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/dependencies.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.validateSchemaDeps = exports.validatePropertyDeps = exports.error = void 0;
@@ -6194,9 +6212,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
+  // node_modules/ajv/dist/vocabularies/applicator/propertyNames.js
   var require_propertyNames = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/propertyNames.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6237,9 +6255,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
+  // node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js
   var require_additionalProperties = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/additionalProperties.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var code_1 = require_code2();
@@ -6343,9 +6361,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/properties.js
+  // node_modules/ajv/dist/vocabularies/applicator/properties.js
   var require_properties = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/properties.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var validate_1 = require_validate();
@@ -6401,9 +6419,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
+  // node_modules/ajv/dist/vocabularies/applicator/patternProperties.js
   var require_patternProperties = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/patternProperties.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var code_1 = require_code2();
@@ -6475,9 +6493,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/not.js
+  // node_modules/ajv/dist/vocabularies/applicator/not.js
   var require_not = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/not.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/not.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var util_1 = require_util();
@@ -6506,9 +6524,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/anyOf.js
+  // node_modules/ajv/dist/vocabularies/applicator/anyOf.js
   var require_anyOf = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/anyOf.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var code_1 = require_code2();
@@ -6523,9 +6541,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/oneOf.js
+  // node_modules/ajv/dist/vocabularies/applicator/oneOf.js
   var require_oneOf = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/oneOf.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6581,9 +6599,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/allOf.js
+  // node_modules/ajv/dist/vocabularies/applicator/allOf.js
   var require_allOf = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var util_1 = require_util();
@@ -6608,9 +6626,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/if.js
+  // node_modules/ajv/dist/vocabularies/applicator/if.js
   var require_if = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/if.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/if.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6677,9 +6695,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/thenElse.js
+  // node_modules/ajv/dist/vocabularies/applicator/thenElse.js
   var require_thenElse = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var util_1 = require_util();
@@ -6695,9 +6713,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/applicator/index.js
+  // node_modules/ajv/dist/vocabularies/applicator/index.js
   var require_applicator = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/applicator/index.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/applicator/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var additionalItems_1 = require_additionalItems();
@@ -6741,9 +6759,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/format/format.js
+  // node_modules/ajv/dist/vocabularies/format/format.js
   var require_format = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/format/format.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/format/format.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -6831,9 +6849,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/format/index.js
+  // node_modules/ajv/dist/vocabularies/format/index.js
   var require_format2 = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/format/index.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/format/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var format_1 = require_format();
@@ -6842,9 +6860,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/metadata.js
+  // node_modules/ajv/dist/vocabularies/metadata.js
   var require_metadata = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/metadata.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/metadata.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.contentVocabulary = exports.metadataVocabulary = void 0;
@@ -6865,9 +6883,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/draft7.js
+  // node_modules/ajv/dist/vocabularies/draft7.js
   var require_draft7 = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/draft7.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/draft7.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var core_1 = require_core2();
@@ -6887,9 +6905,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/discriminator/types.js
+  // node_modules/ajv/dist/vocabularies/discriminator/types.js
   var require_types = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/discriminator/types.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.DiscrError = void 0;
@@ -6901,9 +6919,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/vocabularies/discriminator/index.js
+  // node_modules/ajv/dist/vocabularies/discriminator/index.js
   var require_discriminator = __commonJS({
-    "src/validate/node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports) {
+    "node_modules/ajv/dist/vocabularies/discriminator/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var codegen_1 = require_codegen();
@@ -7002,9 +7020,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/refs/json-schema-draft-07.json
+  // node_modules/ajv/dist/refs/json-schema-draft-07.json
   var require_json_schema_draft_07 = __commonJS({
-    "src/validate/node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports, module) {
+    "node_modules/ajv/dist/refs/json-schema-draft-07.json"(exports, module) {
       module.exports = {
         $schema: "http://json-schema.org/draft-07/schema#",
         $id: "http://json-schema.org/draft-07/schema#",
@@ -7159,9 +7177,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv/dist/ajv.js
+  // node_modules/ajv/dist/ajv.js
   var require_ajv = __commonJS({
-    "src/validate/node_modules/ajv/dist/ajv.js"(exports, module) {
+    "node_modules/ajv/dist/ajv.js"(exports, module) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.CodeGen = exports.Name = exports.nil = exports.stringify = exports.str = exports._ = exports.KeywordCxt = void 0;
@@ -7219,9 +7237,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv-formats/dist/formats.js
+  // node_modules/ajv-formats/dist/formats.js
   var require_formats = __commonJS({
-    "src/validate/node_modules/ajv-formats/dist/formats.js"(exports) {
+    "node_modules/ajv-formats/dist/formats.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.formatNames = exports.fastFormats = exports.fullFormats = void 0;
@@ -7363,9 +7381,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv-formats/dist/limit.js
+  // node_modules/ajv-formats/dist/limit.js
   var require_limit = __commonJS({
-    "src/validate/node_modules/ajv-formats/dist/limit.js"(exports) {
+    "node_modules/ajv-formats/dist/limit.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.formatLimitDefinition = void 0;
@@ -7435,9 +7453,9 @@
     }
   });
 
-  // src/validate/node_modules/ajv-formats/dist/index.js
+  // node_modules/ajv-formats/dist/index.js
   var require_dist = __commonJS({
-    "src/validate/node_modules/ajv-formats/dist/index.js"(exports, module) {
+    "node_modules/ajv-formats/dist/index.js"(exports, module) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var formats_1 = require_formats();
@@ -7585,10 +7603,10 @@
           let buffer = [];
           const processBuffer = async ({ done, value }) => {
             if (done) {
-              const config2 = {};
+              const config = {};
               if (typeof type === "string")
-                config2.type = type;
-              const blob = new Blob(buffer, config2);
+                config.type = type;
+              const blob = new Blob(buffer, config);
               const ab = await blob.arrayBuffer();
               resolve2({ buffer: new Uint8Array(ab), type });
               return;
@@ -7656,13 +7674,14 @@
   };
   var resolve = get;
   var getText = async (uri) => await globalThis.fetch(uri).then((res) => res.text());
-  var safeImport = async (uri, {
-    root,
-    onImport = () => {
-    },
-    outputText,
-    forceImportFromText
-  } = {}) => {
+  var safeImport = async (uri, opts = {}) => {
+    const {
+      root,
+      onImport = () => {
+      },
+      outputText,
+      forceImportFromText
+    } = opts;
     await ready;
     const extension = uri.split(".").slice(-1)[0];
     const isJSON = extension === "json";
@@ -7740,19 +7759,32 @@ ${text}`;
     let type = suffix(relPath);
     const isJSON = !type || type.includes("json");
     const fullPath = resolve(relPath, relativeTo);
+    const isFunc = typeof onImport === "function";
+    const imported = cache[fullPath]?.imported ?? [];
     if (!cache[fullPath]) {
-      cache[fullPath] = remote_esm_default(fullPath, { onImport }).catch((e) => {
+      const imported2 = [];
+      cache[fullPath] = remote_esm_default(fullPath, {
+        onImport: (...args) => {
+          if (isFunc) {
+            imported2.push(args);
+            onImport(...args);
+          }
+        },
+        outputText: true
+      }).catch((e) => {
         if (e.message.includes("Failed to fetch"))
           throw new Error("404");
         else
           throw e;
       });
+      cache[fullPath].imported = imported2;
       const res = await cache[fullPath];
       if (isJSON)
         cache[fullPath] = res?.default ?? {};
       else
         cache[fullPath] = res;
-    }
+    } else if (isFunc)
+      imported.forEach((args) => onImport(...args));
     return isJSON ? JSON.parse(JSON.stringify(cache[fullPath])) : cache[fullPath];
   };
   var get_default = get2;
@@ -7787,7 +7819,46 @@ ${text}`;
     return errors;
   };
 
-  // node_modules/es-plugins/dist/index.esm.js
+  // src/core/utils.ts
+  var isSrc = (str) => {
+    return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
+  };
+  var merge = (main, override, deleteSrc = false) => {
+    const copy = Object.assign({}, main);
+    if (override) {
+      if (deleteSrc) {
+        const ogSrc = override.src ?? override;
+        delete override.src;
+        if ("default" in ogSrc)
+          return ogSrc.default;
+      }
+      const keys = Object.keys(copy);
+      const newKeys = new Set(Object.keys(override));
+      keys.forEach((k) => {
+        newKeys.delete(k);
+        if (typeof override[k] === "object" && !Array.isArray(override[k]))
+          copy[k] = merge(copy[k], override[k]);
+        else if (k in override)
+          copy[k] = override[k];
+      });
+      newKeys.forEach((k) => {
+        copy[k] = override[k];
+      });
+    }
+    return copy;
+  };
+  var checkFiles = (key, filesystem2) => {
+    const isJSON = suffix(key).slice(-4) === "json" ? true : false;
+    const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
+    return output;
+  };
+  var remove = (original, search, key = original, o) => {
+    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
+    if (o)
+      delete o[key];
+  };
+
+  // src/core/node_modules/es-plugins/dist/index.esm.js
   function parseFunctionFromText(method = "") {
     let getFunctionBody = (methodString) => {
       return methodString.replace(/^\W*(function[^{]+\{([\s\S]*)\}|[^=]+=>[^{]*\{([\s\S]*)\}|[^=]+=>(.+))/i, "$2$3$4");
@@ -7871,10 +7942,30 @@ ${text}`;
       sub = state.subscribeTrigger(key, changed);
     }
   };
+  var restrictedKeys = ["_state", "graph"];
+  function merge2(props) {
+    for (let k in props) {
+      if (restrictedKeys.includes(k))
+        continue;
+      else {
+        this._state[k] = props[k];
+        if (k in this)
+          this[k] = props[k];
+        else
+          Object.defineProperty(this, k, {
+            get: () => this._state[k],
+            set: (v) => this._state[k] = v,
+            enumerable: true
+          });
+      }
+    }
+  }
   var GraphNode = class {
     constructor(properties = {}, parentNode, graph) {
       this.nodes = /* @__PURE__ */ new Map();
       this._initial = {};
+      this._state = {};
+      this._unique = Math.random();
       this.state = state;
       this.isLooping = false;
       this.isAnimating = false;
@@ -7885,6 +7976,7 @@ ${text}`;
       this.runSync = false;
       this.firstRun = true;
       this.DEBUGNODE = false;
+      this.merge = merge2;
       this.operator = (...args) => {
         return args;
       };
@@ -7928,13 +8020,15 @@ ${text}`;
         });
       };
       this.transformArgs = (args = []) => args;
+      this.isRunSync = () => {
+        return !(this.children && this.forward || this.parent && this.backward || this.repeat || this.delay || this.frame || this.recursive || this.branch);
+      };
       this.run = (...args) => {
         if (typeof this.transformArgs === "function")
           args = this.transformArgs(args, this);
         if (this.firstRun) {
           this.firstRun = false;
-          if (!(this.children && this.forward || this.parent && this.backward || this.repeat || this.delay || this.frame || this.recursive || this.branch))
-            this.runSync = true;
+          this.runSync = this.isRunSync();
           if (this.animate && !this.isAnimating) {
             this.runAnimation(this.animation, args);
           }
@@ -8092,7 +8186,7 @@ ${text}`;
                 pass = true;
             }
             if (pass) {
-              if (n.branch[k].then instanceof GraphNode) {
+              if (n.branch[k].then.run) {
                 if (Array.isArray(output))
                   await n.branch[k].then.run(...output);
                 else
@@ -8107,7 +8201,7 @@ ${text}`;
                   n.branch[k].then = n.graph.nodes.get(n.branch[k].then);
                 else
                   n.branch[k].then = n.nodes.get(n.branch[k].then);
-                if (n.branch[k].then instanceof GraphNode) {
+                if (n.branch[k].then.run) {
                   if (Array.isArray(output))
                     await n.branch[k].then.run(...output);
                   else
@@ -8226,8 +8320,10 @@ ${text}`;
       this.add = (n = {}) => {
         if (typeof n === "function")
           n = { operator: n };
+        if (n?.node instanceof GraphNode)
+          n = n.node;
         if (!(n instanceof GraphNode))
-          n = new GraphNode(n, this, this.graph);
+          n = new GraphNode(n.node ?? n, this, this.graph);
         this.nodes.set(n.tag, n);
         if (this.graph) {
           this.graph.nodes.set(n.tag, n);
@@ -8238,7 +8334,7 @@ ${text}`;
       this.remove = (n) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode) {
+        if (n?.tag) {
           this.nodes.delete(n.tag);
           if (this.children[n.tag])
             delete this.children[n.tag];
@@ -8262,20 +8358,20 @@ ${text}`;
       this.append = (n, parentNode2 = this) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode) {
+        if (n?.nodes) {
           parentNode2.addChildren(n);
           if (n.forward)
             n.runSync = false;
         }
       };
       this.subscribe = (callback, tag = this.tag) => {
-        if (callback instanceof GraphNode) {
+        if (callback.run) {
           return this.subscribeNode(callback);
         } else
           return this.state.subscribeTrigger(tag, callback);
       };
       this.unsubscribe = (sub, tag = this.tag) => {
-        this.state.unsubscribeTrigger(tag, sub);
+        return this.state.unsubscribeTrigger(tag, sub);
       };
       this.addChildren = (children) => {
         if (!this.children)
@@ -8341,15 +8437,14 @@ ${text}`;
           delete tmp.operator;
         }
         Object.assign(tmp, props);
-        if (!(this.children && this.forward || this.parent && this.backward || this.repeat || this.delay || this.frame || this.recursive))
-          this.runSync = true;
+        this.runSync = this.isRunSync();
       };
       this.removeTree = (n) => {
         if (n) {
           if (typeof n === "string")
             n = this.nodes.get(n);
         }
-        if (n instanceof GraphNode) {
+        if (n?.nodes) {
           let checked = {};
           const recursivelyRemove = (node) => {
             if (typeof node.children === "object" && !checked[node.tag]) {
@@ -8415,7 +8510,7 @@ ${text}`;
             }
           }
           if (n.parent instanceof GraphNode) {
-            if (n.nodes.get(child.tag) && !n.parent.nodes.get(child.tag))
+            if (n.nodes.get(child.tag))
               n.parent.nodes.set(child.tag, child);
             if (n.parent.children) {
               this.checkNodesHaveChildMapped(n.parent, child, checked);
@@ -8461,16 +8556,6 @@ ${text}`;
                     n.children[key] = n.nodes.get(key);
                 }
                 if (n.children[key] instanceof GraphNode) {
-                  if (n.graph) {
-                    let props = n.children[key].getProps();
-                    delete props.parent;
-                    delete props.graph;
-                    if (n.source instanceof Graph) {
-                      n.children[key] = new GraphNode(props, n, n.source);
-                    } else {
-                      n.children[key] = new GraphNode(props, n, n.graph);
-                    }
-                  }
                   n.nodes.set(n.children[key].tag, n.children[key]);
                   this.checkNodesHaveChildMapped(n, n.children[key]);
                   if (!(n.children[key].tag in n))
@@ -8641,8 +8726,7 @@ ${text}`;
             hasnode = parentNode.nodes.get(properties.tag);
           }
           if (hasnode) {
-            for (let k in hasnode)
-              this[k] = hasnode[k];
+            this.merge(hasnode);
             if (!this.source)
               this.source = hasnode;
             let props = hasnode.getProps();
@@ -8667,8 +8751,7 @@ ${text}`;
         }
         if (properties.children)
           this._initial.children = Object.assign({}, properties.children);
-        for (let k in properties)
-          this[k] = properties[k];
+        this.merge(properties);
         if (!this.tag) {
           if (graph) {
             this.tag = `node${graph.nNodes}`;
@@ -8708,6 +8791,8 @@ ${text}`;
           this.oncreate(this);
         if (!this.firstRun)
           this.firstRun = true;
+        if (this.animation && !this.animate)
+          this.animate = true;
       } else
         return properties;
     }
@@ -8717,11 +8802,16 @@ ${text}`;
       this.nNodes = 0;
       this.nodes = /* @__PURE__ */ new Map();
       this.state = state;
+      this._state = {};
+      this._unique = Math.random();
       this.tree = {};
+      this.merge = merge2;
       this.add = (n = {}) => {
+        if (n?.node instanceof GraphNode)
+          n = n.node;
         let props2 = n;
         if (!(n instanceof GraphNode))
-          n = new GraphNode(props2, this, this);
+          n = new GraphNode(props2?.node ?? props2, this, this);
         else {
           this.nNodes = this.nodes.size;
           if (n.tag) {
@@ -8833,7 +8923,7 @@ ${text}`;
       this.run = (n, ...args) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode)
+        if (n?.run)
           return n.run(...args);
         else
           return void 0;
@@ -8841,7 +8931,7 @@ ${text}`;
       this.runAsync = (n, ...args) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode)
+        if (n?.run)
           return new Promise((res, rej) => {
             res(n.run(...args));
           });
@@ -8853,7 +8943,7 @@ ${text}`;
       this.removeTree = (n, checked) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode) {
+        if (n?.nodes) {
           if (!checked)
             checked = {};
           const recursivelyRemove = (node) => {
@@ -8907,8 +8997,9 @@ ${text}`;
       this.remove = (n) => {
         if (typeof n === "string")
           n = this.nodes.get(n);
-        if (n instanceof GraphNode) {
-          n.stopNode();
+        if (n?.nodes) {
+          if (n.stopNode)
+            n.stopNode();
           if (n?.tag) {
             if (this.nodes.get(n.tag)) {
               this.nodes.delete(n.tag);
@@ -8939,7 +9030,7 @@ ${text}`;
       this.subscribe = (n, callback) => {
         if (!callback)
           return;
-        if (n instanceof GraphNode && typeof callback === "function") {
+        if (n?.subscribe && typeof callback === "function") {
           return n.subscribe(callback);
         } else if (callback instanceof GraphNode || typeof callback === "string")
           return this.subscribeNode(n, callback);
@@ -8948,7 +9039,7 @@ ${text}`;
         }
       };
       this.unsubscribe = (tag2, sub) => {
-        this.state.unsubscribeTrigger(tag2, sub);
+        return this.state.unsubscribeTrigger(tag2, sub);
       };
       this.subscribeNode = (inputNode, outputNode) => {
         let tag2;
@@ -8972,12 +9063,12 @@ ${text}`;
         if (typeof n === "string") {
           n = this.nodes.get(n);
         }
-        if (n instanceof GraphNode) {
+        if (n?.stopNode) {
           n.stopNode();
         }
       };
-      this.print = (n = void 0, printChildren = true) => {
-        if (n instanceof GraphNode)
+      this.print = (n, printChildren = true) => {
+        if (n?.print)
           return n.print(n, printChildren);
         else {
           let printed = `{`;
@@ -9007,8 +9098,7 @@ ${text}`;
       };
       this.tag = tag ? tag : `graph${Math.floor(Math.random() * 1e11)}`;
       if (props) {
-        for (let k in props)
-          this[k] = props[k];
+        this.merge(props);
         this._initial = props;
       }
       if (tree || Object.keys(this.tree).length > 0)
@@ -9311,11 +9401,11 @@ ${text}`;
           };
         }
       } else if (name2 === "oncreate") {
-        let oncreate2 = val;
-        if (typeof oncreate2 === "string")
-          oncreate2 = parseFunctionFromText2(oncreate2);
-        if (typeof oncreate2 === "function") {
-          this.oncreate = oncreate2;
+        let oncreate = val;
+        if (typeof oncreate === "string")
+          oncreate = parseFunctionFromText2(oncreate);
+        if (typeof oncreate === "function") {
+          this.oncreate = oncreate;
         }
       } else if (name2 === "renderonchanged") {
         let rpc = val;
@@ -9628,8 +9718,8 @@ ${text}`;
     get oncreate() {
       return this.oncreate;
     }
-    set oncreate(oncreate2) {
-      this.setAttribute("oncreated", oncreate2);
+    set oncreate(oncreate) {
+      this.setAttribute("oncreated", oncreate);
     }
   };
   function addCustomElement(cls, tag, extend = null) {
@@ -9686,6 +9776,8 @@ ${text}`;
       this.loadDefaultRoutes = false;
       this.keepState = true;
       this.firstLoad = true;
+      this.customRoutes = {};
+      this.customChildren = {};
       this.init = (options3) => {
         if (options3)
           options3 = Object.assign({}, options3);
@@ -9715,12 +9807,10 @@ ${text}`;
           customRoutes = Object.assign(this.customRoutes, customRoutes);
         else
           customRoutes = this.customRoutes;
-        if (customChildren)
-          customChildren = Object.assign(this.customChildren, customChildren);
         let service;
         let allRoutes = {};
         if (routes) {
-          if (!(routes instanceof Graph) && routes?.name) {
+          if (!(routes instanceof Graph) && routes?.name && !routes.setTree) {
             if (routes.module) {
               let mod = routes;
               routes = {};
@@ -9734,13 +9824,20 @@ ${text}`;
               service = new routes({ loadDefaultRoutes: this.loadDefaultRoutes });
               service.load();
               routes = service.routes;
+              if (service.customRoutes && !this.customRoutes)
+                this.customRoutes = service.customRoutes;
+              else if (service.customRoutes && this.customRoutes)
+                Object.assign(this.customRoutes, service.customRoutes);
+              if (service.customChildren && !this.customChildren)
+                this.customChildren = service.customChildren;
+              else if (service.customChildren && this.customChildren)
+                Object.assign(this.customChildren, service.customChildren);
             }
-          } else if (routes instanceof Graph || routes.source instanceof Graph) {
+          } else if (routes instanceof Graph || routes.source instanceof Graph || routes.setTree) {
             service = routes;
             routes = {};
-            let name2;
             if (includeClassName) {
-              name2 = service.name;
+              let name2 = service.name;
               if (!name2) {
                 name2 = service.tag;
                 service.name = name2;
@@ -9768,7 +9865,7 @@ ${text}`;
                     checked[nd.tag] = true;
                   else
                     checked[par.tag + routeFormat + nd.tag] = true;
-                  if (nd instanceof Graph || nd.source instanceof Graph) {
+                  if (nd instanceof Graph || nd.source instanceof Graph || nd.setTree) {
                     if (includeClassName) {
                       let nm = nd.name;
                       if (!nm) {
@@ -9813,7 +9910,7 @@ ${text}`;
               });
             }
           }
-          if (service instanceof Graph && service.name && includeClassName) {
+          if ((service instanceof Graph || service?.setTree) && service.name && includeClassName) {
             routes = Object.assign({}, routes);
             for (const prop in routes) {
               let route = routes[prop];
@@ -9956,7 +10053,7 @@ ${text}`;
         }
         if (service) {
           for (const key in this.routes) {
-            if (this.routes[key] instanceof GraphNode) {
+            if (this.routes[key] instanceof GraphNode || this.routes[key].constructor.name.includes("GraphNode")) {
               this.nodes.set(key, this.routes[key]);
               this.nNodes = this.nodes.size;
             }
@@ -9995,19 +10092,19 @@ ${text}`;
       };
       this.handleMethod = (route, method, args) => {
         let m = method.toLowerCase();
-        if (m === "get" && this.routes[route]?.get?.transform instanceof Function) {
-          if (Array.isArray(args))
-            return this.routes[route].get.transform(...args);
-          else
-            return this.routes[route].get.transform(args);
+        let src = this.nodes.get(route);
+        if (!src) {
+          src = this.routes[route];
+          if (!src)
+            src = this.tree[route];
         }
-        if (this.routes[route]?.[m]) {
-          if (!(this.routes[route][m] instanceof Function)) {
+        if (src?.[m]) {
+          if (!(src[m] instanceof Function)) {
             if (args)
-              this.routes[route][m] = args;
-            return this.routes[route][m];
+              src[m] = args;
+            return src[m];
           } else
-            return this.routes[route][m](args);
+            return src[m](args);
         } else
           return this.handleServiceMessage({ route, args, method });
       };
@@ -10176,7 +10273,6 @@ ${text}`;
         pipe: this.pipe,
         terminate: this.terminate,
         run: this.run,
-        _run: this._run,
         subscribe: this.subscribe,
         subscribeNode: this.subscribeNode,
         unsubscribe: this.unsubscribe,
@@ -10204,18 +10300,18 @@ ${text}`;
         this.init(options2);
     }
     handleServiceMessage(message) {
-      let call2;
+      let call;
       if (typeof message === "object") {
         if (message.route)
-          call2 = message.route;
+          call = message.route;
         else if (message.node)
-          call2 = message.node;
+          call = message.node;
       }
-      if (call2) {
+      if (call) {
         if (Array.isArray(message.args))
-          return this.run(call2, ...message.args);
+          return this.run(call, ...message.args);
         else
-          return this.run(call2, message.args);
+          return this.run(call, message.args);
       } else
         return message;
     }
@@ -10284,18 +10380,20 @@ ${text}`;
       };
       this.customRoutes = {
         "dom": (r, route, routes) => {
-          if (r.template) {
-            if (!r.tag)
-              r.tag = route;
-            this.addComponent(r, r.generateChildElementNodes);
-          } else if (r.context) {
-            if (!r.tag)
-              r.tag = route;
-            this.addCanvasComponent(r);
-          } else if (r.tagName || r.element) {
-            if (!r.tag)
-              r.tag = route;
-            this.addElement(r, r.generateChildElementNodes);
+          if (!(r instanceof GraphNode)) {
+            if (r.template) {
+              if (!r.tag)
+                r.tag = route;
+              this.addComponent(r, r.generateChildElementNodes);
+            } else if (r.context) {
+              if (!r.tag)
+                r.tag = route;
+              this.addCanvasComponent(r);
+            } else if (r.tagName || r.element) {
+              if (!r.tag)
+                r.tag = route;
+              this.addElement(r, r.generateChildElementNodes);
+            }
           }
           return r;
         }
@@ -10318,10 +10416,11 @@ ${text}`;
         let node;
         if (this.nodes.get(options3.id)?.element?.parentNode?.id === options3.parentNode || this.nodes.get(options3.id)?.parentNode === options3.parentNode) {
           node = this.nodes.get(options3.id);
-          node.element = element;
         } else {
           node = new GraphNode(options3, options3.parentNode ? this.nodes.get(options3.parentNode) : this.parentNode, this);
         }
+        node.element = element;
+        element.node = node;
         const initialOptions = options3._initial ?? options3;
         for (let key in initialOptions) {
           if (typeof initialOptions[key] === "function")
@@ -10338,7 +10437,7 @@ ${text}`;
       };
       this.addElement = (options3, generateChildElementNodes = false) => {
         let elm = this.createElement(options3);
-        let oncreate2 = options3.onrender;
+        let oncreate = options3.onrender;
         if (!options3.element)
           options3.element = elm;
         if (!options3.operator)
@@ -10360,7 +10459,6 @@ ${text}`;
             return props;
           };
         let node = this.resolveNode(elm, options3);
-        elm.node = node;
         let divs = Array.from(elm.querySelectorAll("*"));
         if (generateChildElementNodes) {
           divs = divs.map((d, i) => this.addElement({ element: d }));
@@ -10370,16 +10468,16 @@ ${text}`;
           node.ondelete = (node2) => {
             elm.remove();
             if (options3.onremove)
-              options3.onremove(elm, this.elements[options3.id]);
+              options3.onremove.call(this.elements[options3.id].node, elm, this.elements[options3.id]);
           };
         if (options3.onresize) {
           let onresize = options3.onresize;
           options3.onresize = (ev) => {
-            onresize(ev, elm, this.elements[options3.id]);
+            onresize.call(this.elements[options3.id].node, ev, elm, this.elements[options3.id]);
           };
           window.addEventListener("resize", options3.onresize);
         }
-        this.resolveParentNode(elm, options3, oncreate2);
+        this.resolveParentNode(elm, options3, oncreate);
         return this.elements[options3.id];
       };
       this.createElement = (options3) => {
@@ -10425,31 +10523,36 @@ ${text}`;
               element[key] = options3.attributes[key];
           }
         }
+        if (!options3.attributes?.innerHTML && options3.innerHTML) {
+          element.innerHTML = options3.innerHTML;
+        } else if (!options3.attributes?.innerText && options3.innerText) {
+          element.innerText = options3.innerText;
+        }
         return options3;
       };
       this.addComponent = (options3, generateChildElementNodes = true) => {
         if (options3.onrender) {
-          let oncreate2 = options3.onrender;
-          options3.onrender = (self2) => {
-            oncreate2(self2, options3);
+          let oncreate = options3.onrender;
+          options3.onrender = (element) => {
+            oncreate.call(element.node, element, options3);
           };
         }
         if (options3.onresize) {
           let onresize = options3.onresize;
-          options3.onresize = (self2) => {
-            onresize(self2, options3);
+          options3.onresize = (element) => {
+            onresize.call(element.node, element, options3);
           };
         }
         if (options3.onremove) {
           let ondelete = options3.onremove;
-          options3.onremove = (self2) => {
-            ondelete(self2, options3);
+          options3.onremove = (element) => {
+            ondelete.call(element.node, self, options3);
           };
         }
         if (typeof options3.renderonchanged === "function") {
           let renderonchanged = options3.renderonchanged;
-          options3.renderonchanged = (self2) => {
-            renderonchanged(self2, options3);
+          options3.renderonchanged = (element) => {
+            renderonchanged.call(element.node, element, options3);
           };
         }
         if (options3.interpreter && options3.interpreter !== "wc") {
@@ -10503,7 +10606,6 @@ ${text}`;
           node.ondelete = (node2) => {
             elm.delete();
           };
-        elm.node = node;
         this.components[completeOptions.id] = {
           element: elm,
           class: CustomElement,
@@ -10525,27 +10627,27 @@ ${text}`;
         } else
           options3.template = options3.canvas;
         if (options3.onrender) {
-          let oncreate2 = options3.onrender;
-          options3.onrender = (self2) => {
-            oncreate2(self2, options3);
+          let oncreate = options3.onrender;
+          options3.onrender = (element) => {
+            oncreate.call(element.node, element, options3);
           };
         }
         if (options3.onresize) {
           let onresize = options3.onresize;
-          options3.onresize = (self2) => {
-            onresize(self2, options3);
+          options3.onresize = (element) => {
+            onresize.call(element.node, element, options3);
           };
         }
         if (options3.ondelete) {
           let ondelete = options3.onremove;
-          options3.onremove = (self2) => {
-            ondelete(self2, options3);
+          options3.onremove = (element) => {
+            ondelete.call(element.node, element, options3);
           };
         }
         if (typeof options3.renderonchanged === "function") {
           let renderonchanged = options3.renderonchanged;
-          options3.renderonchanged = (self2) => {
-            renderonchanged(self2, options3);
+          options3.renderonchanged = (element) => {
+            renderonchanged.call(element.node, element, options3);
           };
         }
         class CustomElement extends DOMElement {
@@ -10593,7 +10695,6 @@ ${text}`;
             return props;
           };
         let node = this.resolveNode(elm, options3);
-        elm.node = node;
         if (!node.ondelete)
           node.ondelete = (node2) => {
             elm.delete();
@@ -10620,10 +10721,9 @@ ${text}`;
         node.canvas = canvas;
         node.context = context;
         this.resolveParentNode(elm, options3);
-        node.runAnimation(animation);
         return this.components[completeOptions.id];
       };
-      this.resolveParentNode = (elm, options3, oncreate2) => {
+      this.resolveParentNode = (elm, options3, oncreate) => {
         if (!elm.parentNode) {
           setTimeout(() => {
             if (typeof options3.parentNode === "string")
@@ -10631,8 +10731,14 @@ ${text}`;
             if (typeof options3.parentNode === "object") {
               options3.parentNode.appendChild(elm);
             }
-            if (oncreate2)
-              oncreate2(elm, this.elements[options3.id]);
+            if (oncreate)
+              oncreate.call(elm.node, elm, this.elements[options3.id]);
+            if (elm.node.animation || elm.node.animate) {
+              elm.node.runAnimation();
+            }
+            if (elm.node.looper || typeof elm.node.loop === "number" && elm.node.loop) {
+              elm.node.runLoop();
+            }
           }, 0.01);
         }
       };
@@ -10692,39 +10798,878 @@ ${text}`;
       this.init(options2);
     }
   };
+  function Struct(structType = "struct", assignProps = {}, parentUser = { _id: "" }, parentStruct = { structType: "struct", _id: "" }) {
+    function randomId(tag = "") {
+      return `${tag + Math.floor(Math.random() + Math.random() * Math.random() * 1e16)}`;
+    }
+    let struct = {
+      _id: randomId(structType + "defaultId"),
+      structType,
+      ownerId: parentUser?._id,
+      timestamp: Date.now(),
+      parent: { structType: parentStruct?.structType, _id: parentStruct?._id }
+    };
+    if (!struct.ownerId)
+      delete struct.ownerId;
+    if (!struct?.parent?._id)
+      delete struct.parent;
+    if (Object.keys(assignProps).length > 0)
+      Object.assign(struct, assignProps);
+    return struct;
+  }
+  function ProfileStruct(tag = "", assignProps = {}, parentUser = { _id: "" }, parentStruct = { structType: "struct", _id: "" }) {
+    let props = {
+      tag,
+      name: "",
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      sex: "",
+      birthday: "",
+      type: "",
+      userRoles: {},
+      socials: {},
+      data: {},
+      id: ""
+    };
+    let struct = Struct("profile", props, parentUser, parentStruct);
+    return Object.assign(struct, assignProps);
+  }
+  var Router = class extends Service {
+    constructor(options2) {
+      super(options2);
+      this.name = "router";
+      this.connections = {};
+      this.sources = {};
+      this.services = {};
+      this.serviceConnections = {};
+      this.users = {};
+      this.addUser = async (info, connections, config, receiving) => {
+        if (!info._id) {
+          info._id = `user${Math.floor(Math.random() * 1e15)}`;
+        }
+        let user = ProfileStruct(info._id, info);
+        if (connections) {
+          for (const key in connections) {
+            if (typeof connections[key] === "object") {
+              if (!connections[key].connection._id) {
+                await new Promise((res, rej) => {
+                  let start = performance.now();
+                  let checker = () => {
+                    if (!connections[key].connection._id) {
+                      if (performance.now() - start > 3e3) {
+                        delete connections[key];
+                        rej(false);
+                      } else {
+                        setTimeout(() => {
+                          checker();
+                        }, 100);
+                      }
+                    } else {
+                      res(true);
+                    }
+                  };
+                  checker();
+                }).catch((er) => {
+                  console.error("Connections timed out:", er);
+                });
+              }
+            }
+          }
+          for (const key in connections) {
+            connections[key] = this.addConnection(connections[key], user._id);
+          }
+        }
+        if (config) {
+          for (const c in config) {
+            this.openConnection(config[c].service, config[c], user._id, config[c].args);
+          }
+        }
+        let send = (message, ...a) => {
+          let connection = this.getConnection(user._id, "send");
+          if (connection?.send)
+            return connection.send(message, ...a);
+        };
+        let request = (message, method, ...a) => {
+          let connection = this.getConnection(user._id, "request");
+          if (connection?.request)
+            return connection.request(message, method, ...a);
+        };
+        let post = (route, args, method, ...a) => {
+          let connection = this.getConnection(user._id, "post");
+          if (connection?.post)
+            return connection.post(route, args, method, ...a);
+        };
+        let run = (route, args, method, ...a) => {
+          let connection = this.getConnection(user._id, "run");
+          if (connection?.run)
+            return connection.run(route, args, method, ...a);
+        };
+        let subscribe = (route, callback, ...a) => {
+          let connection = this.getConnection(user._id, "subscribe");
+          if (connection?.subscribe)
+            return connection.subscribe(route, callback, ...a);
+        };
+        let unsubscribe = (route, sub, ...a) => {
+          let connection = this.getConnection(user._id, "unsubscribe");
+          if (connection?.unsubscribe)
+            return connection.unsubscribe(route, sub, ...a);
+        };
+        let terminate = () => {
+          return this.removeUser(user);
+        };
+        user.send = send;
+        user.request = request;
+        user.post = post;
+        user.run = run;
+        user.subscribe = subscribe;
+        user.unsubscribe = unsubscribe;
+        user.terminate = terminate;
+        this.users[user._id] = user;
+        if (connections && !receiving) {
+          let connectionIds = {};
+          let pass = false;
+          Object.keys(connections).map((k, i) => {
+            if (connections[k]?._id) {
+              connectionIds[`${i}`] = connections[k]?._id;
+              pass = true;
+            }
+          });
+          if (pass) {
+            user.send({
+              route: "addUser",
+              args: [
+                { _id: user._id },
+                connectionIds,
+                void 0,
+                true
+              ]
+            });
+          }
+        }
+        return user;
+      };
+      this.getConnection = (sourceId, hasMethod) => {
+        if (this.sources[sourceId]) {
+          if (this.order) {
+            for (let i = 0; i < this.order.length; i++) {
+              let k = this.order[i];
+              for (const key in this.sources[sourceId]) {
+                if (this.sources[sourceId][key].service) {
+                  if (typeof this.sources[sourceId][key].service === "object") {
+                    if (this.sources[sourceId][key].service.tag === k) {
+                      if (this.sources[sourceId][key].connectionType && this.sources[sourceId][key].service?.name) {
+                        if (!this.serviceConnections[this.sources[sourceId][key].service.name]) {
+                          this.removeConnection(this.sources[sourceId][key]);
+                          continue;
+                        }
+                      }
+                      return this.sources[sourceId][key];
+                    }
+                  } else if (this.sources[sourceId][key].service === k) {
+                    if (this.sources[sourceId][key].connectionType && this.sources[sourceId][key].service?.name) {
+                      if (!this.serviceConnections[this.sources[sourceId][key].service.name])
+                        this.removeConnection(this.sources[sourceId][key]);
+                      continue;
+                    }
+                    return this.sources[sourceId][key];
+                  }
+                }
+              }
+            }
+          } else {
+            for (const k in this.sources[sourceId]) {
+              if (this.sources[sourceId][k].connectionType && this.sources[sourceId][k].service?.name) {
+                if (!this.serviceConnections[this.sources[sourceId][k].service.name]) {
+                  this.removeConnection(this.sources[sourceId][k]);
+                  continue;
+                }
+              }
+              if (hasMethod && this.sources[sourceId][k][hasMethod]) {
+                return this.sources[sourceId][k];
+              } else {
+                return this.sources[sourceId][k];
+              }
+            }
+          }
+        } else if (this.order) {
+          for (let i = 0; i < this.order.length; i++) {
+            let k = this.order[i];
+            if (this.sources[k]?.[sourceId]) {
+              if (this.sources[k][sourceId].connectionType && this.sources[k][sourceId].service?.name) {
+                if (!this.serviceConnections[this.sources[k][sourceId].service.service.name]) {
+                  this.removeConnection(this.sources[k][sourceId].service);
+                  continue;
+                }
+              }
+              if (hasMethod && this.sources[k][sourceId]?.[hasMethod]) {
+                return this.sources[k][sourceId];
+              } else {
+                return this.sources[k][sourceId];
+              }
+            }
+          }
+        }
+        if (typeof sourceId === "string" && this.connections[sourceId] && this.connections[sourceId].send) {
+          return this.connections[sourceId];
+        }
+      };
+      this.getConnections = (sourceId, hasMethod, props) => {
+        if (this.sources[sourceId]) {
+          if (!props && !hasMethod)
+            return this.sources[sourceId];
+          let found = {};
+          for (const key in this.sources[sourceId]) {
+            if (typeof this.sources[sourceId][key] === "object") {
+              if (!this.sources[sourceId][key]._id) {
+                for (const k in this.sources[sourceId][key]) {
+                  if (typeof this.sources[sourceId][key][k] === "object") {
+                    let pass = true;
+                    if (hasMethod && !this.sources[sourceId][key][k][hasMethod])
+                      pass = false;
+                    for (const p in props) {
+                      if (typeof this.sources[sourceId][key][k][p] === "object" && typeof props[p] === "object") {
+                        for (const pp in props[p]) {
+                          if (props[p][pp] !== this.sources[sourceId][key][k][p][pp]) {
+                            pass = false;
+                            break;
+                          }
+                        }
+                      } else if (this.sources[sourceId][key][k][p] !== props[p]) {
+                        pass = false;
+                      } else {
+                        pass = false;
+                        break;
+                      }
+                    }
+                    if (pass) {
+                      found[this.sources[sourceId][key][k]._id] = this.sources[sourceId][key][k];
+                    }
+                  }
+                }
+              } else {
+                let pass = true;
+                if (hasMethod && !this.sources[sourceId][key][hasMethod])
+                  pass = false;
+                for (const p in props) {
+                  if (typeof this.sources[sourceId][key][p] === "object" && typeof props[p] === "object") {
+                    for (const pp in props[p]) {
+                      if (props[p][pp] !== this.sources[sourceId][key][p][pp]) {
+                        pass = false;
+                        break;
+                      }
+                    }
+                  } else if (this.sources[sourceId][key][p] !== props[p]) {
+                    pass = false;
+                  } else {
+                    pass = false;
+                    break;
+                  }
+                }
+                if (pass) {
+                  if (this.getConnection(this.sources[sourceId][key], hasMethod))
+                    found[this.sources[sourceId][key]._id] = this.sources[sourceId][key];
+                }
+              }
+            }
+          }
+        }
+      };
+      this.addConnection = (options3, source) => {
+        let settings = {};
+        if (typeof options3 === "string") {
+          if (this.connections[options3]) {
+            options3 = this.connections[options3];
+          } else {
+            for (const j in this.serviceConnections) {
+              for (const k in this.serviceConnections[j]) {
+                if (this.serviceConnections[j][k][options3]) {
+                  options3 = { connection: this.serviceConnections[j][k][options3] };
+                  options3.service = j;
+                  settings.connectionType = j;
+                  settings.connectionsKey = k;
+                  break;
+                }
+              }
+            }
+          }
+          if (typeof options3 === "string" && this.nodes.get(options3))
+            options3 = { connection: this.nodes.get(options3) };
+        }
+        if (!options3 || typeof options3 === "string")
+          return void 0;
+        if (source)
+          settings.source = source;
+        if (options3.connection instanceof GraphNode) {
+          settings.connection = options3.connection;
+          let node = settings.connection;
+          settings.send = async (message) => {
+            if (message.method) {
+              if (Array.isArray(message.args)) {
+                return node[message.method]?.(...message.args);
+              } else
+                return node[message.method]?.(message.args);
+            } else {
+              if (Array.isArray(message.args)) {
+                return node.run(...message.args);
+              } else
+                return node.run(message.args);
+            }
+          };
+          settings.request = async (message, method) => {
+            if (method) {
+              if (Array.isArray(message.args)) {
+                return node[method]?.(...message.args);
+              } else
+                return node[method]?.(message.args);
+            } else {
+              if (Array.isArray(message.args)) {
+                return node.run(...message.args);
+              } else
+                return node.run(message.args);
+            }
+          };
+          settings.post = async (route, args, method) => {
+            if (route && node.get(route)) {
+              let n = node.get(route);
+              if (method) {
+                if (Array.isArray(args)) {
+                  return n[method]?.(...args);
+                } else
+                  return n[method]?.(args);
+              } else {
+                if (Array.isArray(args)) {
+                  return n.run(...args);
+                } else
+                  return n.run(args);
+              }
+            } else {
+              if (method) {
+                if (Array.isArray(args)) {
+                  return node[method]?.(...args);
+                } else
+                  return node[method]?.(args);
+              } else {
+                if (Array.isArray(args)) {
+                  return node.run(...args);
+                } else
+                  return node.run(args);
+              }
+            }
+          };
+          settings.run = settings.post;
+          settings.subscribe = async (route, callback) => {
+            return node.subscribe(callback, route);
+          };
+          settings.unsubscribe = async (route, sub) => {
+            return node.unsubscribe(sub, route);
+          };
+          settings.terminate = () => {
+            node.graph.remove(node);
+            return true;
+          };
+          settings.onclose = options3.onclose;
+          if (settings.onclose) {
+            let oldondelete;
+            if (node.ondelete)
+              oldondelete = node.ondelete;
+            node.ondelete = (n) => {
+              if (settings.onclose)
+                settings.onclose(settings, n);
+              if (oldondelete)
+                oldondelete(n);
+            };
+          }
+        } else if (options3.connection instanceof Graph) {
+          if (options3.connection.nodes.get("open"))
+            settings.service = options3.connection;
+          let graph = settings.connection;
+          settings.send = async (message) => {
+            if (Array.isArray(message.args))
+              graph.run(message.route, ...message.args);
+            else
+              graph.run(message.route, message.args);
+          };
+          settings.request = async (message, method) => {
+            if (!message.route)
+              return void 0;
+            if (method) {
+              if (Array.isArray(message.args)) {
+                return graph.nodes.get(message.route)[method]?.(...message.args);
+              } else
+                return graph.nodes.get(message.route)[method]?.(message.args);
+            } else {
+              if (Array.isArray(message.args)) {
+                return graph.run(message.route, ...message.args);
+              } else
+                return graph.run(message.route, message.args);
+            }
+          };
+          settings.post = async (route, args, method) => {
+            if (route && graph.get(route)) {
+              let n = graph.get(route);
+              if (method) {
+                if (Array.isArray(args)) {
+                  return n[method]?.(...args);
+                } else
+                  return n[method]?.(args);
+              } else {
+                if (Array.isArray(args)) {
+                  return n.run(...args);
+                } else
+                  return n.run(args);
+              }
+            }
+          };
+          settings.run = settings.post;
+          settings.subscribe = async (route, callback) => {
+            return graph.subscribe(route, callback);
+          };
+          settings.unsubscribe = async (route, sub) => {
+            return graph.unsubscribe(route, sub);
+          };
+          settings.terminate = (n) => {
+            graph.remove(n);
+            return true;
+          };
+        } else if (!(options3._id && this.connections[options3._id])) {
+          let c = options3.connection;
+          if (typeof c === "string") {
+            if (this.connections[c])
+              c = this.connections[c];
+            else if (options3.service) {
+              if (typeof options3.service === "string") {
+                options3.service = this.services[options3.service];
+              }
+              if (typeof options3.service === "object") {
+                if (options3.service.connections) {
+                  for (const key in options3.service.connections) {
+                    if (options3.service.connections[key][c]) {
+                      c = options3.service.connections[key][c];
+                      settings.connectionType = key;
+                      settings.connectionsKey = c;
+                      break;
+                    }
+                  }
+                }
+              }
+            } else {
+              for (const j in this.serviceConnections) {
+                for (const k in this.serviceConnections[j]) {
+                  if (this.serviceConnections[j][k][c]) {
+                    c = this.serviceConnections[j][k][c];
+                    options3.service = j;
+                    settings.connectionType = j;
+                    settings.connectionsKey = k;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          if (typeof c !== "object")
+            return void 0;
+          settings._id = c._id;
+          settings.send = c.send;
+          settings.request = c.request;
+          settings.run = c.run;
+          settings.post = c.post;
+          settings.subscribe = c.subscribe;
+          settings.unsubscribe = c.unsubscribe;
+          settings.terminate = c.terminate;
+          settings.onclose = options3.onclose;
+          if (settings.onclose) {
+            if (!(c.onclose && settings.onclose.toString() === c.onclose.toString())) {
+              let oldonclose = c.onclose;
+              c.onclose = (...args) => {
+                if (settings.onclose)
+                  settings.onclose(settings, ...args);
+                if (this.users[settings.source] && Object.keys(this.sources[settings.source]).length === 0) {
+                  this.removeUser(settings.source, false);
+                }
+                if (oldonclose)
+                  oldonclose(...args);
+              };
+            }
+          } else {
+            let oldonclose = c.onclose;
+            c.onclose = (...args) => {
+              this.removeConnection(settings);
+              if (this.users[settings.source] && Object.keys(this.sources[settings.source]).length === 0) {
+                this.removeUser(settings.source, false);
+              }
+              if (oldonclose)
+                oldonclose(...args);
+            };
+          }
+          if (options3.service) {
+            if (typeof options3.service === "string")
+              options3.service = this.services[options3.service];
+            settings.service = options3.service;
+          } else if (c.graph)
+            settings.service = c.graph;
+        }
+        if (!settings.source && options3.source) {
+          settings.source = options3.source;
+        } else if (!settings.source && options3.service) {
+          settings.source = typeof options3.service === "object" ? options3.service.name : void 0;
+        } else if (!settings.source && (settings.connection instanceof GraphNode || settings.connection instanceof Graph)) {
+          settings.source = "local";
+          if (!this.order.indexOf("local"))
+            this.order.unshift("local");
+        }
+        if (!settings._id)
+          settings._id = `connection${Math.floor(Math.random() * 1e15)}`;
+        if (settings.source) {
+          if (!this.sources[settings.source])
+            this.sources[settings.source] = {};
+          this.sources[settings.source][settings._id] = settings;
+        }
+        if (!this.connections[settings._id])
+          this.connections[settings._id] = settings;
+        return settings;
+      };
+      this.removeConnection = (connection, terminate = false) => {
+        if (typeof connection === "object" && connection._id)
+          connection = connection._id;
+        if (typeof connection === "string") {
+          if (this.connections[connection]) {
+            if (terminate && this.connections[connection])
+              this.connections[connection].terminate();
+            delete this.connections[connection];
+            for (const key in this.sources) {
+              if (this.sources[key][connection])
+                delete this.sources[key][connection];
+              else {
+                for (const k in this.sources[key]) {
+                  if (this.sources[key][k]?.[connection]) {
+                    delete this.sources[key][connection];
+                  }
+                }
+              }
+            }
+            return true;
+          } else if (this.sources[connection]) {
+            for (const key in this.sources[connection]) {
+              this.removeConnection(this.sources[connection][key], terminate);
+            }
+            return true;
+          }
+        }
+      };
+      this.addService = (service, connections, includeClassName, routeFormat, syncServices, source, order) => {
+        this.load(service, includeClassName, routeFormat, this.customRoutes, this.customChildren);
+        this.services[service.name] = service;
+        if (connections) {
+          if (typeof connections === "string")
+            this.addServiceConnections(service, connections, source);
+          else {
+            for (const c in connections) {
+              this.addServiceConnections(service, c, source);
+            }
+          }
+        }
+        if (syncServices)
+          this.syncServices();
+        if (order)
+          this.order = order;
+        else {
+          if (!this.order)
+            this.order = [];
+          this.order.push(service.name);
+        }
+      };
+      this.addServiceConnections = (service, connectionsKey, source) => {
+        if (typeof service === "string") {
+          service = this.services[service];
+        }
+        if (connectionsKey && service[connectionsKey]) {
+          let newConnections = {};
+          if (!this.serviceConnections[service.name])
+            this.serviceConnections[service.name] = {};
+          this.serviceConnections[service.name][connectionsKey] = service[connectionsKey];
+          for (const key in service[connectionsKey]) {
+            if (!this.connections[key]) {
+              newConnections[key] = this.addConnection({ connection: service[connectionsKey][key], service }, source);
+              newConnections[key].connectionType = connectionsKey;
+            }
+          }
+          return newConnections;
+        }
+      };
+      this.openConnection = async (service, options3, source, ...args) => {
+        if (typeof service === "string") {
+          service = this.services[service];
+        }
+        if (service instanceof Service) {
+          let connection = service.run("open", options3, ...args);
+          if (connection instanceof Promise) {
+            return connection.then(async (info) => {
+              if (!info._id) {
+                await new Promise((res, rej) => {
+                  let start = performance.now();
+                  let checker = () => {
+                    if (!info._id) {
+                      if (performance.now() - start > 3e3) {
+                        rej(false);
+                      } else {
+                        setTimeout(() => {
+                          checker();
+                        }, 100);
+                      }
+                    } else {
+                      res(true);
+                    }
+                  };
+                  checker();
+                }).catch((er) => {
+                  console.error("Connections timed out:", er);
+                });
+              }
+              if (info._id)
+                this.addConnection({ connection: info, service }, source);
+            });
+          } else if (connection) {
+            if (!connection._id) {
+              await new Promise((res, rej) => {
+                let start = performance.now();
+                let checker = () => {
+                  if (!connection._id) {
+                    if (performance.now() - start > 3e3) {
+                      rej(false);
+                    } else {
+                      setTimeout(() => {
+                        checker();
+                      }, 100);
+                    }
+                  } else {
+                    res(true);
+                  }
+                };
+                checker();
+              }).catch((er) => {
+                console.error("Connections timed out:", er);
+              });
+            }
+            if (connection._id)
+              return this.addConnection({ connection, service }, source);
+          }
+        }
+      };
+      this.terminate = (connection) => {
+        if (typeof connection === "string")
+          connection = this.connections[connection];
+        return connection.terminate();
+      };
+      this.subscribeThroughConnection = (route, relay, endpoint, callback, ...args) => {
+        if (typeof relay === "string") {
+          relay = this.getConnection(relay, "run");
+        }
+        if (typeof relay === "object")
+          return new Promise((res, rej) => {
+            relay.run("routeConnections", [route, endpoint, relay._id, ...args]).then((sub) => {
+              this.subscribe(endpoint, (res2) => {
+                if (res2?.callbackId === route) {
+                  if (!callback)
+                    this.setState({ [endpoint]: res2.args });
+                  else if (typeof callback === "string") {
+                    this.setState({ [callback]: res2.args });
+                  } else
+                    callback(res2.args);
+                }
+              });
+              res(sub);
+            }).catch(rej);
+          });
+      };
+      this.routeConnections = (route, transmitter, receiver, ...args) => {
+        let rxsrc;
+        if (typeof receiver === "string") {
+          if (this.sources[receiver]) {
+            rxsrc = receiver;
+          }
+          receiver = this.getConnection(receiver, "send");
+        }
+        if (typeof transmitter === "string") {
+          transmitter = this.getConnection(transmitter, "subscribe");
+        }
+        if (transmitter?.subscribe && receiver?.send) {
+          let res = new Promise((res2, rej) => {
+            transmitter.subscribe(route, transmitter._id, (res3) => {
+              if (!this.connections[receiver._id] && rxsrc) {
+                if (this.sources[rxsrc]) {
+                  rxsrc = receiver;
+                  Object.keys(this.sources[rxsrc]).forEach((k) => {
+                    if (this.sources[receiver][k].send) {
+                      receiver = this.sources[receiver][k];
+                    }
+                  });
+                }
+              }
+              if (this.connections[receiver._id])
+                receiver.send({ callbackId: route, args: res3 });
+            }, ...args).then((sub) => {
+              res2(sub);
+            });
+          });
+          return res;
+        }
+      };
+      this.syncServices = () => {
+        for (const name2 in this.services) {
+          if ("users" in this.services[name2])
+            this.services[name2].users = this.users;
+          this.nodes.forEach((n, tag) => {
+            if (!this.services[name2].nodes.get(n.tag)) {
+              this.services[name2].nodes.set(n.tag, n);
+            } else {
+              if (!this.services[name2].nodes.get(tag) && n._UNIQUE !== this.services[name2].nodes.get(n.tag)._UNIQUE)
+                this.services[name2].nodes.set(tag, n);
+            }
+          });
+        }
+      };
+      this.setUserData = (user, data) => {
+        if (user) {
+          if (typeof user === "string") {
+            user = this.users[user];
+            if (!user)
+              return false;
+          }
+        }
+        if (data) {
+          if (typeof data === "string") {
+            data = JSON.parse(data);
+          }
+        }
+        if (typeof data === "object") {
+          this.recursivelyAssign(user, data);
+          return true;
+        }
+      };
+      this.routes = {
+        addUser: this.addUser,
+        removeUser: this.removeUser,
+        getConnection: this.getConnection,
+        addConnection: this.addConnection,
+        removeConnection: this.removeConnection,
+        addService: this.addService,
+        addServiceConnections: this.addServiceConnections,
+        openConnection: this.openConnection,
+        terminate: this.terminate,
+        routeConnections: this.routeConnections,
+        subscribeThroughConnection: this.subscribeThroughConnection,
+        syncServices: this.syncServices
+      };
+      this.load(this.routes);
+      if (options2) {
+        if (options2.order)
+          this.order = options2.order;
+        if (options2.services) {
+          for (const key in options2.services) {
+            let opt = options2.services[key];
+            if (opt instanceof Service) {
+              opt.service.name = key;
+              opt.service.tag = key;
+              this.addService(opt.service, opt.connections, options2.includeClassName, options2.routeFormat, options2.syncServices);
+            } else if (typeof opt === "function") {
+              let service = new opt();
+              service.name = key;
+              service.tag = key;
+              if (service)
+                this.addService(service, service.connections, options2.includeClassName, options2.routeFormat, options2.syncServices);
+            } else {
+              if (typeof opt.service === "function") {
+                let service = new opt.service({ name: key });
+                service.name = key;
+                service.tag = key;
+                if (service)
+                  this.addService(service, void 0, options2.includeClassName, options2.routeFormat, options2.syncServices);
+                opt.service = service;
+              } else if (opt.service instanceof Service) {
+                opt.service.name = key;
+                opt.service.tag = key;
+                this.addService(opt.service, void 0, options2.includeClassName, options2.routeFormat, options2.syncServices);
+              }
+              if (typeof opt.service === "object") {
+                if (opt.connections) {
+                  if (Array.isArray(opt.connections)) {
+                    opt.connections.forEach((k) => {
+                      this.addServiceConnections(opt[key].service, k);
+                    });
+                  } else
+                    this.addServiceConnections(opt.service, opt.connections);
+                }
+                if (opt.config) {
+                  for (const c in opt.config) {
+                    this.openConnection(opt.service, opt.config[c], opt.config[c].source, opt.config[c].args);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    removeUser(profile, terminate) {
+      if (terminate)
+        this.removeConnection(profile, terminate);
+      if (typeof profile === "string")
+        profile = this.users[profile];
+      if (typeof profile === "object" && profile._id) {
+        delete this.users[profile._id];
+        if (profile.onclose)
+          profile.onclose(profile);
+      }
+      return true;
+    }
+  };
   var transform_default = (tag, node) => {
     const args = node.arguments;
     const instanceTree = {};
     Array.from(args.entries()).forEach(([arg], i) => {
       instanceTree[arg] = {
         tag: arg,
-        operator: (input) => {
+        operator: function(input) {
+          console.log("GETTING IN ARG", arg, input);
           const o = args.get(arg);
           o.state = input;
-          if (i === 0)
-            return node.run();
+          if (i === 0) {
+            const ifParent = this.graph.node;
+            return ifParent ? ifParent.run(input) : this.graph.operator(input);
+          }
           return input;
         }
       };
     });
     const originalOperator = node.operator;
-    node.operator = function(...argsArr) {
-      let updatedArgs = [];
-      let i = 0;
-      args.forEach((o, k) => {
-        const argO = args.get(k);
-        const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
-        let update3 = currentArg !== void 0 ? currentArg : o.state;
-        argO.state = update3;
-        if (!argO.spread)
-          update3 = [update3];
-        updatedArgs.push(...update3);
-        i++;
-      });
-      return originalOperator.call(this, ...updatedArgs);
-    };
-    const graph = new Graph(instanceTree, tag, node);
-    return graph;
+    if (typeof originalOperator === "function") {
+      console.log("setting plugin operator", node.tag, node, originalOperator);
+      node.operator = function(...argsArr) {
+        console.warn("GETTING IN PLUGIN", argsArr);
+        let updatedArgs = [];
+        let i = 0;
+        args.forEach((o, k) => {
+          const argO = args.get(k);
+          const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
+          let update = currentArg !== void 0 ? currentArg : o.state;
+          argO.state = update;
+          if (!argO.spread)
+            update = [update];
+          updatedArgs.push(...update);
+          i++;
+        });
+        const res = originalOperator.call(this ?? node, ...updatedArgs);
+        console.log("Called og", res, originalOperator, this ?? node, ...updatedArgs);
+        return res;
+      };
+    } else {
+      console.error("Operator is not a function for", node.tag, node, originalOperator);
+      node.operator = (...args2) => args2;
+    }
+    return new Graph(instanceTree, tag, node);
   };
   var ARGUMENT_NAMES = /([^,]*)/g;
   function getFnParamInfo(fn) {
@@ -10771,22 +11716,29 @@ ${text}`;
   var isNode = "process" in globalThis;
   var ESPlugin = class {
     #initial;
+    #options;
     #instance;
-    #graphscript;
+    #graph;
+    #router;
+    #graphCache = {};
+    plugins = {};
+    #toRun = false;
+    #runProps = true;
     get initial() {
       return this.#initial;
     }
     get instance() {
       return this.#instance;
     }
-    get graphscript() {
-      return this.#graphscript;
+    get graph() {
+      return this.#graph;
     }
-    set graphscript(v) {
-      this.#graphscript = v;
+    set graph(v) {
+      this.#graph = v;
     }
     constructor(node, options2 = {}) {
       this.#initial = node;
+      this.#options = options2;
       do {
         this.#initial = this.initial.initial ?? this.initial;
       } while (this.initial instanceof ESPlugin);
@@ -10799,45 +11751,152 @@ ${text}`;
           newNode.graph.nodes[namedExport] = { default: node[namedExport] };
         this.#initial = newNode;
         hasGraph = true;
+        this.#runProps = false;
       }
-      if (hasDefault || isFunction)
-        this.graphscript = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
+      if (hasDefault || isFunction) {
+        this.graph = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
+      }
+      console.log("ES HAS GRAPH", this.#options.tag, this.initial);
       if (hasGraph) {
+        const toNotify = [];
         for (let tag in this.initial.graph.nodes) {
           const node2 = this.initial.graph.nodes[tag];
           if (!(node2 instanceof ESPlugin)) {
             const clonedOptions = Object.assign({}, Object.assign(options2));
             this.initial.graph.nodes[tag] = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
-            if (typeof options2.onPlugin === "function")
-              options2.onPlugin(this.initial.graph.nodes[tag]);
-          } else {
-            console.error("Gotta compensate");
-            const got = this.graphscript.nodes.get(tag);
-            if (got)
-              node2.graphscript = got;
-          }
+            toNotify.push(this.initial.graph.nodes[tag]);
+          } else
+            this.#graphCache[tag] = node2;
         }
-        let tree = {};
-        for (let tag in this.initial.graph.nodes) {
-          const innerNode = this.#create(tag, this.initial.graph.nodes[tag]);
-          tree[tag] = innerNode.graphscript ?? innerNode;
-        }
-        const edges = this.initial.graph.edges;
-        for (let output in edges) {
-          const outNode = tree[output];
-          if (!outNode.children)
-            outNode.children = {};
-          for (let input in edges[output])
-            outNode.children[input] = true;
-        }
-        const props = this.#instance ?? node;
-        this.graphscript = isNode ? new Graph(tree, options2.tag, props) : new DOMService({ routes: tree, name: options2.tag, props }, options2.parentNode);
+        const thisTag = this.#options.tag;
+        toNotify.forEach((o) => {
+          let tag = o.#options.tag;
+          if (thisTag)
+            tag = `${thisTag}.${tag}`;
+          this.plugins[o.#options.tag] = o;
+          if (typeof options2.onPlugin === "function")
+            options2.onPlugin(tag, o);
+        });
       }
       Object.defineProperty(this, "tag", {
-        get: () => this.graphscript?.tag,
+        get: () => this.graph?.tag,
         enumerable: true
       });
     }
+    #createTree = (graph) => {
+      let tree = {};
+      for (let tag in graph.nodes) {
+        let thisNode = graph.nodes[tag].graph;
+        console.log("creating", tag, thisNode);
+        if (this.#graphCache[tag]) {
+          let gs = this.#graphCache[tag].graph;
+          const ref = gs.node ? gs.node : gs;
+          thisNode = ref._state;
+          thisNode.tag = tag;
+          gs.state.triggers = {};
+        }
+        const innerNode = this.#create(tag, thisNode);
+        tree[tag] = innerNode.graph ?? innerNode;
+      }
+      const edges = graph.edges;
+      for (let output in edges) {
+        const splitEdge = output.split(".");
+        const first = splitEdge.shift();
+        let outNode = tree[first];
+        splitEdge.forEach((str) => outNode = outNode.nodes.get(str));
+        if (!outNode.children)
+          outNode.children = {};
+        for (let input in edges[output]) {
+          const tag = input.split(".").pop();
+          outNode.children[tag] = true;
+        }
+      }
+      return tree;
+    };
+    #activate = () => {
+      if (this.initial.graph) {
+        const graph = this.initial.graph;
+        let tree = this.#createTree(graph);
+        const props = this.#instance ?? this.initial;
+        console.log("tree", tree);
+        console.log("PROPS", this.#options.tag, this.#instance, this.initial);
+        this.graph = isNode ? new Graph(tree, this.#options.tag, props) : new DOMService({ routes: tree, name: this.#options.tag, props: this.#runProps ? props : void 0 }, this.#options.parentNode);
+        if (!this.#router) {
+          this.#router = new Router({
+            routes: this.graph,
+            linkServices: false,
+            includeClassName: false
+          });
+        }
+        for (let tag in graph.nodes) {
+          const cache2 = this.#graphCache[tag];
+          if (cache2) {
+            cache2.graph = tree[tag];
+          }
+        }
+      }
+    };
+    start = async (defer) => {
+      const activateFuncs = [];
+      for (let key in this.plugins) {
+        const o = this.plugins[key];
+        await o.start((f2) => {
+          activateFuncs.push(f2);
+        });
+      }
+      this.#activate();
+      const f = async () => {
+        for (let f2 of activateFuncs)
+          await f2();
+        if (this.#toRun)
+          await this.run();
+      };
+      if (this.initial.graph) {
+        const ports = this.initial.graph.ports;
+        let firstNode, lastNode;
+        const nodes = Array.from(this.graph.nodes.values());
+        if (ports) {
+          firstNode = await this.graph.get(ports.input);
+          this.graph.state.triggers = {};
+          lastNode = this.graph.get(ports.output);
+        } else {
+          const nodes2 = Array.from(this.graph.nodes.values());
+          firstNode = nodes2[0];
+          lastNode = nodes2.slice(-1)[0];
+        }
+        console.error("PATH (input)", firstNode?.tag, firstNode?.parent?.tag, firstNode?.constructor?.name);
+        console.error("PATH (output)", lastNode?.tag, lastNode?.parent?.tag, lastNode?.constructor?.name);
+        if (lastNode)
+          lastNode.subscribe((...args) => {
+            console.log("out", args, lastNode.parent.children);
+            for (let tag in lastNode.parent.children)
+              this.#runGraph(lastNode.parent.children[tag], ...args);
+          });
+        console.log("adding proxy", this.tag, this.initial.graph);
+        if (firstNode)
+          this.#initial.operator = async function(...args) {
+            console.log("proxy", args);
+            await firstNode.run(...args);
+          };
+      }
+      console.log("TO RUN,", this.tag, defer);
+      if (typeof defer === "function")
+        defer(f);
+      else {
+        console.log("No defer", this.tag);
+        await f();
+      }
+    };
+    stop = () => {
+      for (let k in this.nested)
+        this.nested[k].stop();
+      if (this.graph)
+        this.graph.nodes.forEach((n) => {
+          this.graph.removeTree(n);
+          n.stopNode();
+          this.graph.state.triggers = {};
+        });
+    };
     #create = (tag, info) => {
       if (typeof info === "function")
         info = { default: info };
@@ -10852,19 +11911,30 @@ ${text}`;
         const args = parse_default(info.default) ?? /* @__PURE__ */ new Map();
         if (args.size === 0)
           args.set("default", {});
-        const input = args.keys().next().value;
+        let argsArray = Array.from(args.entries());
+        const input = argsArray[0][0];
         if (info.arguments) {
+          const isArray = Array.isArray(info.arguments);
+          let i = 0;
           for (let key in info.arguments) {
-            const o = args.get(key);
-            o.state = info.arguments[key];
-            if (input === key)
-              this.run();
+            const v = info.arguments[key];
+            if (isArray) {
+              argsArray[i].state = v;
+              if (i == 0)
+                this.#toRun = true;
+            } else {
+              args.get(key).state = v;
+              if (input === key)
+                this.#toRun = true;
+            }
+            i++;
           }
         }
         const gsIn = {
           arguments: args,
           operator: info.default,
-          tag
+          tag,
+          default: info.default
         };
         var props = Object.getOwnPropertyNames(info);
         const onActive = ["arguments", "default", "tag", "operator"];
@@ -10882,406 +11952,428 @@ ${text}`;
         return transform_default(tag, gsIn);
       }
     };
-    run = async (...args) => await this.graphscript.run(...args);
+    #runGraph = async (graph = this.graph, ...args) => {
+      if (graph instanceof Graph) {
+        if (graph.node)
+          return graph.node.run(...args);
+        else {
+          if (args.length === 0)
+            return this.#runDefault(graph);
+          else if (graph.nodes.has(args[0]))
+            return graph.run(...args);
+          else
+            return this.#runDefault(graph, ...args);
+        }
+      } else
+        return await graph.run(...args);
+    };
+    #runDefault = (graph, ...args) => graph.run(graph.nodes.values().next().value, ...args);
+    run = async (...args) => this.#runGraph(this.graph, ...args);
   };
   var src_default = ESPlugin;
 
   // src/core/index.ts
-  var isSrc = (str) => {
-    return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
-  };
-  var merge = (main, override, deleteSrc = false) => {
-    const copy = Object.assign({}, main);
-    if (override) {
-      if (deleteSrc) {
-        const ogSrc = override.src ?? override;
-        delete override.src;
-        if ("default" in ogSrc)
-          return ogSrc.default;
-      }
-      const keys = Object.keys(copy);
-      const newKeys = new Set(Object.keys(override));
-      keys.forEach((k) => {
-        newKeys.delete(k);
-        if (typeof override[k] === "object" && !Array.isArray(override[k]))
-          copy[k] = merge(copy[k], override[k]);
-        else if (k in override)
-          copy[k] = override[k];
-      });
-      newKeys.forEach((k) => {
-        copy[k] = override[k];
-      });
-    }
-    return copy;
-  };
-  var checkFiles = (key, filesystem) => {
-    const isJSON = suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
-    return output;
-  };
-  var remove = (original, search, key = original, o) => {
-    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
-    if (o)
-      delete o[key];
-  };
   var basePkgPath = "./package.json";
-  var onError = (e, { errors, warnings }) => {
-    const item = {
-      message: e.message,
-      file: e.file,
-      node: e.node
-    };
-    const arr = e.type === "warning" ? warnings : errors;
-    arr.push(item);
-  };
-  var getWithErrorLog = async (...args) => {
-    const o = args.slice(-1)[0];
-    const path2 = args[0];
-    args = args.slice(0, -1);
-    return await get_default(...args).catch((e) => onError({
-      message: e.message,
-      file: path2
-    }, o));
-  };
-  var loaded = {};
-  async function loadPlugins(node, info, options2, id, debug = false) {
-    if (node.plugins) {
-      for (let nestedName in node.plugins) {
-        const nestedNode = node.src.graph?.nodes?.[nestedName];
+  var _filesystem, _input, _options, _url, _cache, _main, _mode, _onImport, _throw;
+  var WASL = class {
+    constructor(urlOrObject, options2 = {}, url) {
+      this.errors = [];
+      this.warnings = [];
+      this.files = {};
+      this.original = {};
+      __privateAdd(this, _filesystem, void 0);
+      __privateAdd(this, _input, {});
+      __privateAdd(this, _options, {});
+      __privateAdd(this, _url, void 0);
+      __privateAdd(this, _cache, {});
+      __privateAdd(this, _main, "");
+      __privateAdd(this, _mode, "import");
+      __privateAdd(this, _onImport, (path2, info) => this.files[path2] = info);
+      __privateAdd(this, _throw, (e) => {
+        const item = {
+          message: e.message,
+          file: e.file,
+          node: e.node
+        };
+        const arr = e.type === "warning" ? this.warnings : this.errors;
+        arr.push(item);
+      });
+      this.get = async (...args) => {
+        const path2 = args[0];
+        return await get_default(args[0], args[1], __privateGet(this, _onImport)).catch((e) => __privateGet(this, _throw).call(this, {
+          message: e.message,
+          file: path2
+        }));
+      };
+      this.load = async (node, info, options2, id) => {
         if (node.plugins) {
-          for (let key in node.plugins[nestedName]) {
-            const newInfo = node.plugins[nestedName][key];
-            if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
-              const ogSrc = newInfo.src;
-              let newInfoForNode;
-              if (id)
-                newInfoForNode = loaded[id]?.[key];
-              if (!newInfoForNode) {
-                const optsCopy = Object.assign({}, options2);
-                if (key === "graph")
-                  optsCopy._deleteSrc = false;
-                else
-                  optsCopy._deleteSrc = true;
-                newInfoForNode = await getSrc({ [key]: newInfo }, info, optsCopy, {
-                  nodes: newInfo
-                });
-                if (id) {
-                  if (!loaded[id])
-                    loaded[id] = {};
-                  loaded[id][key] = newInfoForNode;
-                }
-              }
-              if (nestedNode) {
-                const newVal = newInfoForNode[key];
-                if (newVal) {
-                  let chosenVal = newVal.src ?? newVal;
-                  if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
-                    chosenVal = chosenVal.default;
-                  if (nestedNode)
-                    nestedNode[key] = chosenVal;
-                } else {
-                  onError({ message: `Could not resolve ${ogSrc}` }, options2);
-                }
-              }
-            } else if (nestedNode)
-              nestedNode[key] = newInfo;
-          }
-        }
-        if (node.src?.graph && !nestedNode) {
-          onError({
-            message: `Plugin target '${nestedName}' does not exist`,
-            node: name
-          }, options2);
-        }
-      }
-    }
-  }
-  async function getSrc(target, info, options2, graph = {}, debug = false) {
-    const nodes2 = graph.nodes;
-    const edges = graph.edges;
-    const id = Symbol();
-    let {
-      relativeToResolved,
-      mainPath,
-      url,
-      onImport
-    } = info;
-    const isImportMode = !!url;
-    relativeToResolved = options2._remote ?? relativeToResolved;
-    for (let name2 in target) {
-      const node = target[name2];
-      const isObj = node && typeof node === "object" && !Array.isArray(node);
-      await loadPlugins(node, info, options2, id, debug);
-      if (isObj) {
-        let ogSrc = node.src ?? "";
-        if (isSrc(ogSrc) || nodes2 && edges && !ogSrc) {
-          node.src = null;
-          let passToNested = null;
-          let fullPath, _remote = options2._remote;
-          try {
-            new URL(ogSrc);
-            fullPath = ogSrc;
-            _remote = ogSrc;
-          } catch {
-            fullPath = relativeToResolved ? resolve(ogSrc, mainPath) : resolve(ogSrc);
-          }
-          if (isImportMode) {
-            node.src = await getWithErrorLog(fullPath, void 0, onImport, options2);
-            if (_remote) {
-              if (!node.src) {
-                const got = await getSrc([node], info, options2, { nodes: [node] });
-                node.src = got[0].src ?? got[0];
-                passToNested = resolve(ogSrc);
-              }
-            }
-            passToNested = resolve(ogSrc, url, true);
-            if (!node.src)
-              remove(ogSrc, fullPath, name2, target);
-          } else {
-            if (options2.filesystem) {
-              const res = checkFiles(fullPath, options2.filesystem);
-              if (res) {
-                if (res.default || fullPath.includes(".json"))
-                  node.src = passToNested = res;
-                else {
-                  onError({
-                    type: "warning",
-                    message: `Node (${name2}) at ${fullPath} does not have a default export.`,
-                    file: ogSrc
-                  }, options2);
-                  node.src = passToNested = { default: res };
-                }
-              } else
-                remove(ogSrc, fullPath, name2, target);
-            } else {
-              onError({
-                message: "No options.filesystem field to get JavaScript objects",
-                file: ogSrc
-              }, options2);
-            }
-          }
-          if (node.src && node.src.graph)
-            node.src = await load(passToNested, {
-              relativeTo: relativeToResolved || options2.relativeTo,
-              filesystem: options2.filesystem,
-              errors: options2.errors,
-              warnings: options2.warnings,
-              files: options2.files,
-              _internal: ogSrc,
-              _deleteSrc: options2._deleteSrc,
-              _remote
-            });
-        } else {
-          for (let key in node) {
-            if (key === "src" && node.src) {
-              const language = node.src.language;
-              if (!language || js.includes(language)) {
-                if (node.src.text) {
-                  const esmImport = async (text) => {
-                    try {
-                      let imported = await importFromText(text);
-                      if (imported.default && Object.keys(imported).length === 1)
-                        imported = imported.default;
-                      return imported;
-                    } catch (e) {
-                      console.error("Import did not work. Probably relies on something...");
-                      onError({
-                        message: e.message,
-                        file: name2
-                      }, options2);
-                    }
-                  };
-                  const esm = await esmImport(node.src.text);
-                  if (esm) {
-                    delete node.src.text;
-                    if (typeof esm === "object")
-                      node.src = { default: Object.assign(node.src, esm) };
+          for (let nestedName in node.plugins) {
+            const nestedNode = node.src.graph?.nodes?.[nestedName];
+            if (node.plugins) {
+              for (let key in node.plugins[nestedName]) {
+                const newInfo = node.plugins[nestedName][key];
+                if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
+                  const ogSrc = newInfo.src;
+                  let newInfoForNode;
+                  if (id)
+                    newInfoForNode = __privateGet(this, _cache)[id]?.[key];
+                  if (!newInfoForNode) {
+                    const optsCopy = Object.assign({}, options2);
+                    if (key === "graph")
+                      optsCopy._deleteSrc = false;
                     else
-                      node.src = esm;
-                  } else {
-                    onError({
-                      message: "Could not import this text as ESM",
-                      file: node.src
-                    }, options2);
-                  }
-                } else {
-                  const expectedFunctions = ["default", "oncreate", "onrender"];
-                  for (let key2 in node.src) {
-                    try {
-                      if (expectedFunctions.includes(key2) && typeof node.src[key2] === "string")
-                        node.src[key2] = (0, eval)(`(${node.src[key2]})`);
-                    } catch (e) {
-                      onError({
-                        message: `Field ${key2} could not be parsed`,
-                        file: node.src[key2]
-                      }, options2);
+                      optsCopy._deleteSrc = true;
+                    newInfoForNode = await this.resolve({ [key]: newInfo }, info, optsCopy, {
+                      nodes: newInfo
+                    });
+                    if (id) {
+                      if (!__privateGet(this, _cache)[id])
+                        __privateGet(this, _cache)[id] = {};
+                      __privateGet(this, _cache)[id][key] = newInfoForNode;
                     }
                   }
-                }
+                  if (nestedNode) {
+                    const newVal = newInfoForNode[key];
+                    if (newVal) {
+                      let chosenVal = newVal.src ?? newVal;
+                      if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
+                        chosenVal = chosenVal.default;
+                      if (nestedNode)
+                        nestedNode[key] = chosenVal;
+                    } else {
+                      __privateGet(this, _throw).call(this, { message: `Could not resolve ${ogSrc}` });
+                    }
+                  }
+                } else if (nestedNode)
+                  nestedNode[key] = newInfo;
+              }
+            }
+            if (node.src.graph && !nestedNode) {
+              __privateGet(this, _throw).call(this, {
+                message: `Plugin target '${nestedName}' does not exist`,
+                node: name
+              });
+            }
+          }
+        }
+      };
+      this.resolve = async (target, info, options2, graph = {}) => {
+        const nodes = graph.nodes;
+        const edges = graph.edges;
+        const id = Symbol("unique");
+        let { url } = info;
+        const mainPath = info.mainPath || __privateGet(this, _main);
+        for (let name2 in target) {
+          const node = target[name2];
+          const isObj = node && typeof node === "object" && !Array.isArray(node);
+          if (isObj) {
+            await this.load(node, info, options2, id);
+            let ogSrc = node.src ?? "";
+            if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
+              node.src = null;
+              let _internal = "";
+              let fullPath;
+              try {
+                new URL(ogSrc);
+                _internal = fullPath = ogSrc;
+              } catch {
+                if (ogSrc)
+                  fullPath = mainPath ? resolve(ogSrc, mainPath) : resolve(ogSrc);
+                else
+                  fullPath = mainPath;
+              }
+              if (__privateGet(this, _mode) === "import") {
+                let res = await this.get(fullPath, void 0);
+                if (res)
+                  node.src = res;
+                else
+                  console.error("Could not get node source.", name2);
+                if (!_internal)
+                  _internal = ogSrc ? resolve(ogSrc, url, true) : true;
+                if (!node.src && !node.graph)
+                  remove(ogSrc, fullPath, name2, target);
               } else {
-                console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
-                onError({
-                  message: `Source is in ${language}. Currently only JavaScript is supported.`,
-                  file: ogSrc
-                }, options2);
+                if (__privateGet(this, _filesystem)) {
+                  let res;
+                  res = checkFiles(fullPath, __privateGet(this, _filesystem));
+                  if (res) {
+                    if (res.default || fullPath.includes(".json"))
+                      node.src = res;
+                    else {
+                      __privateGet(this, _throw).call(this, {
+                        type: "warning",
+                        message: `Node (${name2}) at ${fullPath} does not have a default export.`,
+                        file: ogSrc
+                      });
+                      node.src = { default: res };
+                    }
+                    _internal = fullPath;
+                  } else if (ogSrc)
+                    remove(ogSrc, fullPath, name2, target);
+                } else {
+                  __privateGet(this, _throw).call(this, {
+                    message: "No options.filesystem field to get JavaScript objects",
+                    file: ogSrc
+                  });
+                }
               }
-            } else if (node[key] && typeof node[key] === "object" && !Array.isArray(node[key])) {
-              const optsCopy = Object.assign({}, options2);
-              optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
-              const includesPlayer = Object.keys(node[key]).includes("player");
-              await getSrc(node[key], info, optsCopy, { nodes: node[key] }, includesPlayer);
+              let _top = false;
+              if (node.graph) {
+                _top = true;
+                if (!node.src)
+                  node.src = {};
+                node.src.graph = node.graph;
+              }
+              if (node.src && node.src.graph) {
+                await this.init(node.src, {
+                  _internal,
+                  _deleteSrc: options2._deleteSrc,
+                  _top
+                });
+              }
             }
-          }
-        }
-      }
-    }
-    for (let name2 in nodes2) {
-      const node = nodes2[name2];
-      if (node?.src && typeof node?.src === "object") {
-        if (node.src.default) {
-          const fnString = node.src.default.toString();
-          const keyword = "function";
-          if (fnString.slice(0, keyword.length) === keyword) {
-            onError({
-              type: "warning",
-              message: `Default export may be stateful.`,
-              node: name2
-            }, options2);
-          }
-        }
-        if (node.src.graph)
-          await loadPlugins(node, info, options2, id, debug);
-        else if (edges) {
-          if (!("default" in node.src)) {
-            onError({
-              message: "No default export.",
-              node: name2
-            }, options2);
-          }
-        }
-        nodes2[name2] = merge(node.src, node, options2._deleteSrc);
-      }
-    }
-    return target;
-  }
-  var load = async (urlOrObject, options2 = {}, urlArg = "") => {
-    const clonedOptions = Object.assign({ errors: [], warnings: [], files: {} }, options2);
-    let {
-      relativeTo,
-      errors,
-      warnings
-    } = clonedOptions;
-    const internalLoadCall = clonedOptions._internal;
-    const onImport = (path2, info) => {
-      clonedOptions.files[path2] = info;
-    };
-    const isString = typeof urlOrObject === "string";
-    let object, url = urlArg, relativeToResolved = "";
-    if (url || isString) {
-      if (!url)
-        url = urlOrObject;
-      delete clonedOptions.filesystem;
-      relativeToResolved = relativeTo;
-    } else if (typeof urlOrObject === "object") {
-      object = Object.assign({}, urlOrObject);
-      delete clonedOptions.relativeTo;
-      if (typeof internalLoadCall === "string")
-        relativeToResolved = resolve(internalLoadCall, clonedOptions.relativeTo);
-    }
-    try {
-      new URL(url);
-      clonedOptions._remote = url;
-      relativeToResolved = relativeTo = "";
-    } catch {
-    }
-    errors.push(...valid(urlOrObject, clonedOptions, "load"));
-    let pkg;
-    const mainPath = await resolve(url, relativeToResolved);
-    if (url) {
-      const main = await getWithErrorLog(mainPath, void 0, onImport, { errors, warnings });
-      const pkgUrl = resolve(basePkgPath, mainPath, true);
-      pkg = await getWithErrorLog(pkgUrl, void 0, onImport, { errors, warnings });
-      if (pkg)
-        object = Object.assign(pkg, main);
-    } else {
-      if (clonedOptions.filesystem) {
-        const pkgPath = resolve(basePkgPath, relativeToResolved);
-        pkg = checkFiles(pkgPath, clonedOptions.filesystem);
-        if (pkg)
-          object = Object.assign(pkg, isString ? {} : object);
-        else
-          remove(basePkgPath, pkgPath);
-      } else {
-        const pkgPath = resolve(basePkgPath, mainPath);
-        if (relativeToResolved) {
-          pkg = await getWithErrorLog(pkgPath, { errors, warnings });
-          if (pkg)
-            object = Object.assign(pkg, isString ? {} : object);
-        }
-      }
-    }
-    if (errors.length === 0) {
-      const nodes2 = object.graph.nodes;
-      await getSrc(nodes2, {
-        mainPath,
-        relativeToResolved,
-        url,
-        object,
-        onImport
-      }, clonedOptions, object.graph);
-      const drill = (parent, callback) => {
-        const nodes3 = parent.graph.nodes;
-        for (let tag in nodes3) {
-          const res = callback(nodes3[tag], {
-            tag,
-            parent,
-            options: clonedOptions
-          });
-          if (res)
-            nodes3[tag] = res;
-        }
-      };
-      const plugins = [];
-      const drillToTest = (target) => {
-        drill(target, (node, info) => {
-          const edges = info.parent.graph.edges;
-          for (let output in edges) {
-            const getTarget = (o, str) => {
-              return o.graph?.nodes?.[str] ?? o[str];
-            };
-            let outTarget = info.parent.graph.nodes;
-            output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
-            if (!outTarget) {
-              onError({
-                message: `Node '${output}' (output) does not exist to create an edge.`,
-                file: url
-              }, info.options);
-            }
-            for (let input in edges[output]) {
-              let inTarget = nodes2;
-              input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
-              if (!inTarget) {
-                onError({
-                  message: `Node '${input}' (input) does not exist to create an edge.`,
-                  file: url
-                }, info.options);
+            for (let key in node) {
+              if (!isObj && key === "src" && node.src) {
+                const language = node.src.language;
+                if (!language || js.includes(language)) {
+                  if (node.src.text) {
+                    const esmImport = async (text) => {
+                      try {
+                        let imported = await importFromText(text);
+                        if (imported.default && Object.keys(imported).length === 1)
+                          imported = imported.default;
+                        return imported;
+                      } catch (e) {
+                        console.error("Import did not work. Probably relies on something...");
+                        __privateGet(this, _throw).call(this, {
+                          message: e.message,
+                          file: name2
+                        });
+                      }
+                    };
+                    const esm = await esmImport(node.src.text);
+                    if (esm) {
+                      delete node.src.text;
+                      if (typeof esm === "object")
+                        node.src = { default: Object.assign(node.src, esm) };
+                      else
+                        node.src = esm;
+                    } else {
+                      __privateGet(this, _throw).call(this, {
+                        message: "Could not import this text as ESM",
+                        file: node.src
+                      });
+                    }
+                  } else {
+                    const expectedFunctions = ["default", "oncreate", "onrender"];
+                    for (let key2 in node.src) {
+                      try {
+                        if (expectedFunctions.includes(key2) && typeof node.src[key2] === "string")
+                          node.src[key2] = (0, eval)(`(${node.src[key2]})`);
+                      } catch (e) {
+                        __privateGet(this, _throw).call(this, {
+                          message: `Field ${key2} could not be parsed`,
+                          file: node.src[key2]
+                        });
+                      }
+                    }
+                  }
+                } else {
+                  console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
+                  __privateGet(this, _throw).call(this, {
+                    message: `Source is in ${language}. Currently only JavaScript is supported.`,
+                    file: ogSrc
+                  });
+                }
+              } else if (node[key]) {
+                if (typeof node[key] === "object" && !Array.isArray(node[key])) {
+                  const optsCopy = Object.assign({}, options2);
+                  optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
+                  await this.resolve(node[key], info, optsCopy, { nodes: node[key] });
+                }
               }
             }
           }
-        });
+        }
+        for (let name2 in nodes) {
+          const node = nodes[name2];
+          if (node?.src && typeof node?.src === "object") {
+            if (node.src.graph)
+              await this.load(node, info, options2, id);
+            else if (edges) {
+              if (!("default" in node.src)) {
+                __privateGet(this, _throw).call(this, {
+                  message: "No default export.",
+                  node: name2
+                });
+              }
+            }
+            nodes[name2] = merge(node.src, node, options2._deleteSrc);
+          }
+        }
+        return target;
       };
-      if (!internalLoadCall) {
-        new src_default(object, {
-          activate: clonedOptions.activate,
-          onPlugin: (o) => plugins.push(o),
-          parentNode: clonedOptions.parentNode
-        });
-        drillToTest(object);
-      }
-      return object;
+      this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "") => {
+        __privateSet(this, _input, urlOrObject);
+        __privateSet(this, _options, options2);
+        const internalLoadCall = options2._internal;
+        const isFromValidator = __privateGet(this, _main) === void 0 && internalLoadCall;
+        if (!__privateGet(this, _filesystem))
+          __privateSet(this, _filesystem, options2.filesystem);
+        if (!internalLoadCall) {
+          if (!url)
+            url = __privateGet(this, _url);
+          try {
+            new URL(url ?? urlOrObject);
+            options2.relativeTo = "";
+          } catch {
+          }
+        } else if (internalLoadCall === true)
+          url = __privateGet(this, _main);
+        else if (isFromValidator)
+          url = __privateSet(this, _main, internalLoadCall);
+        const clonedOptions = Object.assign({}, options2);
+        const innerTopLevel = clonedOptions._top === true;
+        const isString = typeof urlOrObject === "string";
+        let mode, object, mainPath;
+        if (typeof urlOrObject === "object") {
+          object = Object.assign({}, urlOrObject);
+          if (typeof internalLoadCall === "string")
+            url = mainPath = resolve(internalLoadCall);
+          mode = "reference";
+        } else if (url || isString) {
+          if (!url)
+            url = resolve(urlOrObject, options2.relativeTo ?? "");
+          mode = "import";
+        } else
+          console.error("Mode is not supported...");
+        if (!internalLoadCall)
+          __privateSet(this, _mode, mode);
+        this.errors.push(...valid(urlOrObject, clonedOptions, "load"));
+        switch (__privateGet(this, _mode)) {
+          case "reference":
+            if (!innerTopLevel) {
+              if (__privateGet(this, _filesystem)) {
+                const pkgPath = resolve(basePkgPath, url);
+                const pkg = checkFiles(pkgPath, __privateGet(this, _filesystem));
+                if (pkg)
+                  object = Object.assign(pkg, isString ? {} : object);
+                else
+                  remove(basePkgPath, pkgPath);
+              }
+            }
+          default:
+            if (!object) {
+              mainPath = await resolve(url);
+              object = await this.get(mainPath, void 0);
+              if (!innerTopLevel) {
+                const pkgUrl = resolve(basePkgPath, mainPath, true);
+                const pkg = await this.get(pkgUrl, void 0);
+                if (pkg)
+                  object = Object.assign(pkg, object);
+              }
+            }
+        }
+        if (!internalLoadCall)
+          __privateSet(this, _main, mainPath);
+        else if (__privateGet(this, _mode) === "reference" && __privateGet(this, _main) === void 0)
+          __privateSet(this, _main, "");
+        if (this.errors.length === 0) {
+          const nodes = object.graph.nodes;
+          await this.resolve(nodes, {
+            mainPath,
+            url,
+            object
+          }, clonedOptions, object.graph);
+          const drill = (parent, callback) => {
+            const nodes2 = parent.graph.nodes;
+            for (let tag in nodes2) {
+              const res = callback(nodes2[tag], {
+                tag,
+                parent,
+                options: clonedOptions
+              });
+              if (res)
+                nodes2[tag] = res;
+            }
+          };
+          const drillToTest = (target) => {
+            drill(target, (node, info) => {
+              const edges = info.parent.graph.edges;
+              for (let output in edges) {
+                const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str];
+                let outTarget = info.parent.graph.nodes;
+                output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
+                if (!outTarget) {
+                  __privateGet(this, _throw).call(this, {
+                    message: `Node '${output}' (output) does not exist to create an edge.`,
+                    file: url
+                  });
+                }
+                for (let input in edges[output]) {
+                  let inTarget = nodes;
+                  input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
+                  if (!inTarget) {
+                    __privateGet(this, _throw).call(this, {
+                      message: `Node '${input}' (input) does not exist to create an edge.`,
+                      file: url
+                    });
+                  }
+                }
+              }
+            });
+          };
+          if (internalLoadCall === void 0) {
+            if (clonedOptions.output !== "object") {
+              this.plugin = new src_default(object, {
+                activate: clonedOptions.activate,
+                parentNode: clonedOptions.parentNode
+              });
+              this.original = Object.assign({}, this.plugin.initial);
+              let drillCopy = (target) => {
+                if (target?.graph) {
+                  let graph = Object.assign({}, target.graph);
+                  let nodes2 = graph.nodes = Object.assign({}, graph.nodes);
+                  if (nodes2) {
+                    for (let k in nodes2) {
+                      nodes2[k] = Object.assign({}, nodes2[k].initial);
+                      drillCopy(nodes2[k]);
+                    }
+                  }
+                  target.graph = graph;
+                }
+              };
+              drillCopy(this.original);
+              return this.plugin;
+            }
+            drillToTest(object);
+          }
+          return object;
+        }
+      };
+      this.start = async () => {
+        if (this.plugin)
+          return await this.plugin.start();
+      };
+      this.stop = async () => {
+        if (this.plugin)
+          return await this.plugin.stop();
+      };
+      __privateSet(this, _input, urlOrObject);
+      __privateSet(this, _options, options2);
+      __privateSet(this, _url, url);
     }
   };
-  var core_default = load;
+  _filesystem = new WeakMap();
+  _input = new WeakMap();
+  _options = new WeakMap();
+  _url = new WeakMap();
+  _cache = new WeakMap();
+  _main = new WeakMap();
+  _mode = new WeakMap();
+  _onImport = new WeakMap();
+  _throw = new WeakMap();
+  var core_default = WASL;
 
   // src/common/utils/latest.js
   var version = "0.0.0";
@@ -11387,112 +12479,111 @@ ${text}`;
     patternProperties: {
       "^(.+)$": {
         type: "object",
-        properties: {
-          src: {
-            anyOf: [
-              {
-                type: "string",
-                format: "uri-reference"
-              },
-              {
-                type: "object",
-                $ref: "component.schema.json"
-              },
-              {
-                type: "object",
-                $comment: "The raw JSON",
-                properties: {
-                  default: {
-                    description: "The stringified stateless function that this node uses to handle upstream information in the graph"
-                  },
-                  tagName: {
-                    type: "string"
-                  },
-                  innerHTML: {
-                    type: "string"
-                  },
-                  innerText: {
-                    type: "string"
-                  },
-                  style: {
-                    anyOf: [
-                      {
-                        type: "string",
-                        format: "uri-reference"
-                      },
-                      {
-                        type: "object"
+        anyOf: [{
+          properties: {
+            src: {
+              anyOf: [
+                {
+                  type: "string",
+                  format: "uri-reference"
+                },
+                {
+                  type: "object",
+                  $ref: "component.schema.json"
+                },
+                {
+                  type: "object",
+                  $comment: "The raw JSON",
+                  properties: {
+                    default: {
+                      description: "The stringified stateless function that this node uses to handle upstream information in the graph"
+                    },
+                    tagName: {
+                      type: "string"
+                    },
+                    style: {
+                      anyOf: [
+                        {
+                          type: "string",
+                          format: "uri-reference"
+                        },
+                        {
+                          type: "object"
+                        }
+                      ]
+                    },
+                    attributes: {
+                      type: "object",
+                      description: "A set of HTML Element events for the node to listen to",
+                      patternProperties: {
+                        "^on(.+)$": {
+                          description: "A stringified function to handle an event"
+                        }
                       }
-                    ]
-                  },
-                  attributes: {
-                    type: "object",
-                    description: "A set of HTML Element events for the node to listen to",
-                    patternProperties: {
-                      "^on(.+)$": {
-                        description: "A stringified function to handle an event"
-                      }
+                    },
+                    oncreate: {
+                      description: "A stringified function that responds to when this node's information is rendered as an HTML element"
                     }
                   },
-                  onrender: {
-                    description: "A stringified function that responds to when this node's information is rendered as an HTML element"
-                  }
+                  required: ["default"]
                 },
-                required: ["default"]
-              },
-              {
-                type: "object",
-                properties: {
-                  language: {
-                    type: "string"
+                {
+                  type: "object",
+                  properties: {
+                    language: {
+                      type: "string"
+                    },
+                    text: {
+                      type: "string"
+                    }
                   },
-                  text: {
-                    type: "string"
-                  }
-                },
-                additionalProperties: false
-              }
-            ]
-          },
-          href: {
-            anyOf: [
-              {
-                type: "string"
-              }
-            ]
-          },
-          extensions: {
-            type: "object",
-            patternProperties: {
-              "^.*$": {
-                type: "object",
-                patternProperties: {
-                  "^.*$": {}
-                },
-                additionalProperties: false
-              }
+                  additionalProperties: false
+                }
+              ]
             },
-            additionalProperties: false
-          },
-          plugins: {
-            type: "object",
-            patternProperties: {
-              "^.*$": {
-                type: "object",
-                patternProperties: {
-                  "^.*$": {}
-                },
-                additionalProperties: false
-              }
+            href: {
+              anyOf: [
+                {
+                  type: "string"
+                }
+              ]
             },
-            additionalProperties: false
+            extensions: {
+              type: "object",
+              patternProperties: {
+                "^.*$": {
+                  type: "object",
+                  patternProperties: {
+                    "^.*$": {}
+                  },
+                  additionalProperties: false
+                }
+              },
+              additionalProperties: false
+            },
+            plugins: {
+              type: "object",
+              patternProperties: {
+                "^.*$": {
+                  type: "object",
+                  patternProperties: {
+                    "^.*$": {}
+                  },
+                  additionalProperties: false
+                }
+              },
+              additionalProperties: false
+            },
+            arguments: {
+              type: ["object", "array"],
+              $comment: "Generated by wasl.load"
+            }
           },
-          arguments: {
-            type: "object",
-            $comment: "Generated by wasl.load"
-          }
-        },
-        required: ["src"]
+          required: ["src"]
+        }, {
+          type: "object",
+          $ref: "component.schema.json"
+        }]
       }
     },
     additionalProperties: false
@@ -11582,12 +12673,13 @@ ${text}`;
   var import_ajv_formats = __toESM(require_dist(), 1);
   var activeVersion = null;
   var ajv = new import_ajv.default({
-    allErrors: true
+    allErrors: true,
+    allowUnionTypes: true
   });
   (0, import_ajv_formats.default)(ajv);
-  var validate = async (urlOrObject, options2 = {}) => {
+  var validate = async (urlOrObject, options2 = {}, load = true) => {
     const clone = Object.assign({ errors: [], warnings: [] }, options2);
-    let { version: version2, relativeTo, errors } = clone;
+    let { version: version2, relativeTo, errors, warnings } = clone;
     if (!version2)
       version2 = latest_default;
     let schemaValid;
@@ -11623,427 +12715,52 @@ ${text}`;
       schemaValid = ajvValidate(data);
       if (ajvValidate.errors)
         errors.push(...ajvValidate.errors);
-      if (inputIsValid && !clone._internal) {
-        clone._internal = true;
-        const loaded2 = await core_default(data, clone, typeof urlOrObject === "string" ? urlOrObject : void 0);
-        if (loaded2)
-          schemaValid = await validate(loaded2, clone);
+      if (load && typeof options2.wasl === "function") {
+        if (inputIsValid && !clone._internal) {
+          clone.output = "object";
+          clone._internal = typeof urlOrObject === "string" ? urlOrObject : void 0;
+          const wasl = new options2.wasl(data, clone);
+          const loaded = await wasl.init();
+          if (loaded)
+            schemaValid = await validate(loaded, clone, false);
+        }
+      } else {
+        warnings.push({
+          message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.'
+        });
       }
     }
     return schemaValid && inputIsValid;
   };
   var validate_default = validate;
 
-  // ../phaser/index.wasl.json
+  // tests/0/0.0/0.0.0/external/index.wasl.json
   var index_wasl_default = {
     graph: {
       nodes: {
         phaser: {
-          src: "src/index.wasl.json",
-          plugins: {
-            game: {
-              preload: {
-                setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
-                tilemapTiledJSON: [
-                  ["map", "map.json"]
-                ],
-                spritesheet: [
-                  ["tiles", "tiles.png", { frameWidth: 70, frameHeight: 70 }]
-                ],
-                image: [
-                  ["coin", "coinGold.png"]
-                ],
-                atlas: [
-                  ["player", "player.png", "player.json"]
-                ]
-              },
-              config: {
-                physics: {
-                  default: "arcade",
-                  arcade: {
-                    gravity: {
-                      y: 500
-                    }
-                  }
-                },
-                scene: {
-                  key: "main",
-                  create: {
-                    src: "scripts/create.js"
-                  }
-                }
-              },
-              graph: {
-                nodes: {
-                  player: {
-                    src: "src/plugins/player/index.js",
-                    position: {
-                      x: 200,
-                      y: 200
-                    },
-                    size: {
-                      offset: {
-                        height: -8
-                      }
-                    },
-                    bounce: 0.2,
-                    collideWorldBounds: false,
-                    create: {
-                      src: "scripts/player/create.js"
-                    },
-                    update: {
-                      src: "scripts/player/update.js"
-                    }
-                  },
-                  player2: {
-                    src: "src/plugins/player/index.js",
-                    position: {
-                      x: 400,
-                      y: 200
-                    },
-                    size: {
-                      offset: {
-                        height: -8
-                      }
-                    },
-                    bounce: 0.2,
-                    collideWorldBounds: false,
-                    create: {
-                      src: "scripts/player/create.js"
-                    },
-                    update: {
-                      src: "scripts/player/update.js"
-                    }
-                  }
-                }
-              }
-            }
-          }
+          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/index.wasl.json"
         }
       },
       edges: {}
     }
   };
 
-  // ../phaser/src/index.wasl.json
-  var index_wasl_default2 = {
-    graph: {
-      nodes: {
-        game: {
-          src: "plugins/game/index.js"
-        },
-        cursors: {
-          src: "plugins/cursors/index.js"
-        }
-      },
-      edges: {
-        game: {
-          cursors: {}
-        }
-      }
-    }
-  };
-
-  // ../phaser/package.json
+  // tests/0/0.0/0.0.0/external/package.json
   var package_default = {
-    name: "myphaserapp",
-    type: "module"
+    name: "phaser"
   };
 
-  // ../phaser/src/package.json
-  var package_default2 = {
-    name: "phaser",
-    type: "module"
-  };
-
-  // ../phaser/src/plugins/game/index.js
-  var game_exports = {};
-  __export(game_exports, {
-    config: () => config,
-    default: () => game_default,
-    oncreate: () => oncreate,
-    preload: () => preload
-  });
-
-  // ../phaser/src/plugins/game/config/merge.js
-  var merge2 = (base, newObj) => {
-    const copy = Object.assign({}, base);
-    if (newObj) {
-      const copyKeys = Object.keys(copy);
-      const newKeys = Object.keys(newObj);
-      copyKeys.forEach((k) => {
-        if (typeof newObj[k] === "object")
-          merge2(base[k], newObj[k]);
-        else if (newObj[k])
-          base[k] = newObj[k];
-      });
-      newKeys.forEach((k) => copy[k] = newObj[k]);
-    }
-    return copy;
-  };
-  var merge_default = merge2;
-
-  // ../phaser/src/plugins/game/config/phaser.config.js
-  var defaultConfig = (Phaser) => {
-    function preload2() {
-      this.load.setBaseURL("http://labs.phaser.io");
-      this.load.image("sky", "assets/skies/space3.png");
-      this.load.image("logo", "assets/sprites/phaser3-logo.png");
-      this.load.image("red", "assets/particles/red.png");
-    }
-    function create3() {
-      this.add.image(400, 300, "sky");
-      var particles = this.add.particles("red");
-      var emitter = particles.createEmitter({
-        speed: 100,
-        scale: { start: 1, end: 0 },
-        blendMode: "ADD"
-      });
-      var logo = this.physics.add.image(400, 100, "logo");
-      logo.setVelocity(100, 200);
-      logo.setBounce(1, 1);
-      logo.setCollideWorldBounds(true);
-      emitter.startFollow(logo);
-    }
-    const config2 = {
-      type: Phaser.AUTO,
-      width: "100",
-      height: "100",
-      physics: {
-        default: "arcade",
-        arcade: {
-          gravity: { y: 200 },
-          debug: false
-        }
-      },
-      scene: {
-        preload: preload2,
-        create: create3
-      }
-    };
-    return config2;
-  };
-  var phaser_config_default = defaultConfig;
-
-  // ../phaser/src/plugins/game/index.js
-  var script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
-  document.head.appendChild(script);
-  var nodes = {};
-  var onResolve = null;
-  if (!("Phaser" in window)) {
-    script.onload = function() {
-      if (onResolve instanceof Function)
-        onResolve(window.Phaser);
-      for (let tag in nodes)
-        nodes[tag].run();
-    };
-  }
-  var call = (func, ctx, ...args) => {
-    if (typeof func === "function")
-      func.call(ctx, args);
-  };
-  var preload = [];
-  var config = phaser_config_default;
-  function oncreate() {
-    if (window.Phaser)
-      this.run();
-    else
-      nodes[this.tag] = this;
-  }
-  async function game_default() {
-    const instance = this;
-    const Phaser = window.Phaser ?? await new Promise((resolve2) => onResolve = resolve2);
-    let cfg = typeof this.config === "function" ? this.config(window.Phaser) : this.config;
-    let defaultCfg = typeof config === "function" ? config(window.Phaser) : config;
-    let mergedConfig = merge_default(defaultCfg, cfg);
-    console.log(instance);
-    mergedConfig.parent = instance.parent.parentNode;
-    return new Promise((resolve2) => {
-      const originalUpdate = mergedConfig.scene.update;
-      const originalCreate = mergedConfig.scene.create;
-      const originalPreload = mergedConfig.scene.preload;
-      mergedConfig.scene.preload = function() {
-        for (let fName in instance.preload) {
-          const o = instance.preload[fName];
-          if (typeof o === "object")
-            for (let key in o)
-              this.load[fName](...Object.values(o[key]));
-          else
-            this.load[fName](o);
-        }
-        call(originalPreload, this);
-      };
-      mergedConfig.scene.create = function() {
-        call(originalCreate, this);
-        this.context = this;
-        instance.nodes.forEach((n) => {
-          if (typeof n.ongame === "function")
-            n.ongame(this.context);
-        });
-        resolve2(this.context);
-      };
-      mergedConfig.scene.update = function() {
-        call(originalUpdate, this);
-        instance.nodes.forEach((n) => {
-          if (typeof n.update === "function")
-            n.update(this, Object.fromEntries(instance.nodes));
-        });
-      };
-      const game = new Phaser.Game(mergedConfig);
-    });
-  }
-
-  // ../phaser/src/plugins/cursors/index.js
-  var cursors_exports = {};
-  __export(cursors_exports, {
-    default: () => cursors_default
-  });
-  function cursors_default(context) {
-    this.ref = context.input.keyboard.createCursorKeys();
-    return this.ref;
-  }
-
-  // ../phaser/src/plugins/player/index.js
-  var player_exports = {};
-  __export(player_exports, {
-    bounce: () => bounce,
-    collideWorldBounds: () => collideWorldBounds,
-    create: () => create,
-    default: () => player_default,
-    ongame: () => ongame,
-    position: () => position,
-    size: () => size,
-    update: () => update
-  });
-  var bounce = 0;
-  var collideWorldBounds;
-  var size = {};
-  var position = {};
-  var create;
-  var update;
-  function ongame(game) {
-    if (game) {
-      this.ref = game.physics.add.sprite(this.position.x, this.position.y, "player");
-      this.ref.setBounce(this.bounce);
-      this.ref.setCollideWorldBounds(this.collideWorldBounds);
-      this.ref.body.setSize((this.size.width ?? this.ref.width) + this.size.offset.width, (this.size.height ?? this.ref.height) + this.size.offset.height);
-      if (typeof this.create === "function")
-        this.create.call(game, this.ref);
-    }
-  }
-  function player_default() {
-    return this.ref;
-  }
-
-  // ../phaser/scripts/create.js
-  var create_exports = {};
-  __export(create_exports, {
-    default: () => create_default
-  });
-  var score = 0;
-  function create2() {
-    const map = this.make.tilemap({ key: "map" });
-    const groundTiles = map.addTilesetImage("tiles");
-    const groundLayer = map.createLayer("World", groundTiles, 0, 0);
-    groundLayer.setCollisionByExclusion([-1]);
-    const coinTiles = map.addTilesetImage("coin");
-    const coinLayer = map.createLayer("Coins", coinTiles, 0, 0);
-    this.physics.world.bounds.width = groundLayer.width;
-    this.physics.world.bounds.height = groundLayer.height;
-    coinLayer.setTileIndexCallback(17, (sprite, tile) => {
-      removeTile(coinLayer, tile);
-      score = incrementScore(score, text);
-    }, this);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setBackgroundColor("#ccccff");
-    const text = this.add.text(20, 570, "0", {
-      fontSize: "20px",
-      fill: "#ffffff"
-    });
-    text.setScrollFactor(0);
-  }
-  function incrementScore(score2, text) {
-    score2++;
-    if (text)
-      text.setText(score2);
-    return score2;
-  }
-  function removeTile(layer, tile) {
-    layer.removeTileAt(tile.x, tile.y);
-    return false;
-  }
-  var create_default = create2;
-
-  // ../phaser/scripts/player/create.js
-  var create_exports2 = {};
-  __export(create_exports2, {
-    default: () => create_default2
-  });
-  var getLayer = (name2, context) => {
-    return context.children.list.find((o) => o.type === "TilemapLayer" && o.layer.name === name2);
-  };
-  function createPlayer(player) {
-    const groundLayer = getLayer("World", this);
-    this.physics.add.collider(groundLayer, player);
-    const coinLayer = getLayer("Coins", this);
-    this.physics.add.overlap(player, coinLayer);
-    this.cameras.main.startFollow(player);
-    this.anims.create({
-      key: "walk",
-      frames: this.anims.generateFrameNames("player", {
-        prefix: "p1_walk",
-        start: 1,
-        end: 11,
-        zeroPad: 2
-      }),
-      frameRate: 10,
-      repeat: -1
-    });
-    this.anims.create({
-      key: "idle",
-      frames: [{ key: "player", frame: "p1_stand" }],
-      frameRate: 10
-    });
-  }
-  var create_default2 = createPlayer;
-
-  // ../phaser/scripts/player/update.js
-  var update_exports = {};
-  __export(update_exports, {
-    default: () => update2
-  });
-  function update2(context, peers) {
-    if (peers.cursors.ref.left.isDown) {
-      this.ref.body.setVelocityX(-200);
-      this.ref.anims.play("walk", true);
-      this.ref.flipX = true;
-    } else if (peers.cursors.ref.right.isDown) {
-      this.ref.body.setVelocityX(200);
-      this.ref.anims.play("walk", true);
-      this.ref.flipX = false;
-    } else {
-      this.ref.body.setVelocityX(0);
-      this.ref.anims.play("idle", true);
-    }
-  }
-
-  // demos/phaser.js
+  // demos/external/0.0.0.js
   var import_meta2 = {};
-  var path = "../../phaser/index.wasl.json";
+  var path = "../../tests/0/0.0/0.0.0/external/index.wasl.json";
+  var filesystem = {
+    ["package.json"]: package_default
+  };
   var options = {
     relativeTo: import_meta2.url,
-    filesystem: {
-      "package.json": package_default,
-      "src/package.json": package_default2,
-      "src/index.wasl.json": index_wasl_default2,
-      "src/plugins/game/index.js": game_exports,
-      "src/plugins/player/index.js": player_exports,
-      "src/plugins/cursors/index.js": cursors_exports,
-      "scripts/create.js": create_exports,
-      "scripts/player/create.js": create_exports2,
-      "scripts/player/update.js": update_exports
-    }
+    version: "0.0.0",
+    filesystem
   };
 
   // index.js
@@ -12056,24 +12773,33 @@ ${text}`;
   var startExecution = async () => {
     options.activate = true;
     options.parentNode = document.getElementById("container");
+    options.wasl = core_default;
     console.log("------------------ IMPORT MODE ------------------");
-    const importOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
+    const importOptions = Object.assign({ errors: [], warnings: [] }, options);
     const res = await validate_default(path, importOptions);
     console.log("validate (import)", res);
     if (res) {
-      const o = await core_default(path, importOptions);
+      const o = new core_default(path, importOptions);
+      await o.init();
+      await o.start();
       console.log("load (import)", o);
+      importOptions.errors = o.errors;
+      importOptions.warnings = o.warnings;
     }
     printError(importOptions.errors, "import");
     printError(importOptions.warnings, "import", "Warning");
     if (index_wasl_default) {
       console.log("------------------ REFERENCE MODE ------------------");
-      const refOptions = Object.assign({ errors: [], warnings: [], files: {} }, options);
+      const refOptions = Object.assign({ errors: [], warnings: [] }, options);
       const res2 = await validate_default(index_wasl_default, refOptions);
       console.log("validate (reference)", res2);
       if (res2) {
-        const o = await core_default(index_wasl_default, refOptions);
+        const o = new core_default(index_wasl_default, refOptions);
+        await o.init();
+        await o.start();
         console.log("load (reference)", o);
+        refOptions.errors = o.errors;
+        refOptions.warnings = o.warnings;
       }
       printError(refOptions.errors, "reference");
       printError(refOptions.warnings, "reference", "Warning");

@@ -3,10 +3,10 @@
     "graph": {
         "nodes": {
             "add": {
-                "src": "../add.js"
+                "src": "../math/add.js"
             },
             "multiply": {
-                "src": "../multiply.js"
+                "src": "../math/multiply.js"
             }
         },
     

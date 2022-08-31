@@ -5,11 +5,11 @@ import latest from "../common/utils/latest.js"
 import { LatestWASL, Options } from "../common/types/index.js"
 import get from "../common/get.js"
 import * as check from '../common/utils/check'
-import load from "../core/index"
 
 let activeVersion = null
 const ajv = new Ajv({
     allErrors: true,
+    allowUnionTypes: true
     // strictRequired: false //"log"
 })
 addFormats(ajv)
@@ -19,11 +19,11 @@ addFormats(ajv)
 //     - Provide a url and a options.relativeTo entry (locally served + Node.js only)
 //     - Provide a file object (any)
 
-const validate = async (urlOrObject, options:Options={}) => {
+const validate = async (urlOrObject, options:Options={}, load = true) => {
 
     const clone = Object.assign({errors: [], warnings: []}, options)
     
-    let {version, relativeTo, errors} = clone
+    let {version, relativeTo, errors, warnings} = clone
     if (!version) version = latest
 
     let schemaValid;
@@ -68,10 +68,19 @@ const validate = async (urlOrObject, options:Options={}) => {
         if (ajvValidate.errors) errors.push(...ajvValidate.errors)
 
     // Runtime Validation
-    if (inputIsValid && !clone._internal){
-        clone._internal = true
-        const loaded = await load(data, clone, (typeof urlOrObject === 'string') ? urlOrObject : undefined)
-        if (loaded)  schemaValid = await validate(loaded, clone)
+    if (load && typeof options.wasl === 'function'){
+        if (inputIsValid && !clone._internal){
+            clone.output = 'object'
+            clone._internal = (typeof urlOrObject === 'string') ? urlOrObject : undefined
+
+            const wasl = new options.wasl(data, clone)
+            const loaded = await wasl.init()
+            if (loaded)  schemaValid = await validate(loaded, clone, false)
+        }
+    } else {
+        warnings.push({ 
+            message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.',
+        })
     }
 }
 
