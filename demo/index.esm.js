@@ -12063,17 +12063,20 @@ var WASL = class {
           if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
             node.src = null;
             let _internal = "";
+            let _modeOverride = options2._modeOverride;
             let fullPath;
             try {
               new URL(ogSrc);
               _internal = fullPath = ogSrc;
+              _modeOverride = "import";
             } catch {
               if (ogSrc)
                 fullPath = mainPath ? resolve(ogSrc, mainPath) : resolve(ogSrc);
               else
                 fullPath = mainPath;
             }
-            if (__privateGet(this, _mode) === "import") {
+            let mode = options2._modeOverride ?? __privateGet(this, _mode);
+            if (_internal || mode === "import") {
               let res = await this.get(fullPath, void 0);
               if (res)
                 node.src = res;
@@ -12119,7 +12122,8 @@ var WASL = class {
               await this.init(node.src, {
                 _internal,
                 _deleteSrc: options2._deleteSrc,
-                _top
+                _top,
+                _modeOverride
               });
             }
           }
@@ -12205,10 +12209,12 @@ var WASL = class {
       return target;
     };
     this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "") => {
-      __privateSet(this, _input, urlOrObject);
-      __privateSet(this, _options, options2);
       const internalLoadCall = options2._internal;
       const isFromValidator = __privateGet(this, _main) === void 0 && internalLoadCall;
+      if (!__privateGet(this, _input))
+        __privateSet(this, _input, urlOrObject);
+      if (!__privateGet(this, _options))
+        __privateSet(this, _options, options2);
       if (!__privateGet(this, _filesystem))
         __privateSet(this, _filesystem, options2.filesystem);
       if (!internalLoadCall) {
@@ -12240,8 +12246,9 @@ var WASL = class {
         console.error("Mode is not supported...");
       if (!internalLoadCall)
         __privateSet(this, _mode, mode);
+      mode = clonedOptions._modeOverride ?? __privateGet(this, _mode);
       this.errors.push(...valid(urlOrObject, clonedOptions, "load"));
-      switch (__privateGet(this, _mode)) {
+      switch (mode) {
         case "reference":
           if (!innerTopLevel) {
             if (__privateGet(this, _filesystem)) {

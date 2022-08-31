@@ -25,6 +25,7 @@ export type Options = {
     _deleteSrc?: boolean
     _remote?: string
     _top?: boolean
+    _modeOverride?: boolean
 
     // ES Components
     activate?: boolean

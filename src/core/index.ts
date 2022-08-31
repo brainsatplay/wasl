@@ -151,17 +151,21 @@ class WASL {
 
                     // Option #1: Active ESM source (TODO: Fetch text for ambiguous interpretation, i.e. other languages)
                     let _internal: string | true = '' // don't mistake for user call
+                    let _modeOverride = options._modeOverride;
                     let fullPath
                     try {
                         new URL(ogSrc);
                         _internal = fullPath = ogSrc
+                        _modeOverride = 'import'
                     } catch {
                         if (ogSrc) fullPath = mainPath ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
                         else fullPath = mainPath
                     }
+
+                    let mode = options._modeOverride ?? this.#mode
                     
                     //Import Mode
-                    if (this.#mode === 'import') {
+                    if (_internal || mode === 'import') {
                         let res = await this.get(fullPath, undefined) as LatestWASL
                         if (res) node.src = res
                         else console.error('Could not get node source.', name)
@@ -220,7 +224,8 @@ class WASL {
                         await this.init(node.src, {
                             _internal,
                             _deleteSrc: options._deleteSrc,
-                            _top
+                            _top,
+                            _modeOverride
                         })
                     }
                 } 
@@ -355,14 +360,13 @@ class WASL {
         url: string = ''
     ) => {
 
-        this.#input = urlOrObject
-        this.#options = options
-
         const internalLoadCall = options._internal
-
         const isFromValidator = this.#main === undefined && internalLoadCall
         // Original User Call
+        if (!this.#input) this.#input = urlOrObject
+        if (!this.#options) this.#options = options
         if (!this.#filesystem) this.#filesystem = options.filesystem 
+
         if (!internalLoadCall) {
             if (!url)  url = this.#url // only use for the top-level call
 
@@ -396,13 +400,16 @@ class WASL {
 
         if (!internalLoadCall) this.#mode = mode // set global mode
 
+
+        mode = clonedOptions._modeOverride ?? this.#mode // set local to global mode
+
         // Check if input is valid
         this.errors.push(...check.valid(urlOrObject, clonedOptions, 'load'))
 
         // maintain a reference to the main path
 
         // ------------------- Merge package.json and (optionally) resolve object-------------------
-        switch (this.#mode) {
+        switch (mode) {
             case 'reference': 
                 if (!innerTopLevel){
                     if (this.#filesystem) {

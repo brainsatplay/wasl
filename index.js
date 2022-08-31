@@ -2,7 +2,6 @@
 import wasl from "./src/core/index"
 import validate from "./src/validate/index"
 
-// import { path, main, options } from './demos/external/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
 // import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/remote.js'
