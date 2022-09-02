@@ -3,7 +3,7 @@ import main from '../../tests/0/0.0/0.0.0/basic/index.wasl.json' assert {type: "
 import pkg from '../../tests/0/0.0/0.0.0/basic/package.json' assert {type: "json"}
 import pluginPkg from '../../tests/0/plugins/plugin/package.json' assert {type: "json"}
 import plugin from '../../tests/0/plugins/plugin/index.wasl.json' assert {type: "json"}
-import math from '../../tests/0/plugins/plugin/index.wasl.json' assert {type: "json"}
+import math from '../../tests/0/plugins/math/index.wasl.json' assert {type: "json"}
 import * as log from "../../tests/0/plugins/log.js"
 import * as add from "../../tests/0/plugins/math/add.js"
 import * as add2 from "../../tests/0/plugins/math/add2.js"

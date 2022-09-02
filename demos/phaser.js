@@ -23,8 +23,8 @@ const options = {
         'src/plugins/player/index.js': player,
         'src/plugins/cursors/index.js': cursors,
         'scripts/create.js': create,
-        'scripts/player/create.js': createPlayer,
-        'scripts/player/update.js': updatePlayer,
+        'src/scripts/player/create.js': createPlayer,
+        'src/scripts/player/update.js': updatePlayer,
     }
 }
 

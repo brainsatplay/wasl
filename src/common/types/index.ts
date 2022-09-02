@@ -16,8 +16,8 @@ export type Options = {
         [x:string]: LatestWASL
     },
 
+    debug?: boolean
     output?: 'plugin' | 'object'
-    fromValidator?: boolean
     wasl?: WASL
 
    

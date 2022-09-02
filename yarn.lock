@@ -137,10 +137,10 @@
   "resolved" "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   "version" "4.0.0"
 
-"es-plugins@0.0.14":
-  "integrity" "sha512-Q6CnmSOu6asOv+FFFxHClgC/gcu0EVrhhQuLfpZltlAJ+bQ4ze8KcYUnLN7lz0CTf4nlmODAVTRA+17Has+/ew=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.14.tgz"
-  "version" "0.0.14"
+"es-plugins@0.0.15":
+  "integrity" "sha512-ioNL0zV+f0BZmLynTRFpWnfq4pC+HnZDLR2jPcIBBOVhYjdsEy7ysVHfv9o/dVT7q9QVS/NRUXJbMuFkk56VGQ=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.15.tgz"
+  "version" "0.0.15"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="

@@ -128,9 +128,9 @@ var require_Blob = __commonJS({
               tlen += 8;
               tlen *= 1 + pos / string.length * 2;
               tlen = tlen >> 3 << 3;
-              var update = new Uint8Array(tlen);
-              update.set(target);
-              target = update;
+              var update3 = new Uint8Array(tlen);
+              update3.set(target);
+              target = update3;
             }
             if ((value & 4294967168) === 0) {
               target[at++] = value;
@@ -252,7 +252,7 @@ var require_Blob = __commonJS({
             }
             return output.join("");
           }
-          var create = Object.create || function(a) {
+          var create3 = Object.create || function(a) {
             function c() {
             }
             c.prototype = a;
@@ -286,12 +286,12 @@ var require_Blob = __commonJS({
             return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
           }
           function concatTypedarrays(chunks) {
-            var size = 0;
+            var size2 = 0;
             var j = chunks.length;
             while (j--) {
-              size += chunks[j].length;
+              size2 += chunks[j].length;
             }
-            var b = new Uint8Array(size);
+            var b = new Uint8Array(size2);
             var offset = 0;
             for (var i = 0; i < chunks.length; i++) {
               var chunk = chunks[i];
@@ -347,7 +347,7 @@ var require_Blob = __commonJS({
             a.lastModified = +a.lastModifiedDate;
             return a;
           }
-          File2.prototype = create(Blob3.prototype);
+          File2.prototype = create3(Blob3.prototype);
           File2.prototype.constructor = File2;
           if (Object.setPrototypeOf) {
             Object.setPrototypeOf(File2, Blob3);
@@ -491,21 +491,21 @@ var require_Blob = __commonJS({
         try {
           new ReadableStream({ type: "bytes" });
           stream = function stream2() {
-            var position = 0;
+            var position2 = 0;
             var blob2 = this;
             return new ReadableStream({
               type: "bytes",
               autoAllocateChunkSize: 524288,
               pull: function(controller) {
                 var v = controller.byobRequest.view;
-                var chunk = blob2.slice(position, position + v.byteLength);
+                var chunk = blob2.slice(position2, position2 + v.byteLength);
                 return chunk.arrayBuffer().then(function(buffer) {
                   var uint8array = new Uint8Array(buffer);
                   var bytesRead = uint8array.byteLength;
-                  position += bytesRead;
+                  position2 += bytesRead;
                   v.set(uint8array);
                   controller.byobRequest.respond(bytesRead);
-                  if (position >= blob2.size)
+                  if (position2 >= blob2.size)
                     controller.close();
                 });
               }
@@ -515,15 +515,15 @@ var require_Blob = __commonJS({
           try {
             new ReadableStream({});
             stream = function stream2(blob2) {
-              var position = 0;
+              var position2 = 0;
               return new ReadableStream({
                 pull: function(controller) {
-                  var chunk = blob2.slice(position, position + 524288);
+                  var chunk = blob2.slice(position2, position2 + 524288);
                   return chunk.arrayBuffer().then(function(buffer) {
-                    position += buffer.byteLength;
+                    position2 += buffer.byteLength;
                     var uint8array = new Uint8Array(buffer);
                     controller.enqueue(uint8array);
-                    if (position == blob2.size)
+                    if (position2 == blob2.size)
                       controller.close();
                   });
                 }
@@ -1056,38 +1056,38 @@ var require_codegen = __commonJS({
       }
     };
     var ParentNode = class extends Node {
-      constructor(nodes = []) {
+      constructor(nodes2 = []) {
         super();
-        this.nodes = nodes;
+        this.nodes = nodes2;
       }
       render(opts) {
         return this.nodes.reduce((code, n) => code + n.render(opts), "");
       }
       optimizeNodes() {
-        const { nodes } = this;
-        let i = nodes.length;
+        const { nodes: nodes2 } = this;
+        let i = nodes2.length;
         while (i--) {
-          const n = nodes[i].optimizeNodes();
+          const n = nodes2[i].optimizeNodes();
           if (Array.isArray(n))
-            nodes.splice(i, 1, ...n);
+            nodes2.splice(i, 1, ...n);
           else if (n)
-            nodes[i] = n;
+            nodes2[i] = n;
           else
-            nodes.splice(i, 1);
+            nodes2.splice(i, 1);
         }
-        return nodes.length > 0 ? this : void 0;
+        return nodes2.length > 0 ? this : void 0;
       }
       optimizeNames(names, constants) {
-        const { nodes } = this;
-        let i = nodes.length;
+        const { nodes: nodes2 } = this;
+        let i = nodes2.length;
         while (i--) {
-          const n = nodes[i];
+          const n = nodes2[i];
           if (n.optimizeNames(names, constants))
             continue;
           subtractNames(names, n.names);
-          nodes.splice(i, 1);
+          nodes2.splice(i, 1);
         }
-        return nodes.length > 0 ? this : void 0;
+        return nodes2.length > 0 ? this : void 0;
       }
       get names() {
         return this.nodes.reduce((names, n) => addNames(names, n.names), {});
@@ -1104,8 +1104,8 @@ var require_codegen = __commonJS({
     };
     Else.kind = "else";
     var If = class extends BlockNode {
-      constructor(condition, nodes) {
-        super(nodes);
+      constructor(condition, nodes2) {
+        super(nodes2);
         this.condition = condition;
       }
       render(opts) {
@@ -7595,10 +7595,10 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
         let buffer = [];
         const processBuffer = async ({ done, value }) => {
           if (done) {
-            const config = {};
+            const config2 = {};
             if (typeof type === "string")
-              config.type = type;
-            const blob = new Blob(buffer, config);
+              config2.type = type;
+            const blob = new Blob(buffer, config2);
             const ab = await blob.arrayBuffer();
             resolve2({ buffer: new Uint8Array(ab), type });
             return;
@@ -7838,9 +7838,9 @@ var merge = (main, override, deleteSrc = false) => {
   }
   return copy;
 };
-var checkFiles = (key, filesystem2) => {
+var checkFiles = (key, filesystem) => {
   const isJSON = suffix(key).slice(-4) === "json" ? true : false;
-  const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
+  const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
   return output;
 };
 var remove = (original, search, key = original, o) => {
@@ -7849,7 +7849,7 @@ var remove = (original, search, key = original, o) => {
     delete o[key];
 };
 
-// src/core/node_modules/es-plugins/dist/index.esm.js
+// node_modules/es-plugins/dist/index.esm.js
 function parseFunctionFromText(method = "") {
   let getFunctionBody = (methodString) => {
     return methodString.replace(/^\W*(function[^{]+\{([\s\S]*)\}|[^=]+=>[^{]*\{([\s\S]*)\}|[^=]+=>(.+))/i, "$2$3$4");
@@ -7883,60 +7883,64 @@ function parseFunctionFromText(method = "") {
   }
   return newFunc;
 }
-var state = {
-  pushToState: {},
-  data: {},
-  triggers: {},
-  setState(updateObj) {
-    Object.assign(state.data, updateObj);
-    for (const prop of Object.getOwnPropertyNames(updateObj)) {
-      if (state.triggers[prop])
-        state.triggers[prop].forEach((obj) => obj.onchange(state.data[prop]));
-    }
-    return state.data;
-  },
-  subscribeTrigger(key, onchange) {
-    if (key) {
-      if (!state.triggers[key]) {
-        state.triggers[key] = [];
+var EventHandler = class {
+  constructor() {
+    this.pushToState = {};
+    this.data = {};
+    this.triggers = {};
+    this.setState = (updateObj) => {
+      Object.assign(this.data, updateObj);
+      for (const prop of Object.getOwnPropertyNames(updateObj)) {
+        if (this.triggers[prop])
+          this.triggers[prop].forEach((obj) => obj.onchange(this.data[prop]));
       }
-      let l = state.triggers[key].length;
-      state.triggers[key].push({ idx: l, onchange });
-      return state.triggers[key].length - 1;
-    } else
-      return void 0;
-  },
-  unsubscribeTrigger(key, sub) {
-    let idx = void 0;
-    let triggers = state.triggers[key];
-    if (triggers) {
-      if (!sub)
-        delete state.triggers[key];
-      else {
-        let obj = triggers.find((o) => {
-          if (o.idx === sub) {
-            return true;
-          }
-        });
-        if (obj)
-          triggers.splice(idx, 1);
-        return true;
-      }
-    }
-  },
-  subscribeTriggerOnce(key, onchange) {
-    let sub;
-    let changed = (value) => {
-      onchange(value);
-      state.unsubscribeTrigger(key, sub);
+      return this.data;
     };
-    sub = state.subscribeTrigger(key, changed);
+    this.subscribeTrigger = (key, onchange) => {
+      if (key) {
+        if (!this.triggers[key]) {
+          this.triggers[key] = [];
+        }
+        let l = this.triggers[key].length;
+        this.triggers[key].push({ idx: l, onchange });
+        return this.triggers[key].length - 1;
+      } else
+        return void 0;
+    };
+    this.unsubscribeTrigger = (key, sub) => {
+      let idx = void 0;
+      let triggers = this.triggers[key];
+      if (triggers) {
+        if (!sub)
+          delete this.triggers[key];
+        else {
+          let obj = triggers.find((o) => {
+            if (o.idx === sub) {
+              return true;
+            }
+          });
+          if (obj)
+            triggers.splice(idx, 1);
+          return true;
+        }
+      }
+    };
+    this.subscribeTriggerOnce = (key, onchange) => {
+      let sub;
+      let changed = (value) => {
+        onchange(value);
+        this.unsubscribeTrigger(key, sub);
+      };
+      sub = this.subscribeTrigger(key, changed);
+    };
   }
 };
-var restrictedKeys = ["_state", "graph"];
-function merge2(props) {
+var state = new EventHandler();
+function addLocalState(props) {
+  if (!this._state)
+    this._state = {};
   for (let k in props) {
-    if (restrictedKeys.includes(k))
+    if (k === "_state" || k === "graph")
       continue;
     else {
       this._state[k] = props[k];
@@ -7944,9 +7948,16 @@ function merge2(props) {
         this[k] = props[k];
       else
         Object.defineProperty(this, k, {
-          get: () => this._state[k],
-          set: (v) => this._state[k] = v,
-          enumerable: true
+          get: () => {
+            this._state[k];
+          },
+          set: (v) => {
+            this._state[k] = v;
+            if (this.state.triggers[this._unique])
+              this.setState({ [this._unique]: this._state });
+          },
+          enumerable: true,
+          configurable: true
         });
     }
   }
@@ -7955,8 +7966,7 @@ var GraphNode = class {
   constructor(properties = {}, parentNode, graph) {
     this.nodes = /* @__PURE__ */ new Map();
     this._initial = {};
-    this._state = {};
-    this._unique = Math.random();
+    this._unique = `${Math.random()}`;
     this.state = state;
     this.isLooping = false;
     this.isAnimating = false;
@@ -7964,10 +7974,11 @@ var GraphNode = class {
     this.animation = void 0;
     this.forward = true;
     this.backward = false;
+    this.reactive = false;
     this.runSync = false;
     this.firstRun = true;
     this.DEBUGNODE = false;
-    this.merge = merge2;
+    this.addLocalState = addLocalState;
     this.operator = (...args) => {
       return args;
     };
@@ -8345,6 +8356,9 @@ var GraphNode = class {
         if (n.ondelete)
           n.ondelete(n);
       }
+      if (typeof this._state === "object") {
+        this.state.unsubscribeTrigger(this._unique);
+      }
     };
     this.append = (n, parentNode2 = this) => {
       if (typeof n === "string")
@@ -8356,13 +8370,40 @@ var GraphNode = class {
       }
     };
     this.subscribe = (callback, tag = this.tag) => {
-      if (callback.run) {
-        return this.subscribeNode(callback);
-      } else
+      console.log(this.state);
+      if (typeof callback === "string") {
+        if (this.graph)
+          callback = this.graph.get(callback);
+        else
+          callback = this.nodes.get(callback);
+      }
+      if (typeof callback === "function") {
         return this.state.subscribeTrigger(tag, callback);
+      } else if (callback)
+        return this.state.subscribeTrigger(tag, (res) => {
+          callback.run(res);
+        });
     };
     this.unsubscribe = (sub, tag = this.tag) => {
       return this.state.unsubscribeTrigger(tag, sub);
+    };
+    this.subscribeState = (callback) => {
+      if (!this.reactive) {
+        return void 0;
+      } else {
+        if (typeof callback === "string") {
+          if (this.graph)
+            callback = this.graph.get(callback);
+          else
+            callback = this.nodes.get(callback);
+        }
+        if (typeof callback === "function") {
+          return this.state.subscribeTrigger(this._unique, callback);
+        } else if (callback)
+          return this.state.subscribeTrigger(this._unique, (_state) => {
+            callback.run(_state);
+          });
+      }
     };
     this.addChildren = (children) => {
       if (!this.children)
@@ -8396,8 +8437,8 @@ var GraphNode = class {
       }
       return result;
     };
-    this.getProps = (n = this) => {
-      return {
+    this.getProps = (n = this, getInitial = true) => {
+      let baseprops = {
         tag: n.tag,
         operator: n.operator,
         graph: n.graph,
@@ -8413,9 +8454,36 @@ var GraphNode = class {
         repeat: n.repeat,
         branch: n.branch,
         oncreate: n.oncreate,
-        DEBUGNODE: n.DEBUGNODE,
-        ...this._initial
+        reactive: n.reactive,
+        DEBUGNODE: n.DEBUGNODE
       };
+      if (!getInitial) {
+        let uniqueprops = {};
+        for (const key in this._initial) {
+          uniqueprops[key] = this[key];
+        }
+        return Object.assign(baseprops, uniqueprops);
+      } else
+        return {
+          tag: n.tag,
+          operator: n.operator,
+          graph: n.graph,
+          children: n.children,
+          parent: n.parent,
+          forward: n.forward,
+          backward: n.bacward,
+          loop: n.loop,
+          animate: n.animate,
+          frame: n.frame,
+          delay: n.delay,
+          recursive: n.recursive,
+          repeat: n.repeat,
+          branch: n.branch,
+          oncreate: n.oncreate,
+          reactive: n.reactive,
+          DEBUGNODE: n.DEBUGNODE,
+          ...this._initial
+        };
     };
     this.setProps = (props = {}) => {
       let tmp = Object.assign({}, props);
@@ -8626,7 +8694,9 @@ var GraphNode = class {
       if (parsed)
         return this.add(parsed);
     };
-    this.setState = this.state.setState;
+    this.setState = (data) => {
+      this.state.setState(data);
+    };
     this.DEBUGNODES = (debugging = true) => {
       this.DEBUGNODE = debugging;
       this.nodes.forEach((n) => {
@@ -8717,7 +8787,9 @@ var GraphNode = class {
           hasnode = parentNode.nodes.get(properties.tag);
         }
         if (hasnode) {
-          this.merge(hasnode);
+          if (this.reactive) {
+            this.addLocalState(hasnode);
+          }
           if (!this.source)
             this.source = hasnode;
           let props = hasnode.getProps();
@@ -8742,7 +8814,7 @@ var GraphNode = class {
       }
       if (properties.children)
         this._initial.children = Object.assign({}, properties.children);
-      this.merge(properties);
+      Object.assign(this, properties);
       if (!this.tag) {
         if (graph) {
           this.tag = `node${graph.nNodes}`;
@@ -8757,6 +8829,13 @@ var GraphNode = class {
         }
         graph.nodes.set(this.tag, this);
         graph.nNodes++;
+        this.state = graph.state;
+      }
+      if (this.reactive) {
+        addLocalState(properties);
+        if (typeof this.reactive === "function") {
+          this.state.subscribeTrigger(this._unique, this.reactive);
+        }
       }
       if (parentNode) {
         this.parent = parentNode;
@@ -8792,11 +8871,10 @@ var Graph = class {
   constructor(tree, tag, props) {
     this.nNodes = 0;
     this.nodes = /* @__PURE__ */ new Map();
-    this.state = state;
-    this._state = {};
-    this._unique = Math.random();
+    this.state = new EventHandler();
+    this._unique = `${Math.random()}`;
     this.tree = {};
-    this.merge = merge2;
+    this.addLocalState = addLocalState;
     this.add = (n = {}) => {
       if (n?.node instanceof GraphNode)
         n = n.node;
@@ -9032,6 +9110,24 @@ var Graph = class {
     this.unsubscribe = (tag2, sub) => {
       return this.state.unsubscribeTrigger(tag2, sub);
     };
+    this.subscribeState = (callback) => {
+      if (!this.reactive) {
+        return void 0;
+      } else {
+        if (typeof callback === "string") {
+          if (this.graph)
+            callback = this.graph.get(callback);
+          else
+            callback = this.nodes.get(callback);
+        }
+        if (typeof callback === "function") {
+          return this.state.subscribeTrigger(this._unique, callback);
+        } else if (callback)
+          return this.state.subscribeTrigger(this._unique, (_state) => {
+            callback.run(_state);
+          });
+      }
+    };
     this.subscribeNode = (inputNode, outputNode) => {
       let tag2;
       if (inputNode?.tag)
@@ -9078,7 +9174,9 @@ var Graph = class {
     this.create = (operator, parentNode, props2) => {
       return createNode(operator, parentNode, props2, this);
     };
-    this.setState = this.state.setState;
+    this.setState = (data) => {
+      this.state.setState(data);
+    };
     this.DEBUGNODES = (debugging = true) => {
       this.nodes.forEach((n) => {
         if (debugging)
@@ -9089,7 +9187,10 @@ var Graph = class {
     };
     this.tag = tag ? tag : `graph${Math.floor(Math.random() * 1e11)}`;
     if (props) {
-      this.merge(props);
+      if (props.reactive) {
+        this.addLocalState(props);
+      } else
+        Object.assign(this, props);
       this._initial = props;
     }
     if (tree || Object.keys(this.tree).length > 0)
@@ -9392,11 +9493,11 @@ var DOMElement = class extends HTMLElement {
         };
       }
     } else if (name2 === "oncreate") {
-      let oncreate = val;
-      if (typeof oncreate === "string")
-        oncreate = parseFunctionFromText2(oncreate);
-      if (typeof oncreate === "function") {
-        this.oncreate = oncreate;
+      let oncreate2 = val;
+      if (typeof oncreate2 === "string")
+        oncreate2 = parseFunctionFromText2(oncreate2);
+      if (typeof oncreate2 === "function") {
+        this.oncreate = oncreate2;
       }
     } else if (name2 === "renderonchanged") {
       let rpc = val;
@@ -9709,8 +9810,8 @@ var DOMElement = class extends HTMLElement {
   get oncreate() {
     return this.oncreate;
   }
-  set oncreate(oncreate) {
-    this.setAttribute("oncreated", oncreate);
+  set oncreate(oncreate2) {
+    this.setAttribute("oncreated", oncreate2);
   }
 };
 function addCustomElement(cls, tag, extend = null) {
@@ -9784,12 +9885,12 @@ var Service = class extends Graph {
         options3.customChildren = this.customChildren;
       if (Array.isArray(options3.routes)) {
         options3.routes.forEach((r) => {
-          this.load(r, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren);
+          this.load(r, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren, options3.sharedState);
         });
       } else if (options3.routes || (Object.keys(this.routes).length > 0 || this.loadDefaultRoutes) && this.firstLoad)
-        this.load(options3.routes, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren);
+        this.load(options3.routes, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren, options3.sharedState);
     };
-    this.load = (routes, includeClassName = true, routeFormat = ".", customRoutes, customChildren) => {
+    this.load = (routes, includeClassName = true, routeFormat = ".", customRoutes, customChildren, sharedState = true) => {
       if (!routes && !this.loadDefaultRoutes && (Object.keys(this.routes).length > 0 || this.firstLoad))
         return;
       if (this.firstLoad)
@@ -9814,6 +9915,8 @@ var Service = class extends Graph {
           } else if (typeof routes === "function") {
             service = new routes({ loadDefaultRoutes: this.loadDefaultRoutes });
             service.load();
+            if (sharedState)
+              service.state = this.state;
             routes = service.routes;
             if (service.customRoutes && !this.customRoutes)
               this.customRoutes = service.customRoutes;
@@ -9827,6 +9930,8 @@ var Service = class extends Graph {
         } else if (routes instanceof Graph || routes.source instanceof Graph || routes.setTree) {
           service = routes;
           routes = {};
+          if (sharedState)
+            service.state = this.state;
           if (includeClassName) {
             let name2 = service.name;
             if (!name2) {
@@ -9857,6 +9962,8 @@ var Service = class extends Graph {
                 else
                   checked[par.tag + routeFormat + nd.tag] = true;
                 if (nd instanceof Graph || nd.source instanceof Graph || nd.setTree) {
+                  if (sharedState)
+                    nd.state = this.state;
                   if (includeClassName) {
                     let nm = nd.name;
                     if (!nm) {
@@ -10291,18 +10398,18 @@ var Service = class extends Graph {
       this.init(options2);
   }
   handleServiceMessage(message) {
-    let call;
+    let call2;
     if (typeof message === "object") {
       if (message.route)
-        call = message.route;
+        call2 = message.route;
       else if (message.node)
-        call = message.node;
+        call2 = message.node;
     }
-    if (call) {
+    if (call2) {
       if (Array.isArray(message.args))
-        return this.run(call, ...message.args);
+        return this.run(call2, ...message.args);
       else
-        return this.run(call, message.args);
+        return this.run(call2, message.args);
     } else
       return message;
   }
@@ -10428,7 +10535,7 @@ var DOMService = class extends Service {
     };
     this.addElement = (options3, generateChildElementNodes = false) => {
       let elm = this.createElement(options3);
-      let oncreate = options3.onrender;
+      let oncreate2 = options3.onrender;
       if (!options3.element)
         options3.element = elm;
       if (!options3.operator)
@@ -10468,7 +10575,7 @@ var DOMService = class extends Service {
         };
         window.addEventListener("resize", options3.onresize);
       }
-      this.resolveParentNode(elm, options3, oncreate);
+      this.resolveParentNode(elm, options3, oncreate2);
       return this.elements[options3.id];
     };
     this.createElement = (options3) => {
@@ -10523,9 +10630,9 @@ var DOMService = class extends Service {
     };
     this.addComponent = (options3, generateChildElementNodes = true) => {
       if (options3.onrender) {
-        let oncreate = options3.onrender;
+        let oncreate2 = options3.onrender;
         options3.onrender = (element) => {
-          oncreate.call(element.node, element, options3);
+          oncreate2.call(element.node, element, options3);
         };
       }
       if (options3.onresize) {
@@ -10618,9 +10725,9 @@ var DOMService = class extends Service {
       } else
         options3.template = options3.canvas;
       if (options3.onrender) {
-        let oncreate = options3.onrender;
+        let oncreate2 = options3.onrender;
         options3.onrender = (element) => {
-          oncreate.call(element.node, element, options3);
+          oncreate2.call(element.node, element, options3);
         };
       }
       if (options3.onresize) {
@@ -10714,7 +10821,7 @@ var DOMService = class extends Service {
       this.resolveParentNode(elm, options3);
       return this.components[completeOptions.id];
     };
-    this.resolveParentNode = (elm, options3, oncreate) => {
+    this.resolveParentNode = (elm, options3, oncreate2) => {
       if (!elm.parentNode) {
         setTimeout(() => {
           if (typeof options3.parentNode === "string")
@@ -10722,8 +10829,8 @@ var DOMService = class extends Service {
           if (typeof options3.parentNode === "object") {
             options3.parentNode.appendChild(elm);
           }
-          if (oncreate)
-            oncreate.call(elm.node, elm, this.elements[options3.id]);
+          if (oncreate2)
+            oncreate2.call(elm.node, elm, this.elements[options3.id]);
           if (elm.node.animation || elm.node.animate) {
             elm.node.runAnimation();
           }
@@ -10789,45 +10896,6 @@ var DOMService = class extends Service {
     this.init(options2);
   }
 };
-function Struct(structType = "struct", assignProps = {}, parentUser = { _id: "" }, parentStruct = { structType: "struct", _id: "" }) {
-  function randomId(tag = "") {
-    return `${tag + Math.floor(Math.random() + Math.random() * Math.random() * 1e16)}`;
-  }
-  let struct = {
-    _id: randomId(structType + "defaultId"),
-    structType,
-    ownerId: parentUser?._id,
-    timestamp: Date.now(),
-    parent: { structType: parentStruct?.structType, _id: parentStruct?._id }
-  };
-  if (!struct.ownerId)
-    delete struct.ownerId;
-  if (!struct?.parent?._id)
-    delete struct.parent;
-  if (Object.keys(assignProps).length > 0)
-    Object.assign(struct, assignProps);
-  return struct;
-}
-function ProfileStruct(tag = "", assignProps = {}, parentUser = { _id: "" }, parentStruct = { structType: "struct", _id: "" }) {
-  let props = {
-    tag,
-    name: "",
-    username: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    sex: "",
-    birthday: "",
-    type: "",
-    userRoles: {},
-    socials: {},
-    data: {},
-    id: ""
-  };
-  let struct = Struct("profile", props, parentUser, parentStruct);
-  return Object.assign(struct, assignProps);
-}
 var Router = class extends Service {
   constructor(options2) {
     super(options2);
@@ -10837,11 +10905,11 @@ var Router = class extends Service {
     this.services = {};
     this.serviceConnections = {};
     this.users = {};
-    this.addUser = async (info, connections, config, receiving) => {
+    this.addUser = async (info, connections, config2, receiving) => {
       if (!info._id) {
         info._id = `user${Math.floor(Math.random() * 1e15)}`;
       }
-      let user = ProfileStruct(info._id, info);
+      let user = Object.assign({}, info);
       if (connections) {
         for (const key in connections) {
           if (typeof connections[key] === "object") {
@@ -10873,9 +10941,9 @@ var Router = class extends Service {
           connections[key] = this.addConnection(connections[key], user._id);
         }
       }
-      if (config) {
-        for (const c in config) {
-          this.openConnection(config[c].service, config[c], user._id, config[c].args);
+      if (config2) {
+        for (const c in config2) {
+          this.openConnection(config2[c].service, config2[c], user._id, config2[c].args);
         }
       }
       let send = (message, ...a) => {
@@ -11624,7 +11692,6 @@ var transform_default = (tag, node) => {
     instanceTree[arg] = {
       tag: arg,
       operator: function(input) {
-        console.log("GETTING IN ARG", arg, input);
         const o = args.get(arg);
         o.state = input;
         if (i === 0) {
@@ -11637,24 +11704,20 @@ var transform_default = (tag, node) => {
   });
   const originalOperator = node.operator;
   if (typeof originalOperator === "function") {
-    console.log("setting plugin operator", node.tag, node, originalOperator);
     node.operator = function(...argsArr) {
-      console.warn("GETTING IN PLUGIN", argsArr);
       let updatedArgs = [];
       let i = 0;
       args.forEach((o, k) => {
         const argO = args.get(k);
         const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
-        let update = currentArg !== void 0 ? currentArg : o.state;
-        argO.state = update;
+        let update3 = currentArg !== void 0 ? currentArg : o.state;
+        argO.state = update3;
         if (!argO.spread)
-          update = [update];
-        updatedArgs.push(...update);
+          update3 = [update3];
+        updatedArgs.push(...update3);
         i++;
       });
-      const res = originalOperator.call(this ?? node, ...updatedArgs);
-      console.log("Called og", res, originalOperator, this ?? node, ...updatedArgs);
-      return res;
+      return originalOperator.call(this ?? node, ...updatedArgs);
     };
   } else {
     console.error("Operator is not a function for", node.tag, node, originalOperator);
@@ -11711,7 +11774,8 @@ var ESPlugin = class {
   #instance;
   #graph;
   #router;
-  #graphCache = {};
+  #cache = {};
+  #plugins = {};
   plugins = {};
   #toRun = false;
   #runProps = true;
@@ -11730,6 +11794,10 @@ var ESPlugin = class {
   constructor(node, options2 = {}) {
     this.#initial = node;
     this.#options = options2;
+    this.#router = options2._router ? options2._router : options2._router = new Router({
+      linkServices: false,
+      includeClassName: false
+    });
     do {
       this.#initial = this.initial.initial ?? this.initial;
     } while (this.initial instanceof ESPlugin);
@@ -11747,17 +11815,18 @@ var ESPlugin = class {
     if (hasDefault || isFunction) {
       this.graph = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
     }
-    console.log("ES HAS GRAPH", this.#options.tag, this.initial);
     if (hasGraph) {
       const toNotify = [];
-      for (let tag in this.initial.graph.nodes) {
-        const node2 = this.initial.graph.nodes[tag];
+      const nodes2 = this.initial.graph.nodes;
+      for (let tag in nodes2) {
+        const node2 = nodes2[tag];
         if (!(node2 instanceof ESPlugin)) {
           const clonedOptions = Object.assign({}, Object.assign(options2));
-          this.initial.graph.nodes[tag] = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
-          toNotify.push(this.initial.graph.nodes[tag]);
+          const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
+          this.#plugins[tag] = plugin;
+          toNotify.push(plugin);
         } else
-          this.#graphCache[tag] = node2;
+          this.#cache[tag] = this.#plugins[tag] = node2;
       }
       const thisTag = this.#options.tag;
       toNotify.forEach((o) => {
@@ -11774,22 +11843,22 @@ var ESPlugin = class {
       enumerable: true
     });
   }
-  #createTree = (graph) => {
+  #createTree = () => {
     let tree = {};
-    for (let tag in graph.nodes) {
-      let thisNode = graph.nodes[tag].graph;
-      console.log("creating", tag, thisNode);
-      if (this.#graphCache[tag]) {
-        let gs = this.#graphCache[tag].graph;
+    for (let tag in this.#plugins) {
+      let thisNode = this.#plugins[tag].graph;
+      if (this.#cache[tag]) {
+        let gs = this.#cache[tag].graph;
         const ref = gs.node ? gs.node : gs;
-        thisNode = ref._state;
+        thisNode = {};
+        for (let key in ref._initial)
+          thisNode[key] = ref[key];
         thisNode.tag = tag;
         gs.state.triggers = {};
       }
-      const innerNode = this.#create(tag, thisNode);
-      tree[tag] = innerNode.graph ?? innerNode;
+      tree[tag] = this.#create(tag, thisNode);
     }
-    const edges = graph.edges;
+    const edges = this.initial.graph.edges;
     for (let output in edges) {
       const splitEdge = output.split(".");
       const first = splitEdge.shift();
@@ -11806,24 +11875,14 @@ var ESPlugin = class {
   };
   #activate = () => {
     if (this.initial.graph) {
-      const graph = this.initial.graph;
-      let tree = this.#createTree(graph);
+      let tree = this.#createTree();
       const props = this.#instance ?? this.initial;
-      console.log("tree", tree);
-      console.log("PROPS", this.#options.tag, this.#instance, this.initial);
       this.graph = isNode ? new Graph(tree, this.#options.tag, props) : new DOMService({ routes: tree, name: this.#options.tag, props: this.#runProps ? props : void 0 }, this.#options.parentNode);
-      if (!this.#router) {
-        this.#router = new Router({
-          routes: this.graph,
-          linkServices: false,
-          includeClassName: false
-        });
-      }
-      for (let tag in graph.nodes) {
-        const cache2 = this.#graphCache[tag];
-        if (cache2) {
+      this.#router.load(this.graph);
+      for (let tag in this.#plugins) {
+        const cache2 = this.#cache[tag];
+        if (cache2)
           cache2.graph = tree[tag];
-        }
       }
     }
   };
@@ -11842,41 +11901,32 @@ var ESPlugin = class {
       if (this.#toRun)
         await this.run();
     };
-    if (this.initial.graph) {
-      const ports = this.initial.graph.ports;
+    const graph = this.initial.graph;
+    if (graph) {
+      const ports = graph.ports;
       let firstNode, lastNode;
-      const nodes = Array.from(this.graph.nodes.values());
       if (ports) {
         firstNode = await this.graph.get(ports.input);
-        this.graph.state.triggers = {};
         lastNode = this.graph.get(ports.output);
       } else {
         const nodes2 = Array.from(this.graph.nodes.values());
         firstNode = nodes2[0];
         lastNode = nodes2.slice(-1)[0];
       }
-      console.error("PATH (input)", firstNode?.tag, firstNode?.parent?.tag, firstNode?.constructor?.name);
-      console.error("PATH (output)", lastNode?.tag, lastNode?.parent?.tag, lastNode?.constructor?.name);
       if (lastNode)
         lastNode.subscribe((...args) => {
-          console.log("out", args, lastNode.parent.children);
           for (let tag in lastNode.parent.children)
             this.#runGraph(lastNode.parent.children[tag], ...args);
         });
-      console.log("adding proxy", this.tag, this.initial.graph);
       if (firstNode)
         this.#initial.operator = async function(...args) {
-          console.log("proxy", args);
           await firstNode.run(...args);
         };
     }
-    console.log("TO RUN,", this.tag, defer);
     if (typeof defer === "function")
       defer(f);
-    else {
-      console.log("No defer", this.tag);
+    else
       await f();
-    }
   };
   stop = () => {
     for (let k in this.nested)
@@ -11965,6 +12015,7 @@ var src_default = ESPlugin;
 
 // src/core/index.ts
 var basePkgPath = "./package.json";
+var startTime = Date.now();
 var _filesystem, _input, _options, _url, _cache, _main, _mode, _onImport, _throw;
 var WASL = class {
   constructor(urlOrObject, options2 = {}, url) {
@@ -11972,6 +12023,7 @@ var WASL = class {
     this.warnings = [];
     this.files = {};
     this.original = {};
+    this.debug = void 0;
     __privateAdd(this, _filesystem, void 0);
     __privateAdd(this, _input, {});
     __privateAdd(this, _options, {});
@@ -11996,48 +12048,46 @@ var WASL = class {
         file: path2
       }));
     };
-    this.load = async (node, info, options2, id) => {
+    this.load = async (node, info, options2, id, symbols, counter) => {
       if (node.plugins) {
         for (let nestedName in node.plugins) {
           const nestedNode = node.src.graph?.nodes?.[nestedName];
-          if (node.plugins) {
-            for (let key in node.plugins[nestedName]) {
-              const newInfo = node.plugins[nestedName][key];
-              if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
-                const ogSrc = newInfo.src;
-                let newInfoForNode;
-                if (id)
-                  newInfoForNode = __privateGet(this, _cache)[id]?.[key];
-                if (!newInfoForNode) {
-                  const optsCopy = Object.assign({}, options2);
-                  if (key === "graph")
-                    optsCopy._deleteSrc = false;
-                  else
-                    optsCopy._deleteSrc = true;
-                  newInfoForNode = await this.resolve({ [key]: newInfo }, info, optsCopy, {
-                    nodes: newInfo
-                  });
-                  if (id) {
-                    if (!__privateGet(this, _cache)[id])
-                      __privateGet(this, _cache)[id] = {};
-                    __privateGet(this, _cache)[id][key] = newInfoForNode;
-                  }
+          for (let key in node.plugins[nestedName]) {
+            const newInfo = node.plugins[nestedName][key];
+            if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
+              const ogSrc = newInfo.src;
+              let newInfoForNode;
+              if (id)
+                newInfoForNode = __privateGet(this, _cache)[id]?.[key];
+              if (!newInfoForNode) {
+                const optsCopy = Object.assign({}, options2);
+                if (key === "graph")
+                  optsCopy._deleteSrc = false;
+                else
+                  optsCopy._deleteSrc = true;
+                newInfoForNode = await this.resolve({ [key]: newInfo }, info, optsCopy, {
+                  nodes: newInfo
+                }, symbols, counter);
+                if (id) {
+                  if (!__privateGet(this, _cache)[id])
+                    __privateGet(this, _cache)[id] = {};
+                  __privateGet(this, _cache)[id][key] = newInfoForNode;
                 }
-                if (nestedNode) {
-                  const newVal = newInfoForNode[key];
-                  if (newVal) {
-                    let chosenVal = newVal.src ?? newVal;
-                    if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
-                      chosenVal = chosenVal.default;
-                    if (nestedNode)
-                      nestedNode[key] = chosenVal;
-                  } else {
-                    __privateGet(this, _throw).call(this, { message: `Could not resolve ${ogSrc}` });
-                  }
+              }
+              if (nestedNode) {
+                const newVal = newInfoForNode[key];
+                if (newVal) {
+                  let chosenVal = newVal.src ?? newVal;
+                  if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
+                    chosenVal = chosenVal.default;
+                  if (nestedNode)
+                    nestedNode[key] = chosenVal;
+                } else {
+                  __privateGet(this, _throw).call(this, { message: `Could not resolve ${ogSrc}` });
                 }
-              } else if (nestedNode)
-                nestedNode[key] = newInfo;
-            }
+              }
+            } else if (nestedNode)
+              nestedNode[key] = newInfo;
           }
           if (node.src.graph && !nestedNode) {
             __privateGet(this, _throw).call(this, {
@@ -12048,19 +12098,22 @@ var WASL = class {
         }
       }
     };
-    this.resolve = async (target, info, options2, graph = {}) => {
-      const nodes = graph.nodes;
+    this.resolve = async (target, info, options2, graph = {}, symbols = [], counter) => {
+      const nodes2 = graph.nodes;
       const edges = graph.edges;
+      counter++;
       const id = Symbol("unique");
       let { url } = info;
       const mainPath = info.mainPath || __privateGet(this, _main);
+      const symbolsRegistry = {};
       for (let name2 in target) {
+        let symbolsCopy = symbolsRegistry[name2] = [...symbols];
         const node = target[name2];
         const isObj = node && typeof node === "object" && !Array.isArray(node);
         if (isObj) {
-          await this.load(node, info, options2, id);
+          await this.load(node, info, options2, id, symbolsCopy, counter);
           let ogSrc = node.src ?? "";
-          if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
+          if (isSrc(ogSrc) || nodes2 && edges && !ogSrc) {
             node.src = null;
             let _internal = "";
             let _modeOverride = options2._modeOverride;
@@ -12072,51 +12125,70 @@ var WASL = class {
             } catch {
               if (ogSrc)
                 fullPath = mainPath ? resolve(ogSrc, mainPath) : resolve(ogSrc);
-              else
-                fullPath = mainPath;
             }
             let mode = options2._modeOverride ?? __privateGet(this, _mode);
-            if (_internal || mode === "import") {
-              let res = await this.get(fullPath, void 0);
-              if (res)
-                node.src = res;
-              else
-                console.error("Could not get node source.", name2);
-              if (!_internal)
-                _internal = ogSrc ? resolve(ogSrc, url, true) : true;
-              if (!node.src && !node.graph)
-                remove(ogSrc, fullPath, name2, target);
-            } else {
-              if (__privateGet(this, _filesystem)) {
-                let res;
-                res = checkFiles(fullPath, __privateGet(this, _filesystem));
-                if (res) {
-                  if (res.default || fullPath.includes(".json"))
-                    node.src = res;
-                  else {
-                    __privateGet(this, _throw).call(this, {
-                      type: "warning",
-                      message: `Node (${name2}) at ${fullPath} does not have a default export.`,
-                      file: ogSrc
-                    });
-                    node.src = { default: res };
+            if (ogSrc) {
+              if (this.debug) {
+                let target2 = this.debug.flow;
+                symbolsCopy.forEach((str) => {
+                  if (str) {
+                    if (!target2[str])
+                      target2[str] = {};
+                    target2 = target2[str];
                   }
-                  _internal = fullPath;
-                } else if (ogSrc)
+                });
+                if (!this.debug.resolutions[name2])
+                  this.debug.resolutions[name2] = {};
+                let nameRes = this.debug.resolutions[name2];
+                if (!nameRes[fullPath])
+                  nameRes[fullPath] = { _resolutions: 0, _depth: [], _time: [] };
+                nameRes[fullPath]._resolutions++;
+                nameRes[fullPath]._depth.push(counter);
+                nameRes[fullPath]._time.push(Date.now() - startTime);
+                if (target2)
+                  target2[fullPath] = {};
+              }
+              if (_internal || mode === "import") {
+                let res = await this.get(fullPath, void 0);
+                if (res)
+                  node.src = res;
+                if (!node.src && !node.graph)
                   remove(ogSrc, fullPath, name2, target);
               } else {
-                __privateGet(this, _throw).call(this, {
-                  message: "No options.filesystem field to get JavaScript objects",
-                  file: ogSrc
-                });
+                if (__privateGet(this, _filesystem)) {
+                  let res;
+                  res = checkFiles(fullPath, __privateGet(this, _filesystem));
+                  if (res) {
+                    if (res.default || fullPath.includes(".json"))
+                      node.src = res;
+                    else {
+                      __privateGet(this, _throw).call(this, {
+                        type: "warning",
+                        message: `Node (${name2}) at ${fullPath} does not have a default export.`,
+                        file: ogSrc
+                      });
+                      node.src = { default: res };
+                    }
+                    _internal = fullPath;
+                  } else if (ogSrc)
+                    remove(ogSrc, fullPath, name2, target);
+                } else {
+                  __privateGet(this, _throw).call(this, {
+                    message: "No options.filesystem field to get JavaScript objects",
+                    file: ogSrc
+                  });
+                }
               }
             }
+            if (!_internal)
+              _internal = ogSrc ? resolve(ogSrc, url, true) : true;
             let _top = false;
             if (node.graph) {
               _top = true;
               if (!node.src)
                 node.src = {};
               node.src.graph = node.graph;
+              delete node.graph;
             }
             if (node.src && node.src.graph) {
               await this.init(node.src, {
@@ -12124,8 +12196,9 @@ var WASL = class {
                 _deleteSrc: options2._deleteSrc,
                 _top,
                 _modeOverride
-              });
-            }
+              }, void 0, symbolsCopy, counter);
+            } else
+              symbolsCopy.push(fullPath);
           }
           for (let key in node) {
             if (!isObj && key === "src" && node.src) {
@@ -12184,17 +12257,17 @@ var WASL = class {
               if (typeof node[key] === "object" && !Array.isArray(node[key])) {
                 const optsCopy = Object.assign({}, options2);
                 optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
-                await this.resolve(node[key], info, optsCopy, { nodes: node[key] });
+                await this.resolve(node[key], info, optsCopy, { nodes: node[key] }, symbolsCopy, counter);
               }
             }
           }
         }
       }
-      for (let name2 in nodes) {
-        const node = nodes[name2];
+      for (let name2 in nodes2) {
+        const node = nodes2[name2];
         if (node?.src && typeof node?.src === "object") {
           if (node.src.graph)
-            await this.load(node, info, options2, id);
+            await this.load(node, info, options2, id, symbolsRegistry[name2]);
           else if (edges) {
             if (!("default" in node.src)) {
               __privateGet(this, _throw).call(this, {
@@ -12203,14 +12276,20 @@ var WASL = class {
               });
             }
           }
-          nodes[name2] = merge(node.src, node, options2._deleteSrc);
+          nodes2[name2] = merge(node.src, node, options2._deleteSrc);
+          if (nodes2[name2].src?.graph)
+            nodes2[name2].src.graph = JSON.parse(JSON.stringify(nodes2[name2].graph));
         }
       }
       return target;
     };
-    this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "") => {
+    this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "", symbols = [], counter = 0) => {
+      if (options2.debug)
+        this.debug = { flow: {}, resolutions: {} };
+      else
+        this.debug = void 0;
       const internalLoadCall = options2._internal;
-      const isFromValidator = __privateGet(this, _main) === void 0 && internalLoadCall;
+      const isFromValidator = !__privateGet(this, _main) && typeof internalLoadCall === "string";
       if (!__privateGet(this, _input))
         __privateSet(this, _input, urlOrObject);
       if (!__privateGet(this, _options))
@@ -12227,7 +12306,7 @@ var WASL = class {
         }
       } else if (internalLoadCall === true)
         url = __privateGet(this, _main);
-      else if (isFromValidator)
+      if (isFromValidator)
         url = __privateSet(this, _main, internalLoadCall);
       const clonedOptions = Object.assign({}, options2);
       const innerTopLevel = clonedOptions._top === true;
@@ -12256,8 +12335,6 @@ var WASL = class {
               const pkg = checkFiles(pkgPath, __privateGet(this, _filesystem));
               if (pkg)
                 object = Object.assign(pkg, isString ? {} : object);
-              else
-                remove(basePkgPath, pkgPath);
             }
           }
         default:
@@ -12274,25 +12351,39 @@ var WASL = class {
       }
       if (!internalLoadCall)
         __privateSet(this, _main, mainPath);
-      else if (__privateGet(this, _mode) === "reference" && __privateGet(this, _main) === void 0)
+      else if (__privateGet(this, _mode) === "reference" && !__privateGet(this, _main))
         __privateSet(this, _main, "");
+      if (this.debug) {
+        let target = this.debug.flow;
+        symbols.forEach((str) => target = target[str]);
+        target[mainPath] = {};
+        symbols.push(mainPath);
+        if (mainPath) {
+          if (!this.debug.resolutions[mainPath])
+            this.debug.resolutions[mainPath] = { _resolutions: 0, _depth: [], _time: [] };
+          const res = this.debug.resolutions;
+          res[mainPath]._resolutions++;
+          res[mainPath]._depth.push(counter);
+          res[mainPath]._time.push(Date.now() - startTime);
+        }
+      }
       if (this.errors.length === 0) {
-        const nodes = object.graph.nodes;
-        await this.resolve(nodes, {
+        const nodes2 = object.graph.nodes;
+        await this.resolve(nodes2, {
           mainPath,
           url,
           object
-        }, clonedOptions, object.graph);
+        }, clonedOptions, object.graph, symbols, counter);
         const drill = (parent, callback) => {
-          const nodes2 = parent.graph.nodes;
-          for (let tag in nodes2) {
-            const res = callback(nodes2[tag], {
+          const nodes3 = parent.graph.nodes;
+          for (let tag in nodes3) {
+            const res = callback(nodes3[tag], {
               tag,
               parent,
               options: clonedOptions
             });
             if (res)
-              nodes2[tag] = res;
+              nodes3[tag] = res;
           }
         };
         const drillToTest = (target) => {
@@ -12309,7 +12400,7 @@ var WASL = class {
                 });
               }
               for (let input in edges[output]) {
-                let inTarget = nodes;
+                let inTarget = nodes2;
                 input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
                 if (!inTarget) {
                   __privateGet(this, _throw).call(this, {
@@ -12331,11 +12422,11 @@ var WASL = class {
             let drillCopy = (target) => {
               if (target?.graph) {
                 let graph = Object.assign({}, target.graph);
-                let nodes2 = graph.nodes = Object.assign({}, graph.nodes);
-                if (nodes2) {
-                  for (let k in nodes2) {
-                    nodes2[k] = Object.assign({}, nodes2[k].initial);
-                    drillCopy(nodes2[k]);
+                let nodes3 = graph.nodes = Object.assign({}, graph.nodes);
+                if (nodes3) {
+                  for (let k in nodes3) {
+                    nodes3[k] = Object.assign({}, nodes3[k].initial);
+                    drillCopy(nodes3[k]);
                   }
                 }
                 target.graph = graph;
@@ -12343,7 +12434,8 @@ var WASL = class {
             };
             drillCopy(this.original);
             return this.plugin;
-          }
+          } else
+            this.original = object;
           drillToTest(object);
         }
         return object;
@@ -12732,32 +12824,413 @@ var validate = async (urlOrObject, options2 = {}, load = true) => {
 };
 var validate_default = validate;
 
-// tests/0/0.0/0.0.0/external/index.wasl.json
+// ../phaser/index.wasl.json
 var index_wasl_default = {
   graph: {
     nodes: {
       phaser: {
-        src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/index.wasl.json"
+        src: "src/index.wasl.json",
+        plugins: {
+          game: {
+            preload: {
+              setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
+              tilemapTiledJSON: [
+                ["map", "map.json"]
+              ],
+              spritesheet: [
+                ["tiles", "tiles.png", { frameWidth: 70, frameHeight: 70 }]
+              ],
+              image: [
+                ["coin", "coinGold.png"]
+              ],
+              atlas: [
+                ["player", "player.png", "player.json"]
+              ]
+            },
+            config: {
+              physics: {
+                default: "arcade",
+                arcade: {
+                  gravity: {
+                    y: 500
+                  }
+                }
+              },
+              scene: {
+                key: "main",
+                create: {
+                  src: "scripts/create.js"
+                }
+              }
+            },
+            graph: {
+              nodes: {
+                cursors: {
+                  src: "src/plugins/cursors/index.js"
+                },
+                player: {
+                  src: "src/plugins/player/index.js",
+                  position: {
+                    x: 200,
+                    y: 200
+                  },
+                  size: {
+                    offset: {
+                      height: -8
+                    }
+                  },
+                  bounce: 0.2,
+                  collideWorldBounds: false,
+                  create: {
+                    src: "scripts/player/create.js"
+                  },
+                  update: {
+                    src: "scripts/player/update.js"
+                  }
+                },
+                player2: {
+                  src: "src/plugins/player/index.js",
+                  position: {
+                    x: 400,
+                    y: 200
+                  },
+                  size: {
+                    offset: {
+                      height: -8
+                    }
+                  },
+                  bounce: 0.2,
+                  collideWorldBounds: false,
+                  create: {
+                    src: "scripts/player/create.js"
+                  },
+                  update: {
+                    src: "scripts/player/update.js"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     edges: {}
   }
 };
 
-// tests/0/0.0/0.0.0/external/package.json
-var package_default = {
-  name: "phaser"
+// ../phaser/src/index.wasl.json
+var index_wasl_default2 = {
+  graph: {
+    nodes: {
+      game: {
+        src: "plugins/game/index.js"
+      }
+    },
+    edges: {}
+  }
 };
 
-// demos/external/0.0.0.js
-var path = "../../tests/0/0.0/0.0.0/external/index.wasl.json";
-var filesystem = {
-  ["package.json"]: package_default
+// ../phaser/package.json
+var package_default = {
+  name: "myphaserapp",
+  type: "module"
 };
+
+// ../phaser/src/package.json
+var package_default2 = {
+  name: "phaser",
+  type: "module"
+};
+
+// ../phaser/src/plugins/game/index.js
+var game_exports = {};
+__export(game_exports, {
+  config: () => config,
+  default: () => game_default,
+  oncreate: () => oncreate,
+  preload: () => preload
+});
+
+// ../phaser/src/plugins/game/config/merge.js
+var merge2 = (base, newObj) => {
+  const copy = Object.assign({}, base);
+  if (newObj) {
+    const copyKeys = Object.keys(copy);
+    const newKeys = Object.keys(newObj);
+    copyKeys.forEach((k) => {
+      if (typeof newObj[k] === "object")
+        merge2(base[k], newObj[k]);
+      else if (newObj[k])
+        base[k] = newObj[k];
+    });
+    newKeys.forEach((k) => copy[k] = newObj[k]);
+  }
+  return copy;
+};
+var merge_default = merge2;
+
+// ../phaser/src/plugins/game/config/phaser.config.js
+var defaultConfig = (Phaser) => {
+  function preload2() {
+    this.load.setBaseURL("http://labs.phaser.io");
+    this.load.image("sky", "assets/skies/space3.png");
+    this.load.image("logo", "assets/sprites/phaser3-logo.png");
+    this.load.image("red", "assets/particles/red.png");
+  }
+  function create3() {
+    this.add.image(400, 300, "sky");
+    var particles = this.add.particles("red");
+    var emitter = particles.createEmitter({
+      speed: 100,
+      scale: { start: 1, end: 0 },
+      blendMode: "ADD"
+    });
+    var logo = this.physics.add.image(400, 100, "logo");
+    logo.setVelocity(100, 200);
+    logo.setBounce(1, 1);
+    logo.setCollideWorldBounds(true);
+    emitter.startFollow(logo);
+  }
+  const config2 = {
+    type: Phaser.AUTO,
+    width: "100",
+    height: "100",
+    physics: {
+      default: "arcade",
+      arcade: {
+        gravity: { y: 200 },
+        debug: false
+      }
+    },
+    scene: {
+      preload: preload2,
+      create: create3
+    }
+  };
+  return config2;
+};
+var phaser_config_default = defaultConfig;
+
+// ../phaser/src/plugins/game/index.js
+var script = document.createElement("script");
+script.src = "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
+document.head.appendChild(script);
+var nodes = {};
+var onResolve = null;
+if (!("Phaser" in window)) {
+  script.onload = function() {
+    if (onResolve instanceof Function)
+      onResolve(window.Phaser);
+    for (let tag in nodes)
+      nodes[tag].run();
+  };
+}
+var call = (func, ctx, ...args) => {
+  if (typeof func === "function")
+    func.call(ctx, args);
+};
+var preload = [];
+var config = phaser_config_default;
+function oncreate() {
+  if (window.Phaser)
+    this.run();
+  else
+    nodes[this.tag] = this;
+}
+async function game_default() {
+  const instance = this;
+  const Phaser = window.Phaser ?? await new Promise((resolve2) => onResolve = resolve2);
+  let cfg = typeof this.config === "function" ? this.config(window.Phaser) : this.config;
+  let defaultCfg = typeof config === "function" ? config(window.Phaser) : config;
+  let mergedConfig = merge_default(defaultCfg, cfg);
+  mergedConfig.parent = instance.parent?.parentNode;
+  return new Promise((resolve2) => {
+    const originalUpdate = mergedConfig.scene.update;
+    const originalCreate = mergedConfig.scene.create;
+    const originalPreload = mergedConfig.scene.preload;
+    mergedConfig.scene.preload = function() {
+      for (let fName in instance.preload) {
+        const o = instance.preload[fName];
+        if (typeof o === "object")
+          for (let key in o)
+            this.load[fName](...Object.values(o[key]));
+        else
+          this.load[fName](o);
+      }
+      call(originalPreload, this);
+    };
+    mergedConfig.scene.create = function() {
+      call(originalCreate, this);
+      this.context = this;
+      instance.nodes.forEach((n) => {
+        if (typeof n.ongame === "function")
+          n.ongame(this.context);
+      });
+      resolve2(this.context);
+    };
+    mergedConfig.scene.update = function() {
+      call(originalUpdate, this);
+      instance.nodes.forEach((n) => {
+        if (typeof n.update === "function")
+          n.update(this, Object.fromEntries(instance.nodes));
+      });
+    };
+    const game = new Phaser.Game(mergedConfig);
+  });
+}
+
+// ../phaser/src/plugins/cursors/index.js
+var cursors_exports = {};
+__export(cursors_exports, {
+  default: () => cursors_default,
+  ongame: () => ongame
+});
+function ongame(context) {
+  this.ref = context.input.keyboard.createCursorKeys();
+}
+function cursors_default() {
+  return this.ref;
+}
+
+// ../phaser/src/plugins/player/index.js
+var player_exports = {};
+__export(player_exports, {
+  bounce: () => bounce,
+  collideWorldBounds: () => collideWorldBounds,
+  create: () => create,
+  default: () => player_default,
+  ongame: () => ongame2,
+  position: () => position,
+  size: () => size,
+  update: () => update
+});
+var bounce = 0;
+var collideWorldBounds;
+var size = {};
+var position = {};
+var create;
+var update;
+function ongame2(game) {
+  if (game) {
+    this.ref = game.physics.add.sprite(this.position.x, this.position.y, "player");
+    this.ref.setBounce(this.bounce);
+    this.ref.setCollideWorldBounds(this.collideWorldBounds);
+    this.ref.body.setSize((this.size.width ?? this.ref.width) + this.size.offset.width, (this.size.height ?? this.ref.height) + this.size.offset.height);
+    if (typeof this.create === "function")
+      this.create.call(game, this.ref);
+  }
+}
+function player_default() {
+  return this.ref;
+}
+
+// ../phaser/scripts/create.js
+var create_exports = {};
+__export(create_exports, {
+  default: () => create_default
+});
+var score = 0;
+function create2() {
+  const map = this.make.tilemap({ key: "map" });
+  const groundTiles = map.addTilesetImage("tiles");
+  const groundLayer = map.createLayer("World", groundTiles, 0, 0);
+  groundLayer.setCollisionByExclusion([-1]);
+  const coinTiles = map.addTilesetImage("coin");
+  const coinLayer = map.createLayer("Coins", coinTiles, 0, 0);
+  this.physics.world.bounds.width = groundLayer.width;
+  this.physics.world.bounds.height = groundLayer.height;
+  coinLayer.setTileIndexCallback(17, (sprite, tile) => {
+    removeTile(coinLayer, tile);
+    score = incrementScore(score, text);
+  }, this);
+  this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+  this.cameras.main.setBackgroundColor("#ccccff");
+  const text = this.add.text(20, 570, "0", {
+    fontSize: "20px",
+    fill: "#ffffff"
+  });
+  text.setScrollFactor(0);
+}
+function incrementScore(score2, text) {
+  score2++;
+  if (text)
+    text.setText(score2);
+  return score2;
+}
+function removeTile(layer, tile) {
+  layer.removeTileAt(tile.x, tile.y);
+  return false;
+}
+var create_default = create2;
+
+// ../phaser/scripts/player/create.js
+var create_exports2 = {};
+__export(create_exports2, {
+  default: () => create_default2
+});
+var getLayer = (name2, context) => {
+  return context.children.list.find((o) => o.type === "TilemapLayer" && o.layer.name === name2);
+};
+function createPlayer(player) {
+  const groundLayer = getLayer("World", this);
+  this.physics.add.collider(groundLayer, player);
+  const coinLayer = getLayer("Coins", this);
+  this.physics.add.overlap(player, coinLayer);
+  this.cameras.main.startFollow(player);
+  this.anims.create({
+    key: "walk",
+    frames: this.anims.generateFrameNames("player", {
+      prefix: "p1_walk",
+      start: 1,
+      end: 11,
+      zeroPad: 2
+    }),
+    frameRate: 10,
+    repeat: -1
+  });
+  this.anims.create({
+    key: "idle",
+    frames: [{ key: "player", frame: "p1_stand" }],
+    frameRate: 10
+  });
+}
+var create_default2 = createPlayer;
+
+// ../phaser/scripts/player/update.js
+var update_exports = {};
+__export(update_exports, {
+  default: () => update2
+});
+function update2(context, peers) {
+  if (peers.cursors.ref.left.isDown) {
+    this.ref.body.setVelocityX(-200);
+    this.ref.anims.play("walk", true);
+    this.ref.flipX = true;
+  } else if (peers.cursors.ref.right.isDown) {
+    this.ref.body.setVelocityX(200);
+    this.ref.anims.play("walk", true);
+    this.ref.flipX = false;
+  } else {
+    this.ref.body.setVelocityX(0);
+    this.ref.anims.play("idle", true);
+  }
+}
+
+// demos/phaser.js
+var path = "../../phaser/index.wasl.json";
 var options = {
   relativeTo: import.meta.url,
-  version: "0.0.0",
-  filesystem
+  filesystem: {
+    "package.json": package_default,
+    "src/package.json": package_default2,
+    "src/index.wasl.json": index_wasl_default2,
+    "src/plugins/game/index.js": game_exports,
+    "src/plugins/player/index.js": player_exports,
+    "src/plugins/cursors/index.js": cursors_exports,
+    "scripts/create.js": create_exports,
+    "src/scripts/player/create.js": create_exports2,
+    "src/scripts/player/update.js": update_exports
+  }
 };
 
 // index.js
@@ -12767,40 +13240,66 @@ var printError = (arr, type, severity = "Error") => {
     log(`${severity} (${type})`, e);
   });
 };
+var referenceDiv = document.getElementById("reference");
+var importDiv = document.getElementById("import");
 var startExecution = async () => {
   options.activate = true;
-  options.parentNode = document.getElementById("container");
   options.wasl = core_default;
-  console.log("------------------ IMPORT MODE ------------------");
+  options.debug = true;
+  let ref, imported;
   const importOptions = Object.assign({ errors: [], warnings: [] }, options);
+  importOptions.parentNode = document.getElementById("importcontainer");
   const res = await validate_default(path, importOptions);
   console.log("validate (import)", res);
   if (res) {
-    const o = new core_default(path, importOptions);
-    await o.init();
-    await o.start();
-    console.log("load (import)", o);
-    importOptions.errors = o.errors;
-    importOptions.warnings = o.warnings;
+    imported = new core_default(path, importOptions);
+    console.log("load (import)", imported);
+    importOptions.errors = imported.errors;
+    importOptions.warnings = imported.warnings;
   }
   printError(importOptions.errors, "import");
   printError(importOptions.warnings, "import", "Warning");
   if (index_wasl_default) {
-    console.log("------------------ REFERENCE MODE ------------------");
     const refOptions = Object.assign({ errors: [], warnings: [] }, options);
+    refOptions.parentNode = document.getElementById("refcontainer");
     const res2 = await validate_default(index_wasl_default, refOptions);
     console.log("validate (reference)", res2);
     if (res2) {
-      const o = new core_default(index_wasl_default, refOptions);
-      await o.init();
-      await o.start();
-      console.log("load (reference)", o);
-      refOptions.errors = o.errors;
-      refOptions.warnings = o.warnings;
+      ref = new core_default(index_wasl_default, refOptions);
+      console.log("load (reference)", ref);
+      refOptions.errors = ref.errors;
+      refOptions.warnings = ref.warnings;
     }
     printError(refOptions.errors, "reference");
     printError(refOptions.warnings, "reference", "Warning");
   }
+  let info = [
+    { wasl: imported, div: importDiv, name: "Import" },
+    { wasl: ref, div: referenceDiv, name: "Reference" }
+  ];
+  let strArr = [];
+  let refArr = [];
+  let flowArr = [];
+  let resArr = [];
+  for (let i in info) {
+    let o = info[i];
+    if (o.wasl) {
+      console.log(`------------------ ${o.name.toUpperCase()} MODE ------------------`);
+      await o.wasl.init();
+      await o.wasl.start();
+      const str = JSON.stringify(o.wasl.original, null, 2);
+      o.div.value = str;
+      strArr.push(str);
+      refArr.push(o.wasl.original);
+      flowArr.push(o.wasl.flow);
+      resArr.push(o.wasl.resolutions);
+    } else
+      o.div.value = void 0;
+  }
+  if (refArr[0] && refArr[1])
+    console.warn("Same Original Input to ESPlugins", strArr[0] === strArr[1]);
+  else
+    console.warn("One of the modes has failed for this example!");
 };
 startExecution();
 /** @license URI.js v4.4.1 (c) 2011 Gary Court. License: http://github.com/garycourt/uri-js */

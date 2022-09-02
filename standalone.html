@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone WASL Application</title>
+</head>
+<body>
+    <div id="container"></div>
+</body>
+<script type="module">
+import wasl from "https://cdn.jsdelivr.net/npm/wasl/dist/index.esm.js";
+import validate from "https://cdn.jsdelivr.net/npm/wasl-validate/dist/index.esm.js";
+
+const path = './tests/0/0.0/0.0.0/basic/index.wasl.json' // create a myproject directory next to this html file
+
+const options = {
+    relativeTo: import.meta.url, // allows you to resolve the project
+}
+
+    options.parentNode = document.getElementById('container') 
+    options.activate = true // use internal graph system
+    options.wasl = wasl
+    // options.output = 'object'
+    options.debug = true
+    options.errors = []
+    options.warnings = []
+
+    // ------------------- Import Mode -------------------
+    const res = await validate(path, options)
+    console.log('validate (import)', res)
+    
+    if (res) {
+        let imported = new wasl(path, options)
+        console.log('load (import)', imported)
+        await imported.init()
+        await imported.start()
+        importOptions.errors = imported.errors
+        importOptions.warnings = imported.warnings
+    }
+
+    printError(importOptions.errors, 'import')
+    printError(importOptions.warnings, 'import', "Warning")
+
+
+function printError(arr, type, severity='Error'){
+    arr.forEach(e => {
+        const log = (severity === 'Warning') ? console.warn : console.error
+        log(`${severity} (${type})`, e)
+    })
+}
+
+</script>
+</html>

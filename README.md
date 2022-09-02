@@ -44,6 +44,11 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
 }
 ```
 
+### Make an ES Module
+Create a file called
+
+### Import and Load
+
 ## The Libraries
 The libraries in this repo validate and load **WASL** files into JavaScript.
 
@@ -64,10 +69,7 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
 ## Contributing
  > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests
 
-
  ### Backlog
- - **Make sure that adding ports from the top-level graph does not curb execution... (see [tests/0/0.0/0.0.0/basic/broken.wasl.json](tests/0/0.0/0.0.0/broken.wasl.json))**
- - Fix inconsistencies loading the basic example in import vs reference mode.
  - Validate ports
  - Nested html source tags that determine execution (using a custom component)
 

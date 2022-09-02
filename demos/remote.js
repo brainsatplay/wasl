@@ -1,4 +1,4 @@
-const main = ''
+let main = ''
 // import main from "https://raw.githubusercontent.com/garrettmflynn/phaser/main/index.wasl.json" assert {type: "json"}
 // import phaserInfo from "https://raw.githubusercontent.com/garrettmflynn/phaser/main/src/index.wasl.json" assert {type: "json"}
 
@@ -15,6 +15,8 @@ const main = ''
 // const path = 'https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/index.wasl.json'
 const path =  'https://raw.githubusercontent.com/brainsatplay/brainsatplay-starter-kit/nightly/index.wasl.json'
 // const path = 'http://127.0.0.1:5502/index.wasl.json'
+
+main = path
 
 const options = {
     relativeTo: import.meta.url,

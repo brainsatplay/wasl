@@ -1,5 +1,5 @@
 {
-    "name": "Math",
+    "name": "Math Plugin",
     "graph": {
         "nodes": {
             "addition": {
@@ -13,6 +13,14 @@
             "addition": {
                 "multiplication": {}
             }
+        },
+        "ports": {
+            "input": "addition",
+            "output": "multiplication"
         }
+    },
+    "ports": {
+        "input": "addition",
+        "output": "multiplication"
     }
 }

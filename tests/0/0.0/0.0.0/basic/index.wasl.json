@@ -1,5 +1,5 @@
 {
-    "name": "App",
+    "name": "My Application",
     "graph": {
         "nodes": {
             "plugin": {
@@ -33,6 +33,10 @@
                             "secondmultiplication": {}
                         }
                     }
+                },
+                "ports": {
+                    "input": "secondaddition",
+                    "output": "secondmultiplication"
                 }
             },
 
@@ -43,8 +47,8 @@
     
         "edges": {
             "plugin": {
-                "math": {},
-                "log": {}
+                "log": {},
+                "math": {}
             },
             "math": {
                 "external": {},
