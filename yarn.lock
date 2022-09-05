@@ -137,10 +137,10 @@
   "resolved" "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   "version" "4.0.0"
 
-"es-plugins@0.0.15":
-  "integrity" "sha512-ioNL0zV+f0BZmLynTRFpWnfq4pC+HnZDLR2jPcIBBOVhYjdsEy7ysVHfv9o/dVT7q9QVS/NRUXJbMuFkk56VGQ=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.15.tgz"
-  "version" "0.0.15"
+"es-plugins@0.0.16":
+  "integrity" "sha512-z38H+ib59IcHEPp16CK5uOq4hvCXyq+2XOtBB3msDMLaWOoXK3EICRgcWbuzZSkZI0A5QQ+dQ+CBm+l9ztDcAw=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.16.tgz"
+  "version" "0.0.16"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="
@@ -464,11 +464,11 @@
 
 "wasl-validate@file:/Users/garrettflynn/Documents/Github/wasl/src/validate":
   "resolved" "file:src/validate"
-  "version" "0.0.12"
+  "version" "0.0.13"
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"
-  "version" "0.0.14"
+  "version" "0.0.15"
 
 "web-streams-polyfill@^3.0.3":
   "integrity" "sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q=="
