@@ -65,7 +65,14 @@
 
                         "jump": {
                             "attributes": {
-                                "innerHTML": "Jump"
+                                "innerHTML": "Jump Main Character"
+                            },
+                            "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+                        },
+
+                        "companionJump": {
+                            "attributes": {
+                                "innerHTML": "Jump Companion"
                             },
                             "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
                         },
@@ -202,6 +209,9 @@
             },
             "ui.jump": {
                 "ui.phaser.game.player.jump": {}
+            },
+            "ui.companionJump": {
+                "ui.phaser.game.companion.jump": {}
             },
             "average": {
                 "threshold": {},

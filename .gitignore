@@ -1,2 +1,4 @@
 node_modules
-dist
+src/validate/dist
+src/core/dist/index.js
+src/core/dist/index.node.js
