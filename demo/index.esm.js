@@ -7620,12 +7620,10 @@ var fetchRemote = async (url, options2 = {}, progressCallback) => {
 };
 
 // node_modules/remote-esm/index.js
-globalThis.REMOTEESM_TEXT_REFERENCES = {};
-globalThis.REMOTEESM_NODE = false;
+var datauri = {};
 var ready = new Promise(async (resolve2, reject) => {
   try {
     if (typeof process === "object") {
-      globalThis.REMOTEESM_NODE = true;
       globalThis.fetch = (await import("node-fetch")).default;
       if (typeof globalThis.fetch !== "function")
         globalThis.fetch = fetch;
@@ -7643,7 +7641,7 @@ var ready = new Promise(async (resolve2, reject) => {
 });
 var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
 var moduleDataURI = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
-var importFromText = async (text, path2) => {
+var importFromText = async (text, path2, collection = {}) => {
   const extension = path2.split(".").slice(-1)[0];
   const isJSON = extension === "json";
   let mimeType = isJSON ? "application/json" : "application/javascript";
@@ -7661,7 +7659,7 @@ var importFromText = async (text, path2) => {
       enumerable: true
     });
   }
-  globalThis.REMOTEESM_TEXT_REFERENCES[path2] = uri;
+  collection[path2] = uri;
   return imported;
 };
 var resolve = get;
@@ -7674,7 +7672,10 @@ var safeImport = async (uri, opts = {}) => {
     outputText,
     forceImportFromText
   } = opts;
+  const uriCollection = opts.datauri || datauri;
   await ready;
+  if (opts.dependencies)
+    opts.dependencies[uri] = {};
   const extension = uri.split(".").slice(-1)[0];
   const isJSON = extension === "json";
   let module = !forceImportFromText ? await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
@@ -7683,7 +7684,7 @@ var safeImport = async (uri, opts = {}) => {
   if (!module) {
     text = await getText(uri);
     try {
-      module = await importFromText(text, uri);
+      module = await importFromText(text, uri, uriCollection);
     } catch (e) {
       const base = get("", uri);
       let childBase = base;
@@ -7709,7 +7710,9 @@ var safeImport = async (uri, opts = {}) => {
         let correctPath = get(path2, childBase);
         const dependentFilePath = get(correctPath);
         const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
-        let ref = globalThis.REMOTEESM_TEXT_REFERENCES[dependentFilePath];
+        if (opts.dependencies)
+          opts.dependencies[uri][dependentFileWithoutRoot] = importInfo[i];
+        let ref = uriCollection[dependentFilePath];
         if (!ref) {
           const extension2 = correctPath.split(".").slice(-1)[0];
           const info = await handleFetch(correctPath);
@@ -7729,12 +7732,12 @@ var safeImport = async (uri, opts = {}) => {
               forceImportFromText
             });
           }) : newText;
-          await importFromText(importedText, correctPath);
+          await importFromText(importedText, correctPath, uriCollection);
         }
-        text = `import ${wildcard ? "* as " : ""}${variables} from "${globalThis.REMOTEESM_TEXT_REFERENCES[correctPath]}";
+        text = `import ${wildcard ? "* as " : ""}${variables} from "${uriCollection[correctPath]}";
 ${text}`;
       }
-      module = await importFromText(text, uri);
+      module = await importFromText(text, uri, uriCollection);
     }
   }
   onImport(uri, {
@@ -7888,6 +7891,7 @@ var EventHandler = class {
     this.pushToState = {};
     this.data = {};
     this.triggers = {};
+    this.id = Math.random();
     this.setState = (updateObj) => {
       Object.assign(this.data, updateObj);
       for (const prop of Object.getOwnPropertyNames(updateObj)) {
@@ -8370,7 +8374,6 @@ var GraphNode = class {
       }
     };
     this.subscribe = (callback, tag = this.tag) => {
-      console.log(this.state);
       if (typeof callback === "string") {
         if (this.graph)
           callback = this.graph.get(callback);
@@ -8757,8 +8760,6 @@ var GraphNode = class {
           properties.animation = source.animation;
         if (source.delay)
           properties.delay = source.delay;
-        if (source.tag)
-          properties.tag = source.tag;
         if (source.oncreate)
           properties.oncreate = source.oncreate;
         if (source.node) {
@@ -8767,6 +8768,8 @@ var GraphNode = class {
         }
         if (source._initial)
           Object.assign(properties, source._initial);
+        if (source.tag)
+          properties.tag = source.tag;
         this.nodes = source.nodes;
         source.node = this;
         if (graph) {
@@ -10629,7 +10632,7 @@ var DOMService = class extends Service {
         setTimeout(() => {
           if (typeof parentNode2 === "string")
             parentNode2 = document.getElementById(parentNode2);
-          if (typeof parentNode2 === "object") {
+          if (parentNode2 && typeof parentNode2 === "object") {
             parentNode2.appendChild(elm);
           }
           if (oncreate)
@@ -11732,21 +11735,8 @@ var Router = class extends Service {
 };
 var transform_default = (tag, node) => {
   const args = node.arguments;
-  const instanceTree = {};
-  Array.from(args.entries()).forEach(([arg], i) => {
-    instanceTree[arg] = {
-      tag: arg,
-      operator: function(input) {
-        const o = args.get(arg);
-        o.state = input;
-        if (i === 0) {
-          const ifParent = this.graph.node;
-          return ifParent ? ifParent.run(input) : this.graph.operator(input);
-        }
-        return input;
-      }
-    };
-  });
+  let graph;
+  Array.from(args.keys()).forEach((arg, i) => node[`${arg}`] = args.get(arg).state);
   const originalOperator = node.operator;
   if (typeof originalOperator === "function") {
     node.operator = function(...argsArr) {
@@ -11754,9 +11744,11 @@ var transform_default = (tag, node) => {
       let i = 0;
       args.forEach((o, k) => {
         const argO = args.get(k);
+        const proxy = `${k}`;
         const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
-        let update = currentArg !== void 0 ? currentArg : o.state;
-        argO.state = update;
+        const target = graph.node ?? graph;
+        let update = currentArg !== void 0 ? currentArg : target[proxy];
+        target[proxy] = update;
         if (!argO.spread)
           update = [update];
         updatedArgs.push(...update);
@@ -11768,7 +11760,8 @@ var transform_default = (tag, node) => {
     console.error("Operator is not a function for", node.tag, node, originalOperator);
     node.operator = (...args2) => args2;
   }
-  return new Graph(instanceTree, tag, node);
+  graph = new Graph({}, tag, node);
+  return graph;
 };
 var ARGUMENT_NAMES = /([^,]*)/g;
 function getFnParamInfo(fn) {
@@ -11821,6 +11814,7 @@ var ESPlugin = class {
   #router;
   #cache = {};
   #plugins = {};
+  #active = false;
   plugins = {};
   #toRun = false;
   #runProps = true;
@@ -11903,18 +11897,59 @@ var ESPlugin = class {
       }
       tree[tag] = this.#create(tag, thisNode);
     }
+    let listeningFor = {};
+    let quickLookup = {};
+    let resolve2 = (path2) => {
+      if (quickLookup[path2] === void 0) {
+        const splitEdge = path2.split(".");
+        const first = splitEdge.shift();
+        const lastKey = splitEdge.pop();
+        let last = tree[first];
+        if (!last)
+          console.error("last", last, first, tree, path2);
+        splitEdge.forEach((str) => last = last.nodes.get(str));
+        const resolved = lastKey ? last.nodes.get(lastKey) : last;
+        quickLookup[path2] = { resolved, last, lastKey };
+      }
+      return quickLookup[path2];
+    };
+    let activate = async (edges2, data) => {
+      for (let input in edges2) {
+        let { resolved, last, lastKey } = resolve2(input);
+        if (resolved) {
+          const target = resolved.node ?? resolved;
+          if (Array.isArray(data))
+            target.run(...data);
+          else
+            target.run(data);
+        } else {
+          const target = last.node ?? last;
+          let res;
+          if (typeof target[lastKey] === "function") {
+            if (Array.isArray(data))
+              res = await target[lastKey](...data);
+            else
+              res = await target[lastKey](data);
+          } else
+            res = target[lastKey] = data;
+          if (listeningFor[input])
+            activate(listeningFor[input], res);
+        }
+      }
+    };
     const edges = this.initial.graph.edges;
     for (let output in edges) {
-      const splitEdge = output.split(".");
-      const first = splitEdge.shift();
-      let outNode = tree[first];
-      splitEdge.forEach((str) => outNode = outNode.nodes.get(str));
-      if (!outNode.children)
-        outNode.children = {};
-      for (let input in edges[output]) {
-        const tag = input.split(".").pop();
-        outNode.children[tag] = true;
-      }
+      let { resolved } = resolve2(output);
+      if (resolved) {
+        if (!resolved.children)
+          resolved.children = {};
+        const callback = (data) => activate(edges[output], data);
+        if (resolved instanceof GraphNode)
+          resolved.subscribe(callback);
+        else
+          this.#router.state.subscribeTrigger(resolved.tag, callback);
+      } else
+        listeningFor[output] = edges[output];
     }
     return tree;
   };
@@ -11932,56 +11967,62 @@ var ESPlugin = class {
     }
   };
   start = async (defer) => {
-    const activateFuncs = [];
-    for (let key in this.plugins) {
-      const o = this.plugins[key];
-      await o.start((f2) => {
-        activateFuncs.push(f2);
-      });
-    }
-    this.#activate();
-    const f = async () => {
-      for (let f2 of activateFuncs)
-        await f2();
-      if (this.#toRun)
-        await this.run();
-    };
-    const graph = this.initial.graph;
-    if (graph) {
-      const ports = graph.ports;
-      let firstNode, lastNode;
-      if (ports) {
-        firstNode = await this.graph.get(ports.input);
-        lastNode = this.graph.get(ports.output);
-      } else {
-        const nodes = Array.from(this.graph.nodes.values());
-        firstNode = nodes[0];
-        lastNode = nodes.slice(-1)[0];
-      }
-      if (lastNode)
-        lastNode.subscribe((...args) => {
-          for (let tag in lastNode.parent.children)
-            this.#runGraph(lastNode.parent.children[tag], ...args);
+    if (this.#active === false) {
+      this.#active = true;
+      const activateFuncs = [];
+      for (let key in this.plugins) {
+        const o = this.plugins[key];
+        await o.start((f2) => {
+          activateFuncs.push(f2);
         });
-      if (firstNode)
-        this.#initial.operator = async function(...args) {
-          await firstNode.run(...args);
-        };
+      }
+      this.#activate();
+      const f = async () => {
+        for (let f2 of activateFuncs)
+          await f2();
+        if (this.#toRun)
+          await this.run();
+      };
+      const graph = this.initial.graph;
+      if (graph) {
+        const ports = graph.ports;
+        let firstNode, lastNode;
+        if (ports) {
+          firstNode = await this.graph.get(ports.input);
+          lastNode = this.graph.get(ports.output);
+        } else {
+          const nodes = Array.from(this.graph.nodes.values());
+          firstNode = nodes[0];
+          lastNode = nodes.slice(-1)[0];
+        }
+        if (lastNode)
+          lastNode.subscribe((...args) => {
+            for (let tag in lastNode.graph.children)
+              this.#runGraph(lastNode.graph.children[tag], ...args);
+          });
+        if (firstNode)
+          this.#initial.operator = async function(...args) {
+            await firstNode.run(...args);
+          };
+      }
+      if (typeof defer === "function")
+        defer(f);
+      else
+        await f();
     }
-    if (typeof defer === "function")
-      defer(f);
-    else
-      await f();
   };
   stop = () => {
-    for (let k in this.nested)
-      this.nested[k].stop();
-    if (this.graph)
-      this.graph.nodes.forEach((n) => {
-        this.graph.removeTree(n);
-        n.stopNode();
-        this.graph.state.triggers = {};
-      });
+    if (this.#active === true) {
+      for (let k in this.nested)
+        this.nested[k].stop();
+      if (this.graph)
+        this.graph.nodes.forEach((n) => {
+          this.graph.removeTree(n);
+          n.stopNode();
+          this.graph.state.triggers = {};
+        });
+      this.#active = false;
+    }
   };
   #create = (tag, info) => {
     if (typeof info === "function")
@@ -12873,6 +12914,16 @@ var validate_default = validate;
 var index_wasl_default = {
   graph: {
     nodes: {
+      log: {
+        src: "../../../plugins/log.js"
+      },
+      average: {
+        src: "../../../plugins/average.js"
+      },
+      threshold: {
+        src: "../../../plugins/threshold.js",
+        threshold: 500
+      },
       synthetic: {
         src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js"
       },
@@ -12921,6 +12972,12 @@ var index_wasl_default = {
             button_3: {
               attributes: {
                 innerHTML: "Connect Muse"
+              },
+              src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+            },
+            jump: {
+              attributes: {
+                innerHTML: "Jump"
               },
               src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
             },
@@ -12995,16 +13052,16 @@ var index_wasl_default = {
                         bounce: 0.2,
                         collideWorldBounds: false,
                         create: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create.js"
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
                         },
                         update: {
                           src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
                         }
                       },
-                      player2: {
+                      companion: {
                         src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
                         position: {
-                          x: 400,
+                          x: 100,
                           y: 200
                         },
                         size: {
@@ -13015,7 +13072,7 @@ var index_wasl_default = {
                         bounce: 0.2,
                         collideWorldBounds: false,
                         create: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create.js"
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
                         },
                         update: {
                           src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
@@ -13050,7 +13107,18 @@ var index_wasl_default = {
         "datastreams.start": {}
       },
       "datastreams.start": {
-        timeseries: {}
+        "ui.timeseries": {},
+        average: {}
+      },
+      "ui.jump": {
+        "ui.phaser.game.player.jump": {}
+      },
+      average: {
+        threshold: {},
+        log: {}
+      },
+      threshold: {
+        "ui.phaser.game.player.jump": {}
       }
     }
   }
@@ -13061,10 +13129,44 @@ var package_default = {
   name: "phaser"
 };
 
+// tests/0/plugins/log.js
+var log_exports = {};
+__export(log_exports, {
+  default: () => log_default
+});
+var log_default = (input) => console.log(input);
+
+// tests/0/plugins/threshold.js
+var threshold_exports = {};
+__export(threshold_exports, {
+  default: () => threshold_default,
+  threshold: () => threshold
+});
+var threshold = 1;
+function threshold_default(input) {
+  return Math.abs(input) > this.threshold;
+}
+
+// tests/0/plugins/average.js
+var average_exports = {};
+__export(average_exports, {
+  default: () => average_default,
+  threshold: () => threshold2
+});
+var threshold2 = 1;
+function average_default(input) {
+  if (!Array.isArray(input))
+    input = [input];
+  return input.reduce((a, b) => a + b, 0) / input.length;
+}
+
 // demos/external/0.0.0.js
 var path = "../../tests/0/0.0/0.0.0/external/index.wasl.json";
 var filesystem = {
-  ["package.json"]: package_default
+  ["package.json"]: package_default,
+  ["plugins/log.js"]: log_exports,
+  ["plugins/threshold.js"]: threshold_exports,
+  ["plugins/average.js"]: average_exports
 };
 var options = {
   relativeTo: import.meta.url,

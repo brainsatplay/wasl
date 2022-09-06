@@ -1,6 +1,16 @@
 {
     "graph": {
         "nodes": {
+            "log": {
+                "src": "../../../plugins/log.js"
+            },
+            "average": {
+                "src": "../../../plugins/average.js"
+            },
+            "threshold": {
+                "src": "../../../plugins/threshold.js",
+                "threshold": 500
+            },
             "synthetic": {
                 "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js"
             },
@@ -52,6 +62,14 @@
                             },
                             "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
                         },
+
+                        "jump": {
+                            "attributes": {
+                                "innerHTML": "Jump"
+                            },
+                            "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+                        },
+
                         "phaser": {
                             "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
                             "plugins": {
@@ -123,16 +141,17 @@
                                                 "bounce": 0.2,
                                                 "collideWorldBounds": false,
                                                 "create": {
-                                                    "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create.js"
+                                                    "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
                                                 },
                                                 "update": {
                                                     "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
                                                 }
                                             },
-                                            "player2": {
+                                            
+                                            "companion": {
                                                 "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
                                                 "position": {
-                                                    "x": 400,
+                                                    "x": 100,
                                                     "y": 200
                                                 },
                                                 "size": {
@@ -143,7 +162,7 @@
                                                 "bounce": 0.2,
                                                 "collideWorldBounds": false,
                                                 "create": {
-                                                    "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create.js"
+                                                    "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
                                                 },
                                                 "update": {
                                                     "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
@@ -178,7 +197,18 @@
                 "datastreams.start": {}
             },
             "datastreams.start": {
-                "timeseries": {}
+                "ui.timeseries": {},
+                "average": {}
+            },
+            "ui.jump": {
+                "ui.phaser.game.player.jump": {}
+            },
+            "average": {
+                "threshold": {},
+                "log": {}
+            },
+             "threshold": {
+                "ui.phaser.game.player.jump": {}
             }
         }
     }

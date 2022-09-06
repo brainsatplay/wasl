@@ -137,10 +137,10 @@
   "resolved" "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   "version" "4.0.0"
 
-"es-plugins@0.0.16":
-  "integrity" "sha512-z38H+ib59IcHEPp16CK5uOq4hvCXyq+2XOtBB3msDMLaWOoXK3EICRgcWbuzZSkZI0A5QQ+dQ+CBm+l9ztDcAw=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.16.tgz"
-  "version" "0.0.16"
+"es-plugins@0.0.17":
+  "integrity" "sha512-rd3bjhMo60J0lXlacSLe+mGlhxFc5s6gTZK+LSGmPzwG5Z/sNIJf/dH1Hej5bQCUY00jTymiU0i7OS0e/vmhlg=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.17.tgz"
+  "version" "0.0.17"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="
@@ -402,10 +402,10 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"remote-esm@0.0.14":
-  "integrity" "sha512-ZD2x8oVieatyIv/FFIvZzYfHBk9uJkuwgUdoDkM8rV7DnorC9QqxbHkS2wtGCTGlbWPEA0t8SZONFcX6jsK+og=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.14.tgz"
-  "version" "0.0.14"
+"remote-esm@0.0.15":
+  "integrity" "sha512-E0Is4tqJYVsySAp7IJl0zixgosQ/N2DX8W+cIfSvnh599WmELJ4SXsXR+aoOyBTfNY3zcU+nl1H2gW/P16MI7A=="
+  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.15.tgz"
+  "version" "0.0.15"
   dependencies:
     "cross-blob" "^3.0.1"
     "node-fetch" "^3.2.10"

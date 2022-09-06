@@ -8,7 +8,9 @@ import * as cursors from  '../../phaser/src/plugins/cursors/index.js'
 import * as player from  '../../phaser/src/plugins/player/index.js'
 
 import * as create from  '../../phaser/scripts/create.js'
-import * as createPlayer from  '../../phaser/scripts/player/create.js'
+import * as createMain from  '../../phaser/scripts/player/create/main.js'
+import * as createCompanion from  '../../phaser/scripts/player/create/companion.js'
+
 import * as updatePlayer from  '../../phaser/scripts/player/update.js'
 
 const path = '../../phaser/index.wasl.json'
@@ -23,7 +25,8 @@ const options = {
         'src/plugins/player/index.js': player,
         'src/plugins/cursors/index.js': cursors,
         'scripts/create.js': create,
-        'src/scripts/player/create.js': createPlayer,
+        'src/scripts/player/create/main.js': createMain,
+        'src/scripts/player/create/companion.js': createCompanion,
         'src/scripts/player/update.js': updatePlayer,
     }
 }
