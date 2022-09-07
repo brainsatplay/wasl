@@ -7,7 +7,7 @@
                 "plugins": {
                     "add": {
                         "arguments": {
-                            "input": 10
+                            "input": 15
                         },
                         "toAdd": {
                             "src": "number.js"

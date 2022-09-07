@@ -5950,8 +5950,11 @@ var WASL = class {
             let fullPath;
             try {
               new URL(ogSrc);
-              _internal = fullPath = ogSrc;
-              _modeOverride = "import";
+              if (!options._overrideRemote || options._modeOverride === "import") {
+                _modeOverride = "import";
+                _internal = fullPath = ogSrc;
+              } else
+                fullPath = `${ogSrc.split("://").slice(1).join("/")}`;
             } catch {
               if (ogSrc)
                 fullPath = mainPath ? resolve2(ogSrc, mainPath) : resolve2(ogSrc);
@@ -6025,7 +6028,8 @@ var WASL = class {
                 _internal,
                 _deleteSrc: options._deleteSrc,
                 _top,
-                _modeOverride
+                _modeOverride,
+                _overrideRemote: options._overrideRemote
               }, void 0, symbolsCopy, counter);
             } else
               symbolsCopy.push(fullPath);

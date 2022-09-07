@@ -165,8 +165,10 @@ class WASL {
                     let fullPath
                     try {
                         new URL(ogSrc);
-                        _internal = fullPath = ogSrc
-                        _modeOverride = 'import'
+                        if (!options._overrideRemote || options._modeOverride === 'import') {
+                            _modeOverride = "import";
+                            _internal = fullPath = ogSrc;
+                        } else fullPath = `${ogSrc.split('://').slice(1).join('/')}` // no protocol
                     } catch {
                         if (ogSrc) fullPath = mainPath ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
                     }
@@ -262,7 +264,8 @@ class WASL {
                             _internal,
                             _deleteSrc: options._deleteSrc,
                             _top,
-                            _modeOverride
+                            _modeOverride,
+                            _overrideRemote: options._overrideRemote
                         }, undefined, symbolsCopy, counter)
                     } else symbolsCopy.push(fullPath) // ensure flow resolutions are properly scoped
 

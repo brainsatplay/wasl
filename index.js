@@ -2,12 +2,15 @@
 import wasl from "./src/core/index"
 import validate from "./src/validate/index"
 
-// import { path, main, options } from './demos/basic/0.0.0.js'
 // import { path, main, options } from './demos/starter.js'
 // import { path, main, options } from './demos/remote.js'
 // import { path, main, options } from './demos/signals.js'
 // import { path, main, options } from './demos/phaser.js'
 import { path, main, options } from './demos/external/0.0.0.js'
+
+// Broken
+// import { path, main, options } from './demos/basic/0.0.0.js'
+
 
 const printError = (arr, type, severity='Error') => {
     arr.forEach(e => {
