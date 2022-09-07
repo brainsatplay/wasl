@@ -136,9 +136,9 @@
                 tlen += 8;
                 tlen *= 1 + pos / string.length * 2;
                 tlen = tlen >> 3 << 3;
-                var update3 = new Uint8Array(tlen);
-                update3.set(target);
-                target = update3;
+                var update = new Uint8Array(tlen);
+                update.set(target);
+                target = update;
               }
               if ((value & 4294967168) === 0) {
                 target[at++] = value;
@@ -260,7 +260,7 @@
               }
               return output.join("");
             }
-            var create3 = Object.create || function(a) {
+            var create = Object.create || function(a) {
               function c() {
               }
               c.prototype = a;
@@ -294,12 +294,12 @@
               return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
             }
             function concatTypedarrays(chunks) {
-              var size2 = 0;
+              var size = 0;
               var j = chunks.length;
               while (j--) {
-                size2 += chunks[j].length;
+                size += chunks[j].length;
               }
-              var b = new Uint8Array(size2);
+              var b = new Uint8Array(size);
               var offset = 0;
               for (var i = 0; i < chunks.length; i++) {
                 var chunk = chunks[i];
@@ -355,7 +355,7 @@
               a.lastModified = +a.lastModifiedDate;
               return a;
             }
-            File2.prototype = create3(Blob4.prototype);
+            File2.prototype = create(Blob4.prototype);
             File2.prototype.constructor = File2;
             if (Object.setPrototypeOf) {
               Object.setPrototypeOf(File2, Blob4);
@@ -499,21 +499,21 @@
           try {
             new ReadableStream({ type: "bytes" });
             stream = function stream2() {
-              var position2 = 0;
+              var position = 0;
               var blob2 = this;
               return new ReadableStream({
                 type: "bytes",
                 autoAllocateChunkSize: 524288,
                 pull: function(controller) {
                   var v = controller.byobRequest.view;
-                  var chunk = blob2.slice(position2, position2 + v.byteLength);
+                  var chunk = blob2.slice(position, position + v.byteLength);
                   return chunk.arrayBuffer().then(function(buffer) {
                     var uint8array = new Uint8Array(buffer);
                     var bytesRead = uint8array.byteLength;
-                    position2 += bytesRead;
+                    position += bytesRead;
                     v.set(uint8array);
                     controller.byobRequest.respond(bytesRead);
-                    if (position2 >= blob2.size)
+                    if (position >= blob2.size)
                       controller.close();
                   });
                 }
@@ -523,15 +523,15 @@
             try {
               new ReadableStream({});
               stream = function stream2(blob2) {
-                var position2 = 0;
+                var position = 0;
                 return new ReadableStream({
                   pull: function(controller) {
-                    var chunk = blob2.slice(position2, position2 + 524288);
+                    var chunk = blob2.slice(position, position + 524288);
                     return chunk.arrayBuffer().then(function(buffer) {
-                      position2 += buffer.byteLength;
+                      position += buffer.byteLength;
                       var uint8array = new Uint8Array(buffer);
                       controller.enqueue(uint8array);
-                      if (position2 == blob2.size)
+                      if (position == blob2.size)
                         controller.close();
                     });
                   }
@@ -679,9 +679,9 @@
                 tlen += 8;
                 tlen *= 1 + pos / string.length * 2;
                 tlen = tlen >> 3 << 3;
-                var update3 = new Uint8Array(tlen);
-                update3.set(target);
-                target = update3;
+                var update = new Uint8Array(tlen);
+                update.set(target);
+                target = update;
               }
               if ((value & 4294967168) === 0) {
                 target[at++] = value;
@@ -803,7 +803,7 @@
               }
               return output.join("");
             }
-            var create3 = Object.create || function(a) {
+            var create = Object.create || function(a) {
               function c() {
               }
               c.prototype = a;
@@ -837,12 +837,12 @@
               return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
             }
             function concatTypedarrays(chunks) {
-              var size2 = 0;
+              var size = 0;
               var j = chunks.length;
               while (j--) {
-                size2 += chunks[j].length;
+                size += chunks[j].length;
               }
-              var b = new Uint8Array(size2);
+              var b = new Uint8Array(size);
               var offset = 0;
               for (var i = 0; i < chunks.length; i++) {
                 var chunk = chunks[i];
@@ -898,7 +898,7 @@
               a.lastModified = +a.lastModifiedDate;
               return a;
             }
-            File2.prototype = create3(Blob4.prototype);
+            File2.prototype = create(Blob4.prototype);
             File2.prototype.constructor = File2;
             if (Object.setPrototypeOf) {
               Object.setPrototypeOf(File2, Blob4);
@@ -1042,21 +1042,21 @@
           try {
             new ReadableStream({ type: "bytes" });
             stream = function stream2() {
-              var position2 = 0;
+              var position = 0;
               var blob2 = this;
               return new ReadableStream({
                 type: "bytes",
                 autoAllocateChunkSize: 524288,
                 pull: function(controller) {
                   var v = controller.byobRequest.view;
-                  var chunk = blob2.slice(position2, position2 + v.byteLength);
+                  var chunk = blob2.slice(position, position + v.byteLength);
                   return chunk.arrayBuffer().then(function(buffer) {
                     var uint8array = new Uint8Array(buffer);
                     var bytesRead = uint8array.byteLength;
-                    position2 += bytesRead;
+                    position += bytesRead;
                     v.set(uint8array);
                     controller.byobRequest.respond(bytesRead);
-                    if (position2 >= blob2.size)
+                    if (position >= blob2.size)
                       controller.close();
                   });
                 }
@@ -1066,15 +1066,15 @@
             try {
               new ReadableStream({});
               stream = function stream2(blob2) {
-                var position2 = 0;
+                var position = 0;
                 return new ReadableStream({
                   pull: function(controller) {
-                    var chunk = blob2.slice(position2, position2 + 524288);
+                    var chunk = blob2.slice(position, position + 524288);
                     return chunk.arrayBuffer().then(function(buffer) {
-                      position2 += buffer.byteLength;
+                      position += buffer.byteLength;
                       var uint8array = new Uint8Array(buffer);
                       controller.enqueue(uint8array);
-                      if (position2 == blob2.size)
+                      if (position == blob2.size)
                         controller.close();
                     });
                   }
@@ -1607,38 +1607,38 @@
         }
       };
       var ParentNode = class extends Node {
-        constructor(nodes2 = []) {
+        constructor(nodes = []) {
           super();
-          this.nodes = nodes2;
+          this.nodes = nodes;
         }
         render(opts) {
           return this.nodes.reduce((code, n) => code + n.render(opts), "");
         }
         optimizeNodes() {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i].optimizeNodes();
+            const n = nodes[i].optimizeNodes();
             if (Array.isArray(n))
-              nodes2.splice(i, 1, ...n);
+              nodes.splice(i, 1, ...n);
             else if (n)
-              nodes2[i] = n;
+              nodes[i] = n;
             else
-              nodes2.splice(i, 1);
+              nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         optimizeNames(names, constants) {
-          const { nodes: nodes2 } = this;
-          let i = nodes2.length;
+          const { nodes } = this;
+          let i = nodes.length;
           while (i--) {
-            const n = nodes2[i];
+            const n = nodes[i];
             if (n.optimizeNames(names, constants))
               continue;
             subtractNames(names, n.names);
-            nodes2.splice(i, 1);
+            nodes.splice(i, 1);
           }
-          return nodes2.length > 0 ? this : void 0;
+          return nodes.length > 0 ? this : void 0;
         }
         get names() {
           return this.nodes.reduce((names, n) => addNames(names, n.names), {});
@@ -1655,8 +1655,8 @@
       };
       Else.kind = "else";
       var If = class extends BlockNode {
-        constructor(condition, nodes2) {
-          super(nodes2);
+        constructor(condition, nodes) {
+          super(nodes);
           this.condition = condition;
         }
         render(opts) {
@@ -3346,26 +3346,26 @@
           addAnchor.call(this, sch.$anchor);
           addAnchor.call(this, sch.$dynamicAnchor);
           baseIds[jsonPtr] = baseId2;
-          function addRef(ref2) {
+          function addRef(ref) {
             const _resolve = this.opts.uriResolver.resolve;
-            ref2 = normalizeId(baseId2 ? _resolve(baseId2, ref2) : ref2);
-            if (schemaRefs.has(ref2))
-              throw ambiguos(ref2);
-            schemaRefs.add(ref2);
-            let schOrRef = this.refs[ref2];
+            ref = normalizeId(baseId2 ? _resolve(baseId2, ref) : ref);
+            if (schemaRefs.has(ref))
+              throw ambiguos(ref);
+            schemaRefs.add(ref);
+            let schOrRef = this.refs[ref];
             if (typeof schOrRef == "string")
               schOrRef = this.refs[schOrRef];
             if (typeof schOrRef == "object") {
-              checkAmbiguosRef(sch, schOrRef.schema, ref2);
-            } else if (ref2 !== normalizeId(fullPath)) {
-              if (ref2[0] === "#") {
-                checkAmbiguosRef(sch, localRefs[ref2], ref2);
-                localRefs[ref2] = sch;
+              checkAmbiguosRef(sch, schOrRef.schema, ref);
+            } else if (ref !== normalizeId(fullPath)) {
+              if (ref[0] === "#") {
+                checkAmbiguosRef(sch, localRefs[ref], ref);
+                localRefs[ref] = sch;
               } else {
-                this.refs[ref2] = fullPath;
+                this.refs[ref] = fullPath;
               }
             }
-            return ref2;
+            return ref;
           }
           function addAnchor(anchor) {
             if (typeof anchor == "string") {
@@ -3376,12 +3376,12 @@
           }
         });
         return localRefs;
-        function checkAmbiguosRef(sch1, sch2, ref2) {
+        function checkAmbiguosRef(sch1, sch2, ref) {
           if (sch2 !== void 0 && !equal(sch1, sch2))
-            throw ambiguos(ref2);
+            throw ambiguos(ref);
         }
-        function ambiguos(ref2) {
-          return new Error(`reference "${ref2}" resolves to more than one schema`);
+        function ambiguos(ref) {
+          return new Error(`reference "${ref}" resolves to more than one schema`);
         }
       }
       exports.getSchemaRefs = getSchemaRefs;
@@ -3909,9 +3909,9 @@
       Object.defineProperty(exports, "__esModule", { value: true });
       var resolve_1 = require_resolve();
       var MissingRefError = class extends Error {
-        constructor(resolver, baseId, ref2, msg) {
-          super(msg || `can't resolve reference ${ref2} from id ${baseId}`);
-          this.missingRef = (0, resolve_1.resolveUrl)(resolver, baseId, ref2);
+        constructor(resolver, baseId, ref, msg) {
+          super(msg || `can't resolve reference ${ref} from id ${baseId}`);
+          this.missingRef = (0, resolve_1.resolveUrl)(resolver, baseId, ref);
           this.missingSchema = (0, resolve_1.normalizeId)((0, resolve_1.getFullPath)(resolver, this.missingRef));
         }
       };
@@ -4036,22 +4036,22 @@
         }
       }
       exports.compileSchema = compileSchema;
-      function resolveRef(root, baseId, ref2) {
+      function resolveRef(root, baseId, ref) {
         var _a;
-        ref2 = (0, resolve_1.resolveUrl)(this.opts.uriResolver, baseId, ref2);
-        const schOrFunc = root.refs[ref2];
+        ref = (0, resolve_1.resolveUrl)(this.opts.uriResolver, baseId, ref);
+        const schOrFunc = root.refs[ref];
         if (schOrFunc)
           return schOrFunc;
-        let _sch = resolve3.call(this, root, ref2);
+        let _sch = resolve3.call(this, root, ref);
         if (_sch === void 0) {
-          const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref2];
+          const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
           const { schemaId } = this.opts;
           if (schema)
             _sch = new SchemaEnv({ schema, schemaId, root, baseId });
         }
         if (_sch === void 0)
           return;
-        return root.refs[ref2] = inlineOrCompile.call(this, _sch);
+        return root.refs[ref] = inlineOrCompile.call(this, _sch);
       }
       exports.resolveRef = resolveRef;
       function inlineOrCompile(sch) {
@@ -4069,14 +4069,14 @@
       function sameSchemaEnv(s1, s2) {
         return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
       }
-      function resolve3(root, ref2) {
+      function resolve3(root, ref) {
         let sch;
-        while (typeof (sch = this.refs[ref2]) == "string")
-          ref2 = sch;
-        return sch || this.schemas[ref2] || resolveSchema.call(this, root, ref2);
+        while (typeof (sch = this.refs[ref]) == "string")
+          ref = sch;
+        return sch || this.schemas[ref] || resolveSchema.call(this, root, ref);
       }
-      function resolveSchema(root, ref2) {
-        const p = this.opts.uriResolver.parse(ref2);
+      function resolveSchema(root, ref) {
+        const p = this.opts.uriResolver.parse(ref);
         const refPath = (0, resolve_1._getFullPath)(this.opts.uriResolver, p);
         let baseId = (0, resolve_1.getFullPath)(this.opts.uriResolver, root.baseId, void 0);
         if (Object.keys(root.schema).length > 0 && refPath === baseId) {
@@ -4094,7 +4094,7 @@
           return;
         if (!schOrRef.validate)
           compileSchema.call(this, schOrRef);
-        if (id === (0, resolve_1.normalizeId)(ref2)) {
+        if (id === (0, resolve_1.normalizeId)(ref)) {
           const { schema } = schOrRef;
           const { schemaId } = this.opts;
           const schId = schema[schemaId];
@@ -4168,7 +4168,7 @@
         typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : factory(global2.URI = global2.URI || {});
       })(exports, function(exports2) {
         "use strict";
-        function merge3() {
+        function merge2() {
           for (var _len = arguments.length, sets = Array(_len), _key = 0; _key < _len; _key++) {
             sets[_key] = arguments[_key];
           }
@@ -4206,18 +4206,18 @@
           return obj;
         }
         function buildExps(isIRI2) {
-          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge3(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge3(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge3(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge3(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge3(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge3("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
+          var ALPHA$$ = "[A-Za-z]", CR$ = "[\\x0D]", DIGIT$$ = "[0-9]", DQUOTE$$ = "[\\x22]", HEXDIG$$2 = merge2(DIGIT$$, "[A-Fa-f]"), LF$$ = "[\\x0A]", SP$$ = "[\\x20]", PCT_ENCODED$2 = subexp(subexp("%[EFef]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$2 + "%" + HEXDIG$$2 + HEXDIG$$2) + "|" + subexp("%" + HEXDIG$$2 + HEXDIG$$2)), GEN_DELIMS$$ = "[\\:\\/\\?\\#\\[\\]\\@]", SUB_DELIMS$$ = "[\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]", RESERVED$$ = merge2(GEN_DELIMS$$, SUB_DELIMS$$), UCSCHAR$$ = isIRI2 ? "[\\xA0-\\u200D\\u2010-\\u2029\\u202F-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]" : "[]", IPRIVATE$$ = isIRI2 ? "[\\uE000-\\uF8FF]" : "[]", UNRESERVED$$2 = merge2(ALPHA$$, DIGIT$$, "[\\-\\.\\_\\~]", UCSCHAR$$), SCHEME$ = subexp(ALPHA$$ + merge2(ALPHA$$, DIGIT$$, "[\\+\\-\\.]") + "*"), USERINFO$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]")) + "*"), DEC_OCTET$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("[1-9]" + DIGIT$$) + "|" + DIGIT$$), DEC_OCTET_RELAXED$ = subexp(subexp("25[0-5]") + "|" + subexp("2[0-4]" + DIGIT$$) + "|" + subexp("1" + DIGIT$$ + DIGIT$$) + "|" + subexp("0?[1-9]" + DIGIT$$) + "|0?0?" + DIGIT$$), IPV4ADDRESS$ = subexp(DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$ + "\\." + DEC_OCTET_RELAXED$), H16$ = subexp(HEXDIG$$2 + "{1,4}"), LS32$ = subexp(subexp(H16$ + "\\:" + H16$) + "|" + IPV4ADDRESS$), IPV6ADDRESS1$ = subexp(subexp(H16$ + "\\:") + "{6}" + LS32$), IPV6ADDRESS2$ = subexp("\\:\\:" + subexp(H16$ + "\\:") + "{5}" + LS32$), IPV6ADDRESS3$ = subexp(subexp(H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{4}" + LS32$), IPV6ADDRESS4$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,1}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{3}" + LS32$), IPV6ADDRESS5$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,2}" + H16$) + "?\\:\\:" + subexp(H16$ + "\\:") + "{2}" + LS32$), IPV6ADDRESS6$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,3}" + H16$) + "?\\:\\:" + H16$ + "\\:" + LS32$), IPV6ADDRESS7$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,4}" + H16$) + "?\\:\\:" + LS32$), IPV6ADDRESS8$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,5}" + H16$) + "?\\:\\:" + H16$), IPV6ADDRESS9$ = subexp(subexp(subexp(H16$ + "\\:") + "{0,6}" + H16$) + "?\\:\\:"), IPV6ADDRESS$ = subexp([IPV6ADDRESS1$, IPV6ADDRESS2$, IPV6ADDRESS3$, IPV6ADDRESS4$, IPV6ADDRESS5$, IPV6ADDRESS6$, IPV6ADDRESS7$, IPV6ADDRESS8$, IPV6ADDRESS9$].join("|")), ZONEID$ = subexp(subexp(UNRESERVED$$2 + "|" + PCT_ENCODED$2) + "+"), IPV6ADDRZ$ = subexp(IPV6ADDRESS$ + "\\%25" + ZONEID$), IPV6ADDRZ_RELAXED$ = subexp(IPV6ADDRESS$ + subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + ZONEID$), IPVFUTURE$ = subexp("[vV]" + HEXDIG$$2 + "+\\." + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:]") + "+"), IP_LITERAL$ = subexp("\\[" + subexp(IPV6ADDRZ_RELAXED$ + "|" + IPV6ADDRESS$ + "|" + IPVFUTURE$) + "\\]"), REG_NAME$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$)) + "*"), HOST$ = subexp(IP_LITERAL$ + "|" + IPV4ADDRESS$ + "(?!" + REG_NAME$ + ")|" + REG_NAME$), PORT$ = subexp(DIGIT$$ + "*"), AUTHORITY$ = subexp(subexp(USERINFO$ + "@") + "?" + HOST$ + subexp("\\:" + PORT$) + "?"), PCHAR$ = subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@]")), SEGMENT$ = subexp(PCHAR$ + "*"), SEGMENT_NZ$ = subexp(PCHAR$ + "+"), SEGMENT_NZ_NC$ = subexp(subexp(PCT_ENCODED$2 + "|" + merge2(UNRESERVED$$2, SUB_DELIMS$$, "[\\@]")) + "+"), PATH_ABEMPTY$ = subexp(subexp("\\/" + SEGMENT$) + "*"), PATH_ABSOLUTE$ = subexp("\\/" + subexp(SEGMENT_NZ$ + PATH_ABEMPTY$) + "?"), PATH_NOSCHEME$ = subexp(SEGMENT_NZ_NC$ + PATH_ABEMPTY$), PATH_ROOTLESS$ = subexp(SEGMENT_NZ$ + PATH_ABEMPTY$), PATH_EMPTY$ = "(?!" + PCHAR$ + ")", PATH$ = subexp(PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), QUERY$ = subexp(subexp(PCHAR$ + "|" + merge2("[\\/\\?]", IPRIVATE$$)) + "*"), FRAGMENT$ = subexp(subexp(PCHAR$ + "|[\\/\\?]") + "*"), HIER_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$), URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), RELATIVE_PART$ = subexp(subexp("\\/\\/" + AUTHORITY$ + PATH_ABEMPTY$) + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$), RELATIVE$ = subexp(RELATIVE_PART$ + subexp("\\?" + QUERY$) + "?" + subexp("\\#" + FRAGMENT$) + "?"), URI_REFERENCE$ = subexp(URI$ + "|" + RELATIVE$), ABSOLUTE_URI$ = subexp(SCHEME$ + "\\:" + HIER_PART$ + subexp("\\?" + QUERY$) + "?"), GENERIC_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", RELATIVE_REF$ = "^(){0}" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_NOSCHEME$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", ABSOLUTE_REF$ = "^(" + SCHEME$ + ")\\:" + subexp(subexp("\\/\\/(" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?)") + "?(" + PATH_ABEMPTY$ + "|" + PATH_ABSOLUTE$ + "|" + PATH_ROOTLESS$ + "|" + PATH_EMPTY$ + ")") + subexp("\\?(" + QUERY$ + ")") + "?$", SAMEDOC_REF$ = "^" + subexp("\\#(" + FRAGMENT$ + ")") + "?$", AUTHORITY_REF$ = "^" + subexp("(" + USERINFO$ + ")@") + "?(" + HOST$ + ")" + subexp("\\:(" + PORT$ + ")") + "?$";
           return {
-            NOT_SCHEME: new RegExp(merge3("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
-            NOT_USERINFO: new RegExp(merge3("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_HOST: new RegExp(merge3("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH: new RegExp(merge3("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_PATH_NOSCHEME: new RegExp(merge3("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
-            NOT_QUERY: new RegExp(merge3("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
-            NOT_FRAGMENT: new RegExp(merge3("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
-            ESCAPE: new RegExp(merge3("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_SCHEME: new RegExp(merge2("[^]", ALPHA$$, DIGIT$$, "[\\+\\-\\.]"), "g"),
+            NOT_USERINFO: new RegExp(merge2("[^\\%\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_HOST: new RegExp(merge2("[^\\%\\[\\]\\:]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH: new RegExp(merge2("[^\\%\\/\\:\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_PATH_NOSCHEME: new RegExp(merge2("[^\\%\\/\\@]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
+            NOT_QUERY: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]", IPRIVATE$$), "g"),
+            NOT_FRAGMENT: new RegExp(merge2("[^\\%]", UNRESERVED$$2, SUB_DELIMS$$, "[\\:\\@\\/\\?]"), "g"),
+            ESCAPE: new RegExp(merge2("[^]", UNRESERVED$$2, SUB_DELIMS$$), "g"),
             UNRESERVED: new RegExp(UNRESERVED$$2, "g"),
-            OTHER_CHARS: new RegExp(merge3("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
+            OTHER_CHARS: new RegExp(merge2("[^\\%]", UNRESERVED$$2, RESERVED$$), "g"),
             PCT_ENCODED: new RegExp(PCT_ENCODED$2, "g"),
             IPV4ADDRESS: new RegExp("^(" + IPV4ADDRESS$ + ")$"),
             IPV6ADDRESS: new RegExp("^\\[?(" + IPV6ADDRESS$ + ")" + subexp(subexp("\\%25|\\%(?!" + HEXDIG$$2 + "{2})") + "(" + ZONEID$ + ")") + "?\\]?$")
@@ -4993,12 +4993,12 @@
         var PCT_ENCODED$ = subexp(subexp("%[EFef]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%[89A-Fa-f]" + HEXDIG$$ + "%" + HEXDIG$$ + HEXDIG$$) + "|" + subexp("%" + HEXDIG$$ + HEXDIG$$));
         var ATEXT$$ = "[A-Za-z0-9\\!\\$\\%\\'\\*\\+\\-\\^\\_\\`\\{\\|\\}\\~]";
         var QTEXT$$ = "[\\!\\$\\%\\'\\(\\)\\*\\+\\,\\-\\.0-9\\<\\>A-Z\\x5E-\\x7E]";
-        var VCHAR$$ = merge3(QTEXT$$, '[\\"\\\\]');
+        var VCHAR$$ = merge2(QTEXT$$, '[\\"\\\\]');
         var SOME_DELIMS$$ = "[\\!\\$\\'\\(\\)\\*\\+\\,\\;\\:\\@]";
         var UNRESERVED = new RegExp(UNRESERVED$$, "g");
         var PCT_ENCODED = new RegExp(PCT_ENCODED$, "g");
-        var NOT_LOCAL_PART = new RegExp(merge3("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
-        var NOT_HFNAME = new RegExp(merge3("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
+        var NOT_LOCAL_PART = new RegExp(merge2("[^]", ATEXT$$, "[\\.]", '[\\"]', VCHAR$$), "g");
+        var NOT_HFNAME = new RegExp(merge2("[^]", UNRESERVED$$, SOME_DELIMS$$), "g");
         var NOT_HFVALUE = NOT_HFNAME;
         function decodeUnreserved(str) {
           var decStr = pctDecChars(str);
@@ -5380,26 +5380,26 @@
               return _compileAsync.call(this, sch);
             }
           }
-          function checkLoaded({ missingSchema: ref2, missingRef }) {
-            if (this.refs[ref2]) {
-              throw new Error(`AnySchema ${ref2} is loaded but ${missingRef} cannot be resolved`);
+          function checkLoaded({ missingSchema: ref, missingRef }) {
+            if (this.refs[ref]) {
+              throw new Error(`AnySchema ${ref} is loaded but ${missingRef} cannot be resolved`);
             }
           }
-          async function loadMissingSchema(ref2) {
-            const _schema = await _loadSchema.call(this, ref2);
-            if (!this.refs[ref2])
+          async function loadMissingSchema(ref) {
+            const _schema = await _loadSchema.call(this, ref);
+            if (!this.refs[ref])
               await loadMetaSchema.call(this, _schema.$schema);
-            if (!this.refs[ref2])
-              this.addSchema(_schema, ref2, meta);
+            if (!this.refs[ref])
+              this.addSchema(_schema, ref, meta);
           }
-          async function _loadSchema(ref2) {
-            const p = this._loading[ref2];
+          async function _loadSchema(ref) {
+            const p = this._loading[ref];
             if (p)
               return p;
             try {
-              return await (this._loading[ref2] = loadSchema(ref2));
+              return await (this._loading[ref] = loadSchema(ref));
             } finally {
-              delete this._loading[ref2];
+              delete this._loading[ref];
             }
           }
         }
@@ -8146,10 +8146,10 @@
           let buffer = [];
           const processBuffer = async ({ done, value }) => {
             if (done) {
-              const config2 = {};
+              const config = {};
               if (typeof type === "string")
-                config2.type = type;
-              const blob = new Blob(buffer, config2);
+                config.type = type;
+              const blob = new Blob(buffer, config);
               const ab = await blob.arrayBuffer();
               resolve3({ buffer: new Uint8Array(ab), type });
               return;
@@ -8203,9 +8203,9 @@
       else
         throw e;
     });
-    const ref2 = {};
+    const ref = {};
     for (let key in imported) {
-      Object.defineProperty(ref2, key, {
+      Object.defineProperty(ref, key, {
         get: () => imported[key],
         enumerable: true
       });
@@ -8263,8 +8263,8 @@
           const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
           if (opts.dependencies)
             opts.dependencies[uri][dependentFileWithoutRoot] = importInfo[i];
-          let ref2 = uriCollection[dependentFilePath];
-          if (!ref2) {
+          let ref = uriCollection[dependentFilePath];
+          if (!ref) {
             const extension2 = correctPath.split(".").slice(-1)[0];
             const info = await handleFetch(correctPath);
             let blob = new Blob([info.buffer], { type: info.type });
@@ -8369,8 +8369,8 @@ ${text}`;
   var isSrc = (str) => {
     return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
   };
-  var merge = (main2, override, deleteSrc = false) => {
-    const copy = Object.assign({}, main2);
+  var merge = (main, override, deleteSrc = false) => {
+    const copy = Object.assign({}, main);
     if (override) {
       if (deleteSrc) {
         const ogSrc = override.src ?? override;
@@ -8393,9 +8393,9 @@ ${text}`;
     }
     return copy;
   };
-  var checkFiles = (key, filesystem) => {
+  var checkFiles = (key, filesystem2) => {
     const isJSON = suffix(key).slice(-4) === "json" ? true : false;
-    const output = isJSON && filesystem[key] ? JSON.parse(JSON.stringify(filesystem[key])) : filesystem[key];
+    const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
     return output;
   };
   var remove = (original, search, key = original, o) => {
@@ -8488,9 +8488,9 @@ ${text}`;
       else
         throw e;
     });
-    const ref2 = {};
+    const ref = {};
     for (let key in imported) {
-      Object.defineProperty(ref2, key, {
+      Object.defineProperty(ref, key, {
         get: () => imported[key],
         enumerable: true
       });
@@ -10140,24 +10140,24 @@ ${text}`;
           window.addEventListener("resize", this.ONRESIZE);
         }
       } else if (name2 === "ondelete") {
-        let ondelete2 = val;
-        if (typeof ondelete2 === "string")
-          ondelete2 = parseFunctionFromText2(ondelete2);
-        if (typeof ondelete2 === "function") {
+        let ondelete = val;
+        if (typeof ondelete === "string")
+          ondelete = parseFunctionFromText2(ondelete);
+        if (typeof ondelete === "function") {
           this.ondelete = () => {
             if (this.ONRESIZE)
               window.removeEventListener("resize", this.ONRESIZE);
             this.state.unsubscribeTrigger("props");
-            if (ondelete2)
-              ondelete2(this.props, this);
+            if (ondelete)
+              ondelete(this.props, this);
           };
         }
       } else if (name2 === "oncreate") {
-        let oncreate2 = val;
-        if (typeof oncreate2 === "string")
-          oncreate2 = parseFunctionFromText2(oncreate2);
-        if (typeof oncreate2 === "function") {
-          this.oncreate = oncreate2;
+        let oncreate = val;
+        if (typeof oncreate === "string")
+          oncreate = parseFunctionFromText2(oncreate);
+        if (typeof oncreate === "function") {
+          this.oncreate = oncreate;
         }
       } else if (name2 === "renderonchanged") {
         let rpc = val;
@@ -10269,13 +10269,13 @@ ${text}`;
         window.addEventListener("resize", this.ONRESIZE);
       }
       if (typeof this.ondelete === "function") {
-        let ondelete2 = this.ondelete;
+        let ondelete = this.ondelete;
         this.ondelete = (props = this.props) => {
           if (this.ONRESIZE)
             window.removeEventListener("resize", this.ONRESIZE);
           this.state.unsubscribeTrigger("props");
           this.dispatchEvent(deleted);
-          ondelete2(this, props);
+          ondelete(this, props);
         };
       }
       if (typeof this.onchanged === "function") {
@@ -10465,14 +10465,14 @@ ${text}`;
     get ondelete() {
       return this.props;
     }
-    set ondelete(ondelete2) {
-      this.setAttribute("ondelete", ondelete2);
+    set ondelete(ondelete) {
+      this.setAttribute("ondelete", ondelete);
     }
     get oncreate() {
       return this.oncreate;
     }
-    set oncreate(oncreate2) {
-      this.setAttribute("oncreated", oncreate2);
+    set oncreate(oncreate) {
+      this.setAttribute("oncreated", oncreate);
     }
   };
   function addCustomElement(cls, tag, extend = null) {
@@ -11059,18 +11059,18 @@ ${text}`;
         this.init(options2);
     }
     handleServiceMessage(message) {
-      let call2;
+      let call;
       if (typeof message === "object") {
         if (message.route)
-          call2 = message.route;
+          call = message.route;
         else if (message.node)
-          call2 = message.node;
+          call = message.node;
       }
-      if (call2) {
+      if (call) {
         if (Array.isArray(message.args))
-          return this.run(call2, ...message.args);
+          return this.run(call, ...message.args);
         else
-          return this.run(call2, message.args);
+          return this.run(call, message.args);
       } else
         return message;
     }
@@ -11279,7 +11279,7 @@ ${text}`;
         }
         return options3;
       };
-      this.resolveParentNode = (elm, parentNode2, options3, oncreate2) => {
+      this.resolveParentNode = (elm, parentNode2, options3, oncreate) => {
         if (!elm.parentNode) {
           setTimeout(() => {
             if (typeof parentNode2 === "string")
@@ -11287,8 +11287,8 @@ ${text}`;
             if (parentNode2 && typeof parentNode2 === "object") {
               parentNode2.appendChild(elm);
             }
-            if (oncreate2)
-              oncreate2.call(elm.node, elm, this.elements[options3.id]);
+            if (oncreate)
+              oncreate.call(elm.node, elm, this.elements[options3.id]);
             if (elm.node.animation || elm.node.animate) {
               elm.node.runAnimation();
             }
@@ -11351,9 +11351,9 @@ ${text}`;
       };
       this.addComponent = (options3, generateChildElementNodes = true) => {
         if (options3.onrender) {
-          let oncreate2 = options3.onrender;
+          let oncreate = options3.onrender;
           options3.onrender = (element) => {
-            oncreate2.call(element.node, element, options3);
+            oncreate.call(element.node, element, options3);
           };
         }
         if (options3.onresize) {
@@ -11363,9 +11363,9 @@ ${text}`;
           };
         }
         if (options3.onremove) {
-          let ondelete2 = options3.onremove;
+          let ondelete = options3.onremove;
           options3.onremove = (element) => {
-            ondelete2.call(element.node, self, options3);
+            ondelete.call(element.node, self, options3);
           };
         }
         if (typeof options3.renderonchanged === "function") {
@@ -11445,9 +11445,9 @@ ${text}`;
         } else
           options3.template = options3.canvas;
         if (options3.onrender) {
-          let oncreate2 = options3.onrender;
+          let oncreate = options3.onrender;
           options3.onrender = (element) => {
-            oncreate2.call(element.node, element, options3);
+            oncreate.call(element.node, element, options3);
           };
         }
         if (options3.onresize) {
@@ -11457,9 +11457,9 @@ ${text}`;
           };
         }
         if (options3.ondelete) {
-          let ondelete2 = options3.onremove;
+          let ondelete = options3.onremove;
           options3.onremove = (element) => {
-            ondelete2.call(element.node, element, options3);
+            ondelete.call(element.node, element, options3);
           };
         }
         if (typeof options3.renderonchanged === "function") {
@@ -11605,7 +11605,7 @@ ${text}`;
       this.services = {};
       this.serviceConnections = {};
       this.users = {};
-      this.addUser = async (info, connections, config2, receiving) => {
+      this.addUser = async (info, connections, config, receiving) => {
         if (!info._id) {
           info._id = `user${Math.floor(Math.random() * 1e15)}`;
         }
@@ -11641,9 +11641,9 @@ ${text}`;
             connections[key] = this.addConnection(connections[key], user._id);
           }
         }
-        if (config2) {
-          for (const c in config2) {
-            this.openConnection(config2[c].service, config2[c], user._id, config2[c].args);
+        if (config) {
+          for (const c in config) {
+            this.openConnection(config[c].service, config[c], user._id, config[c].args);
           }
         }
         let send = (message, ...a) => {
@@ -12399,11 +12399,11 @@ ${text}`;
           const proxy = `${k}`;
           const currentArg = argO.spread ? argsArr.slice(i) : argsArr[i];
           const target = graph.node ?? graph;
-          let update3 = currentArg !== void 0 ? currentArg : target[proxy];
-          target[proxy] = update3;
+          let update = currentArg !== void 0 ? currentArg : target[proxy];
+          target[proxy] = update;
           if (!argO.spread)
-            update3 = [update3];
-          updatedArgs.push(...update3);
+            update = [update];
+          updatedArgs.push(...update);
           i++;
         });
         return originalOperator.call(this ?? node, ...updatedArgs);
@@ -12508,9 +12508,9 @@ ${text}`;
       }
       if (hasGraph) {
         const toNotify = [];
-        const nodes2 = this.initial.graph.nodes;
-        for (let tag in nodes2) {
-          const node2 = nodes2[tag];
+        const nodes = this.initial.graph.nodes;
+        for (let tag in nodes) {
+          const node2 = nodes[tag];
           if (!(node2 instanceof ESPlugin)) {
             const clonedOptions = Object.assign({}, Object.assign(options2));
             const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
@@ -12540,10 +12540,10 @@ ${text}`;
         let thisNode = this.#plugins[tag].graph;
         if (this.#cache[tag]) {
           let gs = this.#cache[tag].graph;
-          const ref2 = gs.node ? gs.node : gs;
+          const ref = gs.node ? gs.node : gs;
           thisNode = {};
-          for (let key in ref2._initial)
-            thisNode[key] = ref2[key];
+          for (let key in ref._initial)
+            thisNode[key] = ref[key];
           thisNode.tag = tag;
           gs.state.triggers = {};
         }
@@ -12646,9 +12646,9 @@ ${text}`;
             firstNode = await this.graph.get(ports.input);
             lastNode = this.graph.get(ports.output);
           } else {
-            const nodes2 = Array.from(this.graph.nodes.values());
-            firstNode = nodes2[0];
-            lastNode = nodes2.slice(-1)[0];
+            const nodes = Array.from(this.graph.nodes.values());
+            firstNode = nodes[0];
+            lastNode = nodes.slice(-1)[0];
           }
           if (lastNode)
             lastNode.subscribe((...args) => {
@@ -12840,7 +12840,7 @@ ${text}`;
         }
       };
       this.resolve = async (target, info, options2, graph = {}, symbols = [], counter) => {
-        const nodes2 = graph.nodes;
+        const nodes = graph.nodes;
         const edges = graph.edges;
         counter++;
         const id = Symbol("unique");
@@ -12854,7 +12854,7 @@ ${text}`;
           if (isObj) {
             await this.load(node, info, options2, id, symbolsCopy, counter);
             let ogSrc = node.src ?? "";
-            if (isSrc(ogSrc) || nodes2 && edges && !ogSrc) {
+            if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
               node.src = null;
               let _internal = "";
               let _modeOverride = options2._modeOverride;
@@ -13008,8 +13008,8 @@ ${text}`;
             }
           }
         }
-        for (let name2 in nodes2) {
-          const node = nodes2[name2];
+        for (let name2 in nodes) {
+          const node = nodes[name2];
           if (node?.src && typeof node?.src === "object") {
             if (node.src.graph)
               await this.load(node, info, options2, id, symbolsRegistry[name2]);
@@ -13021,9 +13021,9 @@ ${text}`;
                 });
               }
             }
-            nodes2[name2] = merge(node.src, node, options2._deleteSrc);
-            if (nodes2[name2].src?.graph)
-              nodes2[name2].src.graph = JSON.parse(JSON.stringify(nodes2[name2].graph));
+            nodes[name2] = merge(node.src, node, options2._deleteSrc);
+            if (nodes[name2].src?.graph)
+              nodes[name2].src.graph = JSON.parse(JSON.stringify(nodes[name2].graph));
           }
         }
         return target;
@@ -13113,22 +13113,22 @@ ${text}`;
           }
         }
         if (this.errors.length === 0) {
-          const nodes2 = object.graph.nodes;
-          await this.resolve(nodes2, {
+          const nodes = object.graph.nodes;
+          await this.resolve(nodes, {
             mainPath,
             url,
             object
           }, clonedOptions, object.graph, symbols, counter);
           const drill = (parent, callback) => {
-            const nodes3 = parent.graph.nodes;
-            for (let tag in nodes3) {
-              const res = callback(nodes3[tag], {
+            const nodes2 = parent.graph.nodes;
+            for (let tag in nodes2) {
+              const res = callback(nodes2[tag], {
                 tag,
                 parent,
                 options: clonedOptions
               });
               if (res)
-                nodes3[tag] = res;
+                nodes2[tag] = res;
             }
           };
           const drillToTest = (target) => {
@@ -13145,7 +13145,7 @@ ${text}`;
                   });
                 }
                 for (let input in edges[output]) {
-                  let inTarget = nodes2;
+                  let inTarget = nodes;
                   input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
                   if (!inTarget) {
                     __privateGet(this, _throw).call(this, {
@@ -13167,11 +13167,11 @@ ${text}`;
               let drillCopy = (target) => {
                 if (target?.graph) {
                   let graph = Object.assign({}, target.graph);
-                  let nodes3 = graph.nodes = Object.assign({}, graph.nodes);
-                  if (nodes3) {
-                    for (let k in nodes3) {
-                      nodes3[k] = Object.assign({}, nodes3[k].initial);
-                      drillCopy(nodes3[k]);
+                  let nodes2 = graph.nodes = Object.assign({}, graph.nodes);
+                  if (nodes2) {
+                    for (let k in nodes2) {
+                      nodes2[k] = Object.assign({}, nodes2[k].initial);
+                      drillCopy(nodes2[k]);
                     }
                   }
                   target.graph = graph;
@@ -13569,88 +13569,181 @@ ${text}`;
   };
   var validate_default = validate;
 
-  // ../phaser/index.wasl.json
+  // tests/0/0.0/0.0.0/external/index.wasl.json
   var index_wasl_default = {
     graph: {
       nodes: {
-        phaser: {
-          src: "src/index.wasl.json",
-          plugins: {
-            game: {
-              preload: {
-                setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
-                tilemapTiledJSON: [
-                  ["map", "map.json"]
-                ],
-                spritesheet: [
-                  ["tiles", "tiles.png", { frameWidth: 70, frameHeight: 70 }]
-                ],
-                image: [
-                  ["coin", "coinGold.png"]
-                ],
-                atlas: [
-                  ["player", "player.png", "player.json"]
-                ]
-              },
-              config: {
-                physics: {
-                  default: "arcade",
-                  arcade: {
-                    gravity: {
-                      y: 500
-                    }
-                  }
+        log: {
+          src: "../../../plugins/log.js"
+        },
+        average: {
+          src: "../../../plugins/average.js"
+        },
+        threshold: {
+          src: "../../../plugins/threshold.js",
+          threshold: 500
+        },
+        synthetic: {
+          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js"
+        },
+        ganglion: {
+          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/ganglion/index.js"
+        },
+        muse: {
+          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/muse/index.js"
+        },
+        datastreams: {
+          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/datastreams/index.wasl.json"
+        },
+        ui: {
+          tagName: "div",
+          style: {
+            position: "absolute",
+            top: "0px",
+            left: "0px",
+            width: "100%",
+            height: "100%"
+          },
+          graph: {
+            nodes: {
+              timeseries: {
+                style: {
+                  position: "absolute",
+                  bottom: "15px",
+                  right: "15px",
+                  width: "250px",
+                  height: "150px"
                 },
-                scene: {
-                  key: "main",
-                  create: {
-                    src: "scripts/create.js"
-                  }
-                }
+                src: "https://raw.githubusercontent.com/brainsatplay/brainsatplay-starter-kit/nightly/plugins/timeseries/index.js"
               },
-              graph: {
-                nodes: {
-                  cursors: {
-                    src: "src/plugins/cursors/index.js"
-                  },
-                  player: {
-                    src: "src/plugins/player/index.js",
-                    position: {
-                      x: 200,
-                      y: 200
+              button_1: {
+                attributes: {
+                  innerHTML: "Start synthetic data generation"
+                },
+                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+              },
+              button_2: {
+                attributes: {
+                  innerHTML: "Connect Ganglion"
+                },
+                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+              },
+              button_3: {
+                attributes: {
+                  innerHTML: "Connect Muse"
+                },
+                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+              },
+              jump: {
+                attributes: {
+                  innerHTML: "Jump Main Character"
+                },
+                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+              },
+              companionJump: {
+                attributes: {
+                  innerHTML: "Jump Companion"
+                },
+                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+              },
+              phaser: {
+                src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
+                plugins: {
+                  game: {
+                    preload: {
+                      setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
+                      tilemapTiledJSON: [
+                        [
+                          "map",
+                          "map.json"
+                        ]
+                      ],
+                      spritesheet: [
+                        [
+                          "tiles",
+                          "tiles.png",
+                          {
+                            frameWidth: 70,
+                            frameHeight: 70
+                          }
+                        ]
+                      ],
+                      image: [
+                        [
+                          "coin",
+                          "coinGold.png"
+                        ]
+                      ],
+                      atlas: [
+                        [
+                          "player",
+                          "player.png",
+                          "player.json"
+                        ]
+                      ]
                     },
-                    size: {
-                      offset: {
-                        height: -8
+                    config: {
+                      physics: {
+                        default: "arcade",
+                        arcade: {
+                          gravity: {
+                            y: 500
+                          }
+                        }
+                      },
+                      scene: {
+                        key: "main",
+                        create: {
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/create.js"
+                        }
                       }
                     },
-                    bounce: 0.2,
-                    collideWorldBounds: false,
-                    create: {
-                      src: "scripts/player/create/main.js"
-                    },
-                    update: {
-                      src: "scripts/player/update.js"
-                    }
-                  },
-                  companion: {
-                    src: "src/plugins/player/index.js",
-                    position: {
-                      x: 100,
-                      y: 200
-                    },
-                    size: {
-                      offset: {
-                        height: -8
+                    graph: {
+                      nodes: {
+                        cursors: {
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/cursors/index.js"
+                        },
+                        player: {
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
+                          position: {
+                            x: 200,
+                            y: 200
+                          },
+                          size: {
+                            offset: {
+                              height: -8
+                            }
+                          },
+                          bounce: 0.2,
+                          collideWorldBounds: false,
+                          create: {
+                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
+                          },
+                          update: {
+                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
+                          }
+                        },
+                        companion: {
+                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
+                          position: {
+                            x: 100,
+                            y: 200
+                          },
+                          size: {
+                            offset: {
+                              height: -8
+                            }
+                          },
+                          bounce: 0.2,
+                          collideWorldBounds: false,
+                          create: {
+                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
+                          },
+                          update: {
+                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
+                          }
+                        }
                       }
-                    },
-                    bounce: 0.2,
-                    collideWorldBounds: false,
-                    create: {
-                      src: "scripts/player/create/companion.js"
-                    },
-                    update: {
-                      src: "scripts/player/update.js"
                     }
                   }
                 }
@@ -13659,381 +13752,95 @@ ${text}`;
           }
         }
       },
-      edges: {}
-    }
-  };
-
-  // ../phaser/src/index.wasl.json
-  var index_wasl_default2 = {
-    graph: {
-      nodes: {
-        game: {
-          src: "plugins/game/index.js"
+      edges: {
+        "ui.button_1": {
+          synthetic: {}
+        },
+        synthetic: {
+          "datastreams.start": {}
+        },
+        "ui.button_2": {
+          ganglion: {}
+        },
+        ganglion: {
+          "datastreams.start": {}
+        },
+        "ui.button_3": {
+          muse: {}
+        },
+        muse: {
+          "datastreams.start": {}
+        },
+        "datastreams.start": {
+          "ui.timeseries": {},
+          average: {}
+        },
+        "ui.jump": {
+          "ui.phaser.game.player.jump": {}
+        },
+        "ui.companionJump": {
+          "ui.phaser.game.companion.jump": {}
+        },
+        average: {
+          threshold: {},
+          log: {}
+        },
+        threshold: {
+          "ui.phaser.game.player.jump": {}
         }
-      },
-      edges: {}
-    }
-  };
-
-  // ../phaser/package.json
-  var package_default = {
-    name: "myphaserapp",
-    type: "module"
-  };
-
-  // ../phaser/src/package.json
-  var package_default2 = {
-    name: "phaser",
-    type: "module"
-  };
-
-  // ../phaser/src/plugins/game/index.js
-  var game_exports = {};
-  __export(game_exports, {
-    config: () => config,
-    default: () => game_default,
-    game: () => game,
-    oncreate: () => oncreate,
-    ondelete: () => ondelete,
-    preload: () => preload
-  });
-
-  // ../phaser/src/plugins/game/config/merge.js
-  var merge2 = (base, newObj) => {
-    const copy = Object.assign({}, base);
-    if (newObj) {
-      const copyKeys = Object.keys(copy);
-      const newKeys = Object.keys(newObj);
-      copyKeys.forEach((k) => {
-        if (typeof newObj[k] === "object")
-          merge2(base[k], newObj[k]);
-        else if (newObj[k])
-          base[k] = newObj[k];
-      });
-      newKeys.forEach((k) => copy[k] = newObj[k]);
-    }
-    return copy;
-  };
-  var merge_default = merge2;
-
-  // ../phaser/src/plugins/game/config/phaser.config.js
-  var defaultConfig = (Phaser) => {
-    function preload2() {
-      this.load.setBaseURL("http://labs.phaser.io");
-      this.load.image("sky", "assets/skies/space3.png");
-      this.load.image("logo", "assets/sprites/phaser3-logo.png");
-      this.load.image("red", "assets/particles/red.png");
-    }
-    function create3() {
-      this.add.image(400, 300, "sky");
-      var particles = this.add.particles("red");
-      var emitter = particles.createEmitter({
-        speed: 100,
-        scale: { start: 1, end: 0 },
-        blendMode: "ADD"
-      });
-      var logo = this.physics.add.image(400, 100, "logo");
-      logo.setVelocity(100, 200);
-      logo.setBounce(1, 1);
-      logo.setCollideWorldBounds(true);
-      emitter.startFollow(logo);
-    }
-    const config2 = {
-      type: Phaser.AUTO,
-      width: "100",
-      height: "100",
-      physics: {
-        default: "arcade",
-        arcade: {
-          gravity: { y: 200 },
-          debug: false
-        }
-      },
-      scene: {
-        preload: preload2,
-        create: create3
       }
-    };
-    return config2;
+    }
   };
-  var phaser_config_default = defaultConfig;
 
-  // ../phaser/src/plugins/game/index.js
-  var script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
-  document.head.appendChild(script);
-  var nodes = {};
-  var onResolve = null;
-  if (!("Phaser" in window)) {
-    script.onload = function() {
-      if (onResolve instanceof Function)
-        onResolve(window.Phaser);
-      for (let tag in nodes)
-        nodes[tag].run();
-    };
-  }
-  var call = (func, ctx, ...args) => {
-    if (typeof func === "function")
-      func.call(ctx, args);
+  // tests/0/0.0/0.0.0/external/package.json
+  var package_default = {
+    name: "phaser"
   };
-  var preload = [];
-  var config = phaser_config_default;
-  var game;
-  function oncreate() {
-    if (window.Phaser)
-      this.run();
-    else
-      nodes[this.tag] = this;
-  }
-  function ondelete() {
-    if (this.game)
-      this.game.destroy(true, false);
-  }
-  async function game_default() {
-    const instance = this;
-    const Phaser = window.Phaser ?? await new Promise((resolve3) => onResolve = resolve3);
-    let cfg = typeof this.config === "function" ? this.config(window.Phaser) : this.config;
-    let defaultCfg = typeof config === "function" ? config(window.Phaser) : config;
-    let mergedConfig = merge_default(defaultCfg, cfg);
-    mergedConfig.parent = instance.parent?.parentNode;
-    return new Promise((resolve3) => {
-      const originalUpdate = mergedConfig.scene.update;
-      const originalCreate = mergedConfig.scene.create;
-      const originalPreload = mergedConfig.scene.preload;
-      mergedConfig.scene.preload = function() {
-        for (let fName in instance.preload) {
-          const o = instance.preload[fName];
-          if (typeof o === "object")
-            for (let key in o)
-              this.load[fName](...Object.values(o[key]));
-          else
-            this.load[fName](o);
-        }
-        call(originalPreload, this);
-      };
-      mergedConfig.scene.create = function() {
-        call(originalCreate, this);
-        this.context = this;
-        instance.nodes.forEach((n) => {
-          if (typeof n.ongame === "function")
-            n.ongame(this.context);
-        });
-        resolve3(this.context);
-      };
-      mergedConfig.scene.update = function() {
-        call(originalUpdate, this);
-        instance.nodes.forEach((n) => {
-          if (typeof n.update === "function")
-            n.update(this, Object.fromEntries(instance.nodes));
-        });
-      };
-      this.game = new Phaser.Game(mergedConfig);
-    });
-  }
 
-  // ../phaser/src/plugins/cursors/index.js
-  var cursors_exports = {};
-  __export(cursors_exports, {
-    default: () => cursors_default,
-    ongame: () => ongame
+  // tests/0/plugins/log.js
+  var log_exports = {};
+  __export(log_exports, {
+    default: () => log_default
   });
-  function ongame(context) {
-    this.ref = context.input.keyboard.createCursorKeys();
-  }
-  function cursors_default() {
-    return this.ref;
-  }
+  var log_default = (input) => console.log(input);
 
-  // ../phaser/src/plugins/player/index.js
-  var player_exports = {};
-  __export(player_exports, {
-    bounce: () => bounce,
-    collideWorldBounds: () => collideWorldBounds,
-    create: () => create,
-    default: () => player_default,
-    jump: () => jump,
-    jumpRefractoryPeriod: () => jumpRefractoryPeriod,
-    jumped: () => jumped,
-    move: () => move,
-    ongame: () => ongame2,
-    position: () => position,
-    ref: () => ref,
-    size: () => size,
-    update: () => update
+  // tests/0/plugins/threshold.js
+  var threshold_exports = {};
+  __export(threshold_exports, {
+    default: () => threshold_default,
+    threshold: () => threshold
   });
-  var bounce = 0;
-  var collideWorldBounds;
-  var size = {};
-  var position = {};
-  var jumpRefractoryPeriod = 1500;
-  var create;
-  var update;
-  var ref;
-  var jumped = false;
-  function jump(height) {
-    if (height && this.jumped === false) {
-      this.jumped = true;
-      this.ref.body.setVelocityY(-500 * height);
-      setTimeout(() => this.jumped = false, this.jumpRefractoryPeriod);
-    }
-  }
-  function move(x = 0) {
-    this.ref.body.setVelocityX(x);
-  }
-  function ongame2(game2) {
-    if (game2) {
-      this.ref = game2.physics.add.sprite(this.position.x, this.position.y, "player");
-      this.ref.setBounce(this.bounce);
-      this.ref.setCollideWorldBounds(this.collideWorldBounds);
-      this.ref.body.setSize((this.size.width ?? this.ref.width) + this.size.offset.width, (this.size.height ?? this.ref.height) + this.size.offset.height);
-      if (typeof this.create === "function")
-        this.create.call(game2, this.ref);
-    }
-  }
-  function player_default() {
-    return this.ref;
+  var threshold = 1;
+  function threshold_default(input) {
+    return Math.abs(input) > this.threshold;
   }
 
-  // ../phaser/scripts/create.js
-  var create_exports = {};
-  __export(create_exports, {
-    default: () => create_default
+  // tests/0/plugins/average.js
+  var average_exports = {};
+  __export(average_exports, {
+    default: () => average_default,
+    threshold: () => threshold2
   });
-  var score = 0;
-  function create2() {
-    const map = this.make.tilemap({ key: "map" });
-    const groundTiles = map.addTilesetImage("tiles");
-    const groundLayer = map.createLayer("World", groundTiles, 0, 0);
-    groundLayer.setCollisionByExclusion([-1]);
-    const coinTiles = map.addTilesetImage("coin");
-    const coinLayer = map.createLayer("Coins", coinTiles, 0, 0);
-    this.physics.world.bounds.width = groundLayer.width;
-    this.physics.world.bounds.height = groundLayer.height;
-    coinLayer.setTileIndexCallback(17, (sprite, tile) => {
-      removeTile(coinLayer, tile);
-      score = incrementScore(score, text);
-    }, this);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setBackgroundColor("#ccccff");
-    const text = this.add.text(20, 570, "0", {
-      fontSize: "20px",
-      fill: "#ffffff"
-    });
-    text.setScrollFactor(0);
-  }
-  function incrementScore(score2, text) {
-    score2++;
-    if (text)
-      text.setText(score2);
-    return score2;
-  }
-  function removeTile(layer, tile) {
-    layer.removeTileAt(tile.x, tile.y);
-    return false;
-  }
-  var create_default = create2;
-
-  // ../phaser/scripts/player/create/main.js
-  var main_exports = {};
-  __export(main_exports, {
-    default: () => main_default,
-    main: () => main
-  });
-
-  // ../phaser/scripts/player/create/base.js
-  var getLayer = (name2, context) => {
-    return context.children.list.find((o) => o.type === "TilemapLayer" && o.layer.name === name2);
-  };
-  function createPlayer(player) {
-    const groundLayer = getLayer("World", this);
-    this.physics.add.collider(groundLayer, player);
-    const coinLayer = getLayer("Coins", this);
-    this.physics.add.overlap(player, coinLayer);
-  }
-  var base_default = createPlayer;
-
-  // ../phaser/scripts/player/create/main.js
-  function main() {
-    this.anims.create({
-      key: "walk",
-      frames: this.anims.generateFrameNames("player", {
-        prefix: "p1_walk",
-        start: 1,
-        end: 11,
-        zeroPad: 2
-      }),
-      frameRate: 10,
-      repeat: -1
-    });
-    this.anims.create({
-      key: "idle",
-      frames: [{ key: "player", frame: "p1_stand" }],
-      frameRate: 10
-    });
-  }
-  function createMain(player) {
-    base_default.call(this, player);
-    main.call(this, player);
-    this.cameras.main.startFollow(player);
-  }
-  var main_default = createMain;
-
-  // ../phaser/scripts/player/create/companion.js
-  var companion_exports = {};
-  __export(companion_exports, {
-    default: () => companion_default
-  });
-  function createCompanion(player) {
-    base_default.call(this, player);
-    main.call(this, player);
-    player.setDisplaySize(4 * player.width / 6, 4 * player.height / 6);
-  }
-  var companion_default = createCompanion;
-
-  // ../phaser/scripts/player/update.js
-  var update_exports = {};
-  __export(update_exports, {
-    default: () => update2
-  });
-  function update2(context, peers) {
-    if (this.ref.x >= 2060 || this.ref.x <= 0)
-      this.ref.x = 0.5;
-    if (peers.cursors.ref.up.isDown) {
-      this.jump(true);
-    }
-    if (peers.cursors.ref.left.isDown) {
-      this.move(-200);
-      this.ref.flipX = true;
-    } else if (peers.cursors.ref.right.isDown) {
-      this.move(200);
-      this.ref.flipX = false;
-    } else {
-      this.move(0);
-      this.ref.anims.play("idle", true);
-    }
-    if (this.ref.body.velocity.x === 0)
-      this.ref.anims.play("walk", false);
-    else
-      this.ref.anims.play("walk", true);
+  var threshold2 = 1;
+  function average_default(input) {
+    if (!Array.isArray(input))
+      input = [input];
+    return input.reduce((a, b) => a + b, 0) / input.length;
   }
 
-  // demos/phaser.js
+  // demos/external/0.0.0.js
   var import_meta2 = {};
-  var path = "../../phaser/index.wasl.json";
+  var path = "../../tests/0/0.0/0.0.0/external/index.wasl.json";
+  var filesystem = {
+    ["package.json"]: package_default,
+    ["plugins/log.js"]: log_exports,
+    ["plugins/threshold.js"]: threshold_exports,
+    ["plugins/average.js"]: average_exports
+  };
   var options = {
     relativeTo: import_meta2.url,
-    filesystem: {
-      "package.json": package_default,
-      "src/package.json": package_default2,
-      "src/index.wasl.json": index_wasl_default2,
-      "src/plugins/game/index.js": game_exports,
-      "src/plugins/player/index.js": player_exports,
-      "src/plugins/cursors/index.js": cursors_exports,
-      "scripts/create.js": create_exports,
-      "src/scripts/player/create/main.js": main_exports,
-      "src/scripts/player/create/companion.js": companion_exports,
-      "src/scripts/player/update.js": update_exports
-    }
+    version: "0.0.0",
+    filesystem
   };
 
   // index.js
@@ -14049,7 +13856,7 @@ ${text}`;
     options.activate = true;
     options.wasl = core_default;
     options.debug = true;
-    let ref2, imported;
+    let ref, imported;
     const importOptions = Object.assign({ errors: [], warnings: [] }, options);
     importOptions.parentNode = document.getElementById("importcontainer");
     const res = await validate_default(path, importOptions);
@@ -14068,17 +13875,17 @@ ${text}`;
       const res2 = await validate_default(index_wasl_default, refOptions);
       console.log("validate (reference)", res2);
       if (res2) {
-        ref2 = new core_default(index_wasl_default, refOptions);
-        console.log("load (reference)", ref2);
-        refOptions.errors = ref2.errors;
-        refOptions.warnings = ref2.warnings;
+        ref = new core_default(index_wasl_default, refOptions);
+        console.log("load (reference)", ref);
+        refOptions.errors = ref.errors;
+        refOptions.warnings = ref.warnings;
       }
       printError(refOptions.errors, "reference");
       printError(refOptions.warnings, "reference", "Warning");
     }
     let info = [
       { wasl: imported, div: importDiv, name: "Import" },
-      { wasl: ref2, div: referenceDiv, name: "Reference" }
+      { wasl: ref, div: referenceDiv, name: "Reference" }
     ];
     let strArr = [];
     let refArr = [];
