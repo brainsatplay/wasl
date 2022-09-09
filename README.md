@@ -69,7 +69,7 @@ Warnings indicate that there is suboptimal syntax in the files themselves. Howev
  > **Note:** Use Node v16.15.0 or higher (which support import assertions for JSON files) to run the tests
 
 ## Acknowledgments
-**wasl** is maintained by [Garrett Flynn](https://github.com/garrettmflynn) and [Joshua Brewster](https://github.com/joshbrew), who use contract work and community contributions through [Open Collective](https://opencollective.com/brainsatplay) to support themselves.
+This library is maintained by [Garrett Flynn](https://github.com/garrettmflynn) and [Joshua Brewster](https://github.com/joshbrew), who use contract work and community contributions through [Open Collective](https://opencollective.com/brainsatplay) to support themselves.
 
 ### Backers
 [Support us with a monthly donation](https://opencollective.com/brainsatplay#backer) and help us continue our activities!
