@@ -1,6 +1,9 @@
 # Web Application Specification Languages (WASL) 1.0
+[![Npm package version](https://badgen.net/npm/v/wasl)](https://npmjs.com/package/wasl)
+[![Npm package monthly downloads](https://badgen.net/npm/dm/wasl)](https://npmjs.ccom/package/wasl)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Discord](https://img.shields.io/badge/community-discord-7289da.svg?sanitize=true)](https://discord.gg/CDxskSh9ZB)
 
-## Introduction
 **WASL** is a specification language for defining Web applications. It allows JavaScript developers to specify a JSON tree of source files and custom scripts. This then executes a program stored across the Web.
 
 > **Note:** **brainsatplay** is a core library of the [Brains@Play Framework](../../README.md)
