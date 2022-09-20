@@ -308,12 +308,12 @@
               }
               return b;
             }
-            function Blob4(chunks, opts) {
+            function Blob3(chunks, opts) {
               chunks = chunks || [];
               opts = opts == null ? {} : opts;
               for (var i = 0, len = chunks.length; i < len; i++) {
                 var chunk = chunks[i];
-                if (chunk instanceof Blob4) {
+                if (chunk instanceof Blob3) {
                   chunks[i] = chunk._buffer;
                 } else if (typeof chunk === "string") {
                   chunks[i] = textEncode(chunk);
@@ -334,34 +334,34 @@
                 this.type = this.type.toLowerCase();
               }
             }
-            Blob4.prototype.arrayBuffer = function() {
+            Blob3.prototype.arrayBuffer = function() {
               return Promise.resolve(this._buffer.buffer || this._buffer);
             };
-            Blob4.prototype.text = function() {
+            Blob3.prototype.text = function() {
               return Promise.resolve(textDecode(this._buffer));
             };
-            Blob4.prototype.slice = function(start, end, type) {
+            Blob3.prototype.slice = function(start, end, type) {
               var slice = this._buffer.slice(start || 0, end || this._buffer.length);
-              return new Blob4([slice], { type });
+              return new Blob3([slice], { type });
             };
-            Blob4.prototype.toString = function() {
+            Blob3.prototype.toString = function() {
               return "[object Blob]";
             };
             function File2(chunks, name2, opts) {
               opts = opts || {};
-              var a = Blob4.call(this, chunks, opts) || this;
+              var a = Blob3.call(this, chunks, opts) || this;
               a.name = name2.replace(/\//g, ":");
               a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
               a.lastModified = +a.lastModifiedDate;
               return a;
             }
-            File2.prototype = create(Blob4.prototype);
+            File2.prototype = create(Blob3.prototype);
             File2.prototype.constructor = File2;
             if (Object.setPrototypeOf) {
-              Object.setPrototypeOf(File2, Blob4);
+              Object.setPrototypeOf(File2, Blob3);
             } else {
               try {
-                File2.__proto__ = Blob4;
+                File2.__proto__ = Blob3;
               } catch (e) {
               }
             }
@@ -383,7 +383,7 @@
               this.removeEventListener = delegate.removeEventListener;
             }
             function _read(fr, blob2, kind) {
-              if (!(blob2 instanceof Blob4)) {
+              if (!(blob2 instanceof Blob3)) {
                 throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
               }
               fr.result = "";
@@ -418,7 +418,7 @@
             FileReader2.prototype.abort = function() {
             };
             URL2.createObjectURL = function(blob2) {
-              return blob2 instanceof Blob4 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
+              return blob2 instanceof Blob3 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
             };
             URL2.revokeObjectURL = function(url) {
               revokeObjectURL && revokeObjectURL.call(URL2, url);
@@ -426,7 +426,7 @@
             var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
             if (_send) {
               XMLHttpRequest.prototype.send = function(data) {
-                if (data instanceof Blob4) {
+                if (data instanceof Blob3) {
                   this.setRequestHeader("Content-Type", data.type);
                   _send.call(this, textDecode(data._buffer));
                 } else {
@@ -434,7 +434,7 @@
                 }
               };
             }
-            exports2.Blob = Blob4;
+            exports2.Blob = Blob3;
             exports2.File = File2;
             exports2.FileReader = FileReader2;
             exports2.URL = URL2;
@@ -551,10 +551,10 @@
             }
           }
           function promisify(obj) {
-            return new Promise(function(resolve3, reject) {
+            return new Promise(function(resolve2, reject) {
               obj.onload = obj.onerror = function(evt) {
                 obj.onload = obj.onerror = null;
-                evt.type === "load" ? resolve3(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
+                evt.type === "load" ? resolve2(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
               };
             });
           }
@@ -590,549 +590,6 @@
     "node_modules/cross-blob/browser.js"() {
       import_blob_polyfill = __toESM(require_Blob(), 1);
       browser_default = import_blob_polyfill.Blob;
-    }
-  });
-
-  // src/core/node_modules/blob-polyfill/Blob.js
-  var require_Blob2 = __commonJS({
-    "src/core/node_modules/blob-polyfill/Blob.js"(exports) {
-      (function(global2) {
-        (function(factory) {
-          if (typeof define === "function" && define.amd) {
-            define(["exports"], factory);
-          } else if (typeof exports === "object" && typeof exports.nodeName !== "string") {
-            factory(exports);
-          } else {
-            factory(global2);
-          }
-        })(function(exports2) {
-          "use strict";
-          var BlobBuilder = global2.BlobBuilder || global2.WebKitBlobBuilder || global2.MSBlobBuilder || global2.MozBlobBuilder;
-          var URL2 = global2.URL || global2.webkitURL || function(href, a) {
-            a = document.createElement("a");
-            a.href = href;
-            return a;
-          };
-          var origBlob = global2.Blob;
-          var createObjectURL = URL2.createObjectURL;
-          var revokeObjectURL = URL2.revokeObjectURL;
-          var strTag = global2.Symbol && global2.Symbol.toStringTag;
-          var blobSupported = false;
-          var blobSupportsArrayBufferView = false;
-          var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
-          try {
-            blobSupported = new Blob(["\xE4"]).size === 2;
-            blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
-          } catch (e) {
-          }
-          function mapArrayBufferViews(ary) {
-            return ary.map(function(chunk) {
-              if (chunk.buffer instanceof ArrayBuffer) {
-                var buf = chunk.buffer;
-                if (chunk.byteLength !== buf.byteLength) {
-                  var copy = new Uint8Array(chunk.byteLength);
-                  copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-                  buf = copy.buffer;
-                }
-                return buf;
-              }
-              return chunk;
-            });
-          }
-          function BlobBuilderConstructor(ary, options2) {
-            options2 = options2 || {};
-            var bb = new BlobBuilder();
-            mapArrayBufferViews(ary).forEach(function(part) {
-              bb.append(part);
-            });
-            return options2.type ? bb.getBlob(options2.type) : bb.getBlob();
-          }
-          function BlobConstructor(ary, options2) {
-            return new origBlob(mapArrayBufferViews(ary), options2 || {});
-          }
-          if (global2.Blob) {
-            BlobBuilderConstructor.prototype = Blob.prototype;
-            BlobConstructor.prototype = Blob.prototype;
-          }
-          function stringEncode(string) {
-            var pos = 0;
-            var len = string.length;
-            var Arr = global2.Uint8Array || Array;
-            var at = 0;
-            var tlen = Math.max(32, len + (len >> 1) + 7);
-            var target = new Arr(tlen >> 3 << 3);
-            while (pos < len) {
-              var value = string.charCodeAt(pos++);
-              if (value >= 55296 && value <= 56319) {
-                if (pos < len) {
-                  var extra = string.charCodeAt(pos);
-                  if ((extra & 64512) === 56320) {
-                    ++pos;
-                    value = ((value & 1023) << 10) + (extra & 1023) + 65536;
-                  }
-                }
-                if (value >= 55296 && value <= 56319) {
-                  continue;
-                }
-              }
-              if (at + 4 > target.length) {
-                tlen += 8;
-                tlen *= 1 + pos / string.length * 2;
-                tlen = tlen >> 3 << 3;
-                var update = new Uint8Array(tlen);
-                update.set(target);
-                target = update;
-              }
-              if ((value & 4294967168) === 0) {
-                target[at++] = value;
-                continue;
-              } else if ((value & 4294965248) === 0) {
-                target[at++] = value >> 6 & 31 | 192;
-              } else if ((value & 4294901760) === 0) {
-                target[at++] = value >> 12 & 15 | 224;
-                target[at++] = value >> 6 & 63 | 128;
-              } else if ((value & 4292870144) === 0) {
-                target[at++] = value >> 18 & 7 | 240;
-                target[at++] = value >> 12 & 63 | 128;
-                target[at++] = value >> 6 & 63 | 128;
-              } else {
-                continue;
-              }
-              target[at++] = value & 63 | 128;
-            }
-            return target.slice(0, at);
-          }
-          function stringDecode(buf) {
-            var end = buf.length;
-            var res = [];
-            var i = 0;
-            while (i < end) {
-              var firstByte = buf[i];
-              var codePoint = null;
-              var bytesPerSequence = firstByte > 239 ? 4 : firstByte > 223 ? 3 : firstByte > 191 ? 2 : 1;
-              if (i + bytesPerSequence <= end) {
-                var secondByte, thirdByte, fourthByte, tempCodePoint;
-                switch (bytesPerSequence) {
-                  case 1:
-                    if (firstByte < 128) {
-                      codePoint = firstByte;
-                    }
-                    break;
-                  case 2:
-                    secondByte = buf[i + 1];
-                    if ((secondByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 31) << 6 | secondByte & 63;
-                      if (tempCodePoint > 127) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                    break;
-                  case 3:
-                    secondByte = buf[i + 1];
-                    thirdByte = buf[i + 2];
-                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 15) << 12 | (secondByte & 63) << 6 | thirdByte & 63;
-                      if (tempCodePoint > 2047 && (tempCodePoint < 55296 || tempCodePoint > 57343)) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                    break;
-                  case 4:
-                    secondByte = buf[i + 1];
-                    thirdByte = buf[i + 2];
-                    fourthByte = buf[i + 3];
-                    if ((secondByte & 192) === 128 && (thirdByte & 192) === 128 && (fourthByte & 192) === 128) {
-                      tempCodePoint = (firstByte & 15) << 18 | (secondByte & 63) << 12 | (thirdByte & 63) << 6 | fourthByte & 63;
-                      if (tempCodePoint > 65535 && tempCodePoint < 1114112) {
-                        codePoint = tempCodePoint;
-                      }
-                    }
-                }
-              }
-              if (codePoint === null) {
-                codePoint = 65533;
-                bytesPerSequence = 1;
-              } else if (codePoint > 65535) {
-                codePoint -= 65536;
-                res.push(codePoint >>> 10 & 1023 | 55296);
-                codePoint = 56320 | codePoint & 1023;
-              }
-              res.push(codePoint);
-              i += bytesPerSequence;
-            }
-            var len = res.length;
-            var str = "";
-            var j = 0;
-            while (j < len) {
-              str += String.fromCharCode.apply(String, res.slice(j, j += 4096));
-            }
-            return str;
-          }
-          var textEncode = typeof TextEncoder === "function" ? TextEncoder.prototype.encode.bind(new TextEncoder()) : stringEncode;
-          var textDecode = typeof TextDecoder === "function" ? TextDecoder.prototype.decode.bind(new TextDecoder()) : stringDecode;
-          function FakeBlobBuilder() {
-            function bufferClone(buf) {
-              var view = new Array(buf.byteLength);
-              var array = new Uint8Array(buf);
-              var i = view.length;
-              while (i--) {
-                view[i] = array[i];
-              }
-              return view;
-            }
-            function array2base64(input) {
-              var byteToCharMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-              var output = [];
-              for (var i = 0; i < input.length; i += 3) {
-                var byte1 = input[i];
-                var haveByte2 = i + 1 < input.length;
-                var byte2 = haveByte2 ? input[i + 1] : 0;
-                var haveByte3 = i + 2 < input.length;
-                var byte3 = haveByte3 ? input[i + 2] : 0;
-                var outByte1 = byte1 >> 2;
-                var outByte2 = (byte1 & 3) << 4 | byte2 >> 4;
-                var outByte3 = (byte2 & 15) << 2 | byte3 >> 6;
-                var outByte4 = byte3 & 63;
-                if (!haveByte3) {
-                  outByte4 = 64;
-                  if (!haveByte2) {
-                    outByte3 = 64;
-                  }
-                }
-                output.push(byteToCharMap[outByte1], byteToCharMap[outByte2], byteToCharMap[outByte3], byteToCharMap[outByte4]);
-              }
-              return output.join("");
-            }
-            var create = Object.create || function(a) {
-              function c() {
-              }
-              c.prototype = a;
-              return new c();
-            };
-            function getObjectTypeName(o) {
-              return Object.prototype.toString.call(o).slice(8, -1);
-            }
-            function isPrototypeOf(c, o) {
-              return typeof c === "object" && Object.prototype.isPrototypeOf.call(c.prototype, o);
-            }
-            function isDataView(o) {
-              return getObjectTypeName(o) === "DataView" || isPrototypeOf(global2.DataView, o);
-            }
-            var arrayBufferClassNames = [
-              "Int8Array",
-              "Uint8Array",
-              "Uint8ClampedArray",
-              "Int16Array",
-              "Uint16Array",
-              "Int32Array",
-              "Uint32Array",
-              "Float32Array",
-              "Float64Array",
-              "ArrayBuffer"
-            ];
-            function includes(a, v) {
-              return a.indexOf(v) !== -1;
-            }
-            function isArrayBuffer(o) {
-              return includes(arrayBufferClassNames, getObjectTypeName(o)) || isPrototypeOf(global2.ArrayBuffer, o);
-            }
-            function concatTypedarrays(chunks) {
-              var size = 0;
-              var j = chunks.length;
-              while (j--) {
-                size += chunks[j].length;
-              }
-              var b = new Uint8Array(size);
-              var offset = 0;
-              for (var i = 0; i < chunks.length; i++) {
-                var chunk = chunks[i];
-                b.set(chunk, offset);
-                offset += chunk.byteLength || chunk.length;
-              }
-              return b;
-            }
-            function Blob4(chunks, opts) {
-              chunks = chunks || [];
-              opts = opts == null ? {} : opts;
-              for (var i = 0, len = chunks.length; i < len; i++) {
-                var chunk = chunks[i];
-                if (chunk instanceof Blob4) {
-                  chunks[i] = chunk._buffer;
-                } else if (typeof chunk === "string") {
-                  chunks[i] = textEncode(chunk);
-                } else if (isDataView(chunk)) {
-                  chunks[i] = bufferClone(chunk.buffer);
-                } else if (isArrayBuffer(chunk)) {
-                  chunks[i] = bufferClone(chunk);
-                } else {
-                  chunks[i] = textEncode(String(chunk));
-                }
-              }
-              this._buffer = global2.Uint8Array ? concatTypedarrays(chunks) : [].concat.apply([], chunks);
-              this.size = this._buffer.length;
-              this.type = opts.type || "";
-              if (/[^\u0020-\u007E]/.test(this.type)) {
-                this.type = "";
-              } else {
-                this.type = this.type.toLowerCase();
-              }
-            }
-            Blob4.prototype.arrayBuffer = function() {
-              return Promise.resolve(this._buffer.buffer || this._buffer);
-            };
-            Blob4.prototype.text = function() {
-              return Promise.resolve(textDecode(this._buffer));
-            };
-            Blob4.prototype.slice = function(start, end, type) {
-              var slice = this._buffer.slice(start || 0, end || this._buffer.length);
-              return new Blob4([slice], { type });
-            };
-            Blob4.prototype.toString = function() {
-              return "[object Blob]";
-            };
-            function File2(chunks, name2, opts) {
-              opts = opts || {};
-              var a = Blob4.call(this, chunks, opts) || this;
-              a.name = name2.replace(/\//g, ":");
-              a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
-              a.lastModified = +a.lastModifiedDate;
-              return a;
-            }
-            File2.prototype = create(Blob4.prototype);
-            File2.prototype.constructor = File2;
-            if (Object.setPrototypeOf) {
-              Object.setPrototypeOf(File2, Blob4);
-            } else {
-              try {
-                File2.__proto__ = Blob4;
-              } catch (e) {
-              }
-            }
-            File2.prototype.toString = function() {
-              return "[object File]";
-            };
-            function FileReader2() {
-              if (!(this instanceof FileReader2)) {
-                throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
-              }
-              var delegate = document.createDocumentFragment();
-              this.addEventListener = delegate.addEventListener;
-              this.dispatchEvent = function(evt) {
-                var local = this["on" + evt.type];
-                if (typeof local === "function")
-                  local(evt);
-                delegate.dispatchEvent(evt);
-              };
-              this.removeEventListener = delegate.removeEventListener;
-            }
-            function _read(fr, blob2, kind) {
-              if (!(blob2 instanceof Blob4)) {
-                throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
-              }
-              fr.result = "";
-              setTimeout(function() {
-                this.readyState = FileReader2.LOADING;
-                fr.dispatchEvent(new Event("load"));
-                fr.dispatchEvent(new Event("loadend"));
-              });
-            }
-            FileReader2.EMPTY = 0;
-            FileReader2.LOADING = 1;
-            FileReader2.DONE = 2;
-            FileReader2.prototype.error = null;
-            FileReader2.prototype.onabort = null;
-            FileReader2.prototype.onerror = null;
-            FileReader2.prototype.onload = null;
-            FileReader2.prototype.onloadend = null;
-            FileReader2.prototype.onloadstart = null;
-            FileReader2.prototype.onprogress = null;
-            FileReader2.prototype.readAsDataURL = function(blob2) {
-              _read(this, blob2, "readAsDataURL");
-              this.result = "data:" + blob2.type + ";base64," + array2base64(blob2._buffer);
-            };
-            FileReader2.prototype.readAsText = function(blob2) {
-              _read(this, blob2, "readAsText");
-              this.result = textDecode(blob2._buffer);
-            };
-            FileReader2.prototype.readAsArrayBuffer = function(blob2) {
-              _read(this, blob2, "readAsText");
-              this.result = (blob2._buffer.buffer || blob2._buffer).slice();
-            };
-            FileReader2.prototype.abort = function() {
-            };
-            URL2.createObjectURL = function(blob2) {
-              return blob2 instanceof Blob4 ? "data:" + blob2.type + ";base64," + array2base64(blob2._buffer) : createObjectURL.call(URL2, blob2);
-            };
-            URL2.revokeObjectURL = function(url) {
-              revokeObjectURL && revokeObjectURL.call(URL2, url);
-            };
-            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-            if (_send) {
-              XMLHttpRequest.prototype.send = function(data) {
-                if (data instanceof Blob4) {
-                  this.setRequestHeader("Content-Type", data.type);
-                  _send.call(this, textDecode(data._buffer));
-                } else {
-                  _send.call(this, data);
-                }
-              };
-            }
-            exports2.Blob = Blob4;
-            exports2.File = File2;
-            exports2.FileReader = FileReader2;
-            exports2.URL = URL2;
-          }
-          function fixFileAndXHR() {
-            var isIE = !!global2.ActiveXObject || "-ms-scroll-limit" in document.documentElement.style && "-ms-ime-align" in document.documentElement.style;
-            var _send = global2.XMLHttpRequest && global2.XMLHttpRequest.prototype.send;
-            if (isIE && _send) {
-              XMLHttpRequest.prototype.send = function(data) {
-                if (data instanceof Blob) {
-                  this.setRequestHeader("Content-Type", data.type);
-                  _send.call(this, data);
-                } else {
-                  _send.call(this, data);
-                }
-              };
-            }
-            try {
-              new File([], "");
-              exports2.File = global2.File;
-              exports2.FileReader = global2.FileReader;
-            } catch (e) {
-              try {
-                exports2.File = new Function('class File extends Blob {constructor(chunks, name, opts) {opts = opts || {};super(chunks, opts || {});this.name = name.replace(/\\//g, ":");this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();this.lastModified = +this.lastModifiedDate;}};return new File([], ""), File')();
-              } catch (e2) {
-                exports2.File = function(b, d, c) {
-                  var blob2 = new Blob(b, c);
-                  var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
-                  blob2.name = d.replace(/\//g, ":");
-                  blob2.lastModifiedDate = t;
-                  blob2.lastModified = +t;
-                  blob2.toString = function() {
-                    return "[object File]";
-                  };
-                  if (strTag) {
-                    blob2[strTag] = "File";
-                  }
-                  return blob2;
-                };
-              }
-            }
-          }
-          if (blobSupported) {
-            fixFileAndXHR();
-            exports2.Blob = blobSupportsArrayBufferView ? global2.Blob : BlobConstructor;
-          } else if (blobBuilderSupported) {
-            fixFileAndXHR();
-            exports2.Blob = BlobBuilderConstructor;
-          } else {
-            FakeBlobBuilder();
-          }
-          if (strTag) {
-            if (!exports2.File.prototype[strTag])
-              exports2.File.prototype[strTag] = "File";
-            if (!exports2.Blob.prototype[strTag])
-              exports2.Blob.prototype[strTag] = "Blob";
-            if (!exports2.FileReader.prototype[strTag])
-              exports2.FileReader.prototype[strTag] = "FileReader";
-          }
-          var blob = exports2.Blob.prototype;
-          var stream;
-          try {
-            new ReadableStream({ type: "bytes" });
-            stream = function stream2() {
-              var position = 0;
-              var blob2 = this;
-              return new ReadableStream({
-                type: "bytes",
-                autoAllocateChunkSize: 524288,
-                pull: function(controller) {
-                  var v = controller.byobRequest.view;
-                  var chunk = blob2.slice(position, position + v.byteLength);
-                  return chunk.arrayBuffer().then(function(buffer) {
-                    var uint8array = new Uint8Array(buffer);
-                    var bytesRead = uint8array.byteLength;
-                    position += bytesRead;
-                    v.set(uint8array);
-                    controller.byobRequest.respond(bytesRead);
-                    if (position >= blob2.size)
-                      controller.close();
-                  });
-                }
-              });
-            };
-          } catch (e) {
-            try {
-              new ReadableStream({});
-              stream = function stream2(blob2) {
-                var position = 0;
-                return new ReadableStream({
-                  pull: function(controller) {
-                    var chunk = blob2.slice(position, position + 524288);
-                    return chunk.arrayBuffer().then(function(buffer) {
-                      position += buffer.byteLength;
-                      var uint8array = new Uint8Array(buffer);
-                      controller.enqueue(uint8array);
-                      if (position == blob2.size)
-                        controller.close();
-                    });
-                  }
-                });
-              };
-            } catch (e2) {
-              try {
-                new Response("").body.getReader().read();
-                stream = function stream2() {
-                  return new Response(this).body;
-                };
-              } catch (e3) {
-                stream = function stream2() {
-                  throw new Error("Include https://github.com/MattiasBuelens/web-streams-polyfill");
-                };
-              }
-            }
-          }
-          function promisify(obj) {
-            return new Promise(function(resolve3, reject) {
-              obj.onload = obj.onerror = function(evt) {
-                obj.onload = obj.onerror = null;
-                evt.type === "load" ? resolve3(obj.result || obj) : reject(new Error("Failed to read the blob/file"));
-              };
-            });
-          }
-          if (!blob.arrayBuffer) {
-            blob.arrayBuffer = function arrayBuffer() {
-              var fr = new FileReader();
-              fr.readAsArrayBuffer(this);
-              return promisify(fr);
-            };
-          }
-          if (!blob.text) {
-            blob.text = function text() {
-              var fr = new FileReader();
-              fr.readAsText(this);
-              return promisify(fr);
-            };
-          }
-          if (!blob.stream) {
-            blob.stream = stream;
-          }
-        });
-      })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || exports);
-    }
-  });
-
-  // src/core/node_modules/cross-blob/browser.js
-  var browser_exports2 = {};
-  __export(browser_exports2, {
-    default: () => browser_default2
-  });
-  var import_blob_polyfill2, browser_default2;
-  var init_browser2 = __esm({
-    "src/core/node_modules/cross-blob/browser.js"() {
-      import_blob_polyfill2 = __toESM(require_Blob2(), 1);
-      browser_default2 = import_blob_polyfill2.Blob;
     }
   });
 
@@ -4042,7 +3499,7 @@
         const schOrFunc = root.refs[ref];
         if (schOrFunc)
           return schOrFunc;
-        let _sch = resolve3.call(this, root, ref);
+        let _sch = resolve2.call(this, root, ref);
         if (_sch === void 0) {
           const schema = (_a = root.localRefs) === null || _a === void 0 ? void 0 : _a[ref];
           const { schemaId } = this.opts;
@@ -4069,7 +3526,7 @@
       function sameSchemaEnv(s1, s2) {
         return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
       }
-      function resolve3(root, ref) {
+      function resolve2(root, ref) {
         let sch;
         while (typeof (sch = this.refs[ref]) == "string")
           ref = sch;
@@ -4891,7 +4348,7 @@
           target.fragment = relative.fragment;
           return target;
         }
-        function resolve3(baseURI, relativeURI, options2) {
+        function resolve2(baseURI, relativeURI, options2) {
           var schemelessOptions = assign({ scheme: "null" }, options2);
           return serialize(resolveComponents(parse(baseURI, schemelessOptions), parse(relativeURI, schemelessOptions), schemelessOptions, true), schemelessOptions);
         }
@@ -5159,7 +4616,7 @@
         exports2.removeDotSegments = removeDotSegments;
         exports2.serialize = serialize;
         exports2.resolveComponents = resolveComponents;
-        exports2.resolve = resolve3;
+        exports2.resolve = resolve2;
         exports2.normalize = normalize;
         exports2.equal = equal;
         exports2.escapeComponent = escapeComponent;
@@ -5581,10 +5038,10 @@
           }
           return metaSchema;
         }
-        _removeAllSchemas(schemas, regex3) {
+        _removeAllSchemas(schemas, regex) {
           for (const keyRef in schemas) {
             const sch = schemas[keyRef];
-            if (!regex3 || regex3.test(keyRef)) {
+            if (!regex || regex.test(keyRef)) {
               if (typeof sch == "string") {
                 delete schemas[keyRef];
               } else if (sch && !sch.meta) {
@@ -7802,7 +7259,7 @@
         hostname: /^(?=.{1,253}\.?$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[-0-9a-z]{0,61}[0-9a-z])?)*\.?$/i,
         ipv4: /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
         ipv6: /^((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))$/i,
-        regex: regex3,
+        regex,
         uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i,
         "json-pointer": /^(?:\/(?:[^~/]|~0|~1)*)*$/,
         "json-pointer-uri-fragment": /^#(?:\/(?:[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)*$/i,
@@ -7911,7 +7368,7 @@
         return true;
       }
       var Z_ANCHOR = /[^\\]\\Z/;
-      function regex3(str) {
+      function regex(str) {
         if (Z_ANCHOR.test(str))
           return false;
         try {
@@ -8055,25 +7512,20 @@
   };
 
   // node_modules/remote-esm/utils/path.js
-  var regex = new RegExp("https?:", "g");
+  var urlSep = "://";
   var get = (path2, rel = "", keepRelativeImports = false) => {
-    const windowLocation = globalThis?.location?.origin;
-    let pathMatch = false;
-    let relMatch = false;
-    if (windowLocation) {
-      relMatch = rel.includes(windowLocation);
-      if (relMatch) {
-        rel = rel.replace(windowLocation, "");
-        if (rel[0] === "/")
-          rel = rel.slice(1);
-      }
-      pathMatch = path2.includes(windowLocation);
-      if (pathMatch) {
-        path2 = path2.replace(windowLocation, "");
-        if (path2[0] === "/")
-          path2 = path2.slice(1);
-      }
-    }
+    let prefix = "";
+    const getPrefix = (str) => {
+      prefix = str.includes(urlSep) ? str.split(urlSep).splice(0, 1) : void 0;
+      if (prefix)
+        return str.replace(`${prefix}${urlSep}`, "");
+      else
+        return str;
+    };
+    if (path2.includes(urlSep))
+      path2 = getPrefix(path2);
+    if (rel.includes(urlSep))
+      rel = getPrefix(rel);
     if (!keepRelativeImports)
       rel = rel.split("/").filter((v) => v != "..").join("/");
     if (rel[rel.length - 1] === "/")
@@ -8088,12 +7540,7 @@
         dirTokens.push(potentialFile);
     }
     const splitPath = path2.split("/");
-    const pathTokens = splitPath.filter((str, i) => {
-      if (splitPath[i - 1] && regex.test(splitPath[i - 1]))
-        return true;
-      else
-        return !!str;
-    });
+    const pathTokens = splitPath.filter((str, i) => !!str);
     const extensionTokens = pathTokens.filter((str, i) => {
       if (str === "..") {
         dirTokens.pop();
@@ -8103,8 +7550,11 @@
       else
         return true;
     });
-    const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
-    return newPath;
+    const newPath = [...dirTokens, ...extensionTokens].join("/");
+    if (prefix)
+      return prefix + "://" + newPath;
+    else
+      return newPath;
   };
 
   // node_modules/remote-esm/utils/request.js
@@ -8133,12 +7583,12 @@
   };
   var fetchRemote = async (url, options2 = {}, progressCallback) => {
     const response = await globalThis.fetch(url, options2);
-    return new Promise(async (resolve3) => {
+    return new Promise(async (resolve2) => {
       if (response) {
         const type = response.headers.get("Content-Type");
         if (globalThis.REMOTEESM_NODE) {
           const buffer = await response.arrayBuffer();
-          resolve3({ buffer, type });
+          resolve2({ buffer, type });
         } else {
           const reader = response.body.getReader();
           const bytes = parseInt(response.headers.get("Content-Length"), 10);
@@ -8151,7 +7601,7 @@
                 config.type = type;
               const blob = new Blob(buffer, config);
               const ab = await blob.arrayBuffer();
-              resolve3({ buffer: new Uint8Array(ab), type });
+              resolve2({ buffer: new Uint8Array(ab), type });
               return;
             }
             bytesReceived += value.length;
@@ -8165,26 +7615,26 @@
         }
       } else {
         console.warn("Response not received!", options2.headers);
-        resolve3(void 0);
+        resolve2(void 0);
       }
     });
   };
 
   // node_modules/remote-esm/index.js
   var datauri = {};
-  var ready = new Promise(async (resolve3, reject) => {
+  var ready = new Promise(async (resolve2, reject) => {
     try {
       if (typeof process === "object") {
         globalThis.fetch = (await import("node-fetch")).default;
         if (typeof globalThis.fetch !== "function")
           globalThis.fetch = fetch;
-        const Blob4 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
-        globalThis.Blob = Blob4;
+        const Blob3 = (await Promise.resolve().then(() => (init_browser(), browser_exports))).default;
+        globalThis.Blob = Blob3;
         if (typeof globalThis.Blob !== "function")
-          globalThis.Blob = Blob4;
-        resolve3(true);
+          globalThis.Blob = Blob3;
+        resolve2(true);
       } else
-        resolve3(true);
+        resolve2(true);
     } catch (err) {
       console.log(err);
       reject(err);
@@ -8231,9 +7681,9 @@
     const isJSON = extension === "json";
     let module = !forceImportFromText ? await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
     }) : void 0;
-    let text;
+    let text, originalText;
     if (!module) {
-      text = await getText(uri);
+      text = originalText = await getText(uri);
       try {
         module = await importFromText(text, uri, uriCollection);
       } catch (e) {
@@ -8271,16 +7721,17 @@
             const isJS = extension2.includes("js");
             const newURI = dependentFileWithoutRoot;
             const newText = await blob.text();
-            let importedText = isJS ? await new Promise(async (resolve3) => {
+            let importedText = isJS ? await new Promise(async (resolve2) => {
               await safeImport(newURI, {
                 root: uri,
                 onImport: (path3, info2) => {
                   onImport(path3, info2);
                   if (path3 == newURI)
-                    resolve3(info2.text);
+                    resolve2(info2.text);
                 },
                 outputText: true,
-                forceImportFromText
+                forceImportFromText,
+                datauri: uriCollection
               });
             }) : newText;
             await importFromText(importedText, correctPath, uriCollection);
@@ -8291,8 +7742,10 @@ ${text}`;
         module = await importFromText(text, uri, uriCollection);
       }
     }
+    let txt = outputText ? text ?? await getText(uri) : void 0;
     onImport(uri, {
-      text: outputText ? text ?? await getText(uri) : void 0,
+      text: txt,
+      file: outputText ? originalText ?? txt : void 0,
       module
     });
     return module;
@@ -8301,10 +7754,10 @@ ${text}`;
 
   // src/common/get.ts
   var cache = {};
-  var get2 = async (relPath, relativeTo = "", onImport) => {
+  var get2 = async (relPath, relativeTo = "", onImport, options2 = {}) => {
     let type = suffix(relPath);
     const isJSON = !type || type.includes("json");
-    const fullPath = resolve(relPath, relativeTo);
+    const fullPath = relPath[0] === "." ? resolve(relPath, relativeTo) : relPath;
     const isFunc = typeof onImport === "function";
     const imported = cache[fullPath]?.imported ?? [];
     if (!cache[fullPath]) {
@@ -8316,12 +7769,12 @@ ${text}`;
             onImport(...args);
           }
         },
-        outputText: true
+        outputText: true,
+        nodeModules: options2.nodeModules,
+        rootRelativeTo: options2.relativeTo,
+        forceImportFromText: true
       }).catch((e) => {
-        if (e.message.includes("Failed to fetch"))
-          throw new Error("404");
-        else
-          throw e;
+        throw e;
       });
       cache[fullPath].imported = imported2;
       const res = await cache[fullPath];
@@ -8369,22 +7822,21 @@ ${text}`;
   var isSrc = (str) => {
     return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
   };
-  var merge = (main, override, deleteSrc = false) => {
+  var merge = (main, override) => {
     const copy = Object.assign({}, main);
     if (override) {
-      if (deleteSrc) {
-        const ogSrc = override.src ?? override;
-        delete override.src;
-        if ("default" in ogSrc)
-          return ogSrc.default;
-      }
       const keys = Object.keys(copy);
       const newKeys = new Set(Object.keys(override));
       keys.forEach((k) => {
+        if (k === "channels")
+          copy[k] = Object.assign({}, copy[k]);
         newKeys.delete(k);
-        if (typeof override[k] === "object" && !Array.isArray(override[k]))
-          copy[k] = merge(copy[k], override[k]);
-        else if (k in override)
+        if (typeof override[k] === "object" && !Array.isArray(override[k])) {
+          if (typeof copy[k] === "object")
+            copy[k] = merge(copy[k], override[k]);
+          else
+            copy[k] = override[k];
+        } else if (k in override)
           copy[k] = override[k];
       });
       newKeys.forEach((k) => {
@@ -8398,109 +7850,16 @@ ${text}`;
     const output = isJSON && filesystem2[key] ? JSON.parse(JSON.stringify(filesystem2[key])) : filesystem2[key];
     return output;
   };
-  var remove = (original, search, key = original, o) => {
-    console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
+  var remove = (original, search, key = original, o, message) => {
+    if (message)
+      console.error(message);
+    else
+      console.error(`Source was not ${original ? `resolved for ${original}` : `specified for ${key}`}. ${search ? `If available, refer to this object directly as options.filesystem["${search}"]. ` : ""}${o ? `Automatically removing ${key} from the WASL file.` : ""}`);
     if (o)
       delete o[key];
   };
 
-  // src/core/node_modules/remote-esm/utils/path.js
-  var regex2 = new RegExp("https?:", "g");
-  var get3 = (path2, rel = "", keepRelativeImports = false) => {
-    const windowLocation = globalThis?.location?.origin;
-    let pathMatch = false;
-    let relMatch = false;
-    if (windowLocation) {
-      relMatch = rel.includes(windowLocation);
-      if (relMatch) {
-        rel = rel.replace(windowLocation, "");
-        if (rel[0] === "/")
-          rel = rel.slice(1);
-      }
-      pathMatch = path2.includes(windowLocation);
-      if (pathMatch) {
-        path2 = path2.replace(windowLocation, "");
-        if (path2[0] === "/")
-          path2 = path2.slice(1);
-      }
-    }
-    if (!keepRelativeImports)
-      rel = rel.split("/").filter((v) => v != "..").join("/");
-    if (rel[rel.length - 1] === "/")
-      rel = rel.slice(0, -1);
-    let dirTokens = rel.split("/");
-    if (dirTokens.length === 1 && dirTokens[0] === "")
-      dirTokens = [];
-    const potentialFile = dirTokens.pop();
-    if (potentialFile) {
-      const splitPath2 = potentialFile.split(".");
-      if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
-        dirTokens.push(potentialFile);
-    }
-    const splitPath = path2.split("/");
-    const pathTokens = splitPath.filter((str, i) => {
-      if (splitPath[i - 1] && regex2.test(splitPath[i - 1]))
-        return true;
-      else
-        return !!str;
-    });
-    const extensionTokens = pathTokens.filter((str, i) => {
-      if (str === "..") {
-        dirTokens.pop();
-        return false;
-      } else if (str === ".")
-        return false;
-      else
-        return true;
-    });
-    const newPath = (relMatch || !rel && pathMatch ? `${windowLocation}/` : ``) + [...dirTokens, ...extensionTokens].join("/");
-    return newPath;
-  };
-
-  // src/core/node_modules/remote-esm/index.js
-  var ready2 = new Promise(async (resolve3, reject) => {
-    try {
-      if (typeof process === "object") {
-        globalThis.fetch = (await import("node-fetch")).default;
-        if (typeof globalThis.fetch !== "function")
-          globalThis.fetch = fetch;
-        const Blob4 = (await Promise.resolve().then(() => (init_browser2(), browser_exports2))).default;
-        globalThis.Blob = Blob4;
-        if (typeof globalThis.Blob !== "function")
-          globalThis.Blob = Blob4;
-        resolve3(true);
-      } else
-        resolve3(true);
-    } catch (err) {
-      console.log(err);
-      reject(err);
-    }
-  });
-  var moduleDataURI2 = (text, mimeType = "text/javascript") => `data:${mimeType};base64,` + btoa(text);
-  var importFromText2 = async (text, path2, collection = {}) => {
-    const extension = path2.split(".").slice(-1)[0];
-    const isJSON = extension === "json";
-    let mimeType = isJSON ? "application/json" : "application/javascript";
-    const uri = moduleDataURI2(text, mimeType);
-    let imported = await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
-      if (e.message.includes("Unexpected token"))
-        throw new Error("Failed to fetch");
-      else
-        throw e;
-    });
-    const ref = {};
-    for (let key in imported) {
-      Object.defineProperty(ref, key, {
-        get: () => imported[key],
-        enumerable: true
-      });
-    }
-    collection[path2] = uri;
-    return imported;
-  };
-  var resolve2 = get3;
-
-  // src/core/node_modules/es-plugins/dist/index.esm.js
+  // node_modules/es-plugins/dist/index.esm.js
   function parseFunctionFromText(method = "") {
     let getFunctionBody = (methodString) => {
       return methodString.replace(/^\W*(function[^{]+\{([\s\S]*)\}|[^=]+=>[^{]*\{([\s\S]*)\}|[^=]+=>(.+))/i, "$2$3$4");
@@ -8696,7 +8055,7 @@ ${text}`;
           let res = this.runOp(...args);
           return res;
         }
-        return new Promise(async (resolve3) => {
+        return new Promise(async (resolve2) => {
           if (this) {
             let run = (node, tick = 0, ...input) => {
               return new Promise(async (r) => {
@@ -8771,17 +8130,17 @@ ${text}`;
             };
             if (this.delay) {
               setTimeout(async () => {
-                resolve3(await runnode());
+                resolve2(await runnode());
               }, this.delay);
             } else if (this.frame && window?.requestAnimationFrame) {
               requestAnimationFrame(async () => {
-                resolve3(await runnode());
+                resolve2(await runnode());
               });
             } else {
-              resolve3(await runnode());
+              resolve2(await runnode());
             }
           } else
-            resolve3(void 0);
+            resolve2(void 0);
         });
       };
       this.runParent = async (n, ...args) => {
@@ -9168,9 +8527,11 @@ ${text}`;
                   this.nodes.forEach((n2) => {
                     if (n2.nodes.get(node.children[key].tag))
                       n2.nodes.delete(node.children[key].tag);
-                    if (n2.children[key] instanceof GraphNode)
+                    if (n2.children?.[key] instanceof GraphNode)
                       delete n2.children[key];
                   });
+                  if (node.children[key].ondelete && !this.graph)
+                    node.children[key].ondelete(node.children[key]);
                   recursivelyRemove(node.children[key]);
                 }
               }
@@ -9180,7 +8541,7 @@ ${text}`;
             n.stopNode();
           if (n.tag) {
             this.nodes.delete(n.tag);
-            if (this.children[n.tag])
+            if (this.children?.[n.tag])
               delete this.children[n.tag];
             if (this.parent?.tag === n.tag)
               delete this.parent;
@@ -9190,7 +8551,7 @@ ${text}`;
               if (n2?.tag) {
                 if (n2.nodes.get(n2.tag))
                   n2.nodes.delete(n2.tag);
-                if (n2.children[n2.tag] instanceof GraphNode)
+                if (n2.children?.[n2.tag] instanceof GraphNode)
                   delete n2.children[n2.tag];
               }
             });
@@ -9452,8 +8813,13 @@ ${text}`;
             let props = hasnode.getProps();
             delete props.graph;
             delete props.parent;
-            for (let k in props)
-              properties[k] = props[k];
+            for (let k in props) {
+              const desc = Object.getOwnPropertyDescriptor(properties, k);
+              if (desc && desc.get && !desc.set)
+                properties = Object.assign({}, properties);
+              else
+                properties[k] = props[k];
+            }
           }
         }
         if (properties?.operator) {
@@ -9471,9 +8837,6 @@ ${text}`;
         }
         if (properties.children)
           this._initial.children = Object.assign({}, properties.children);
-        if (properties.run) {
-          console.log("Transferring", properties, "to", this);
-        }
         Object.assign(this, properties);
         if (!this.tag) {
           if (graph) {
@@ -9670,40 +9033,31 @@ ${text}`;
           });
       };
       this.removeTree = (n, checked) => {
-        if (typeof n === "string")
-          n = this.nodes.get(n);
+        if (n) {
+          if (typeof n === "string")
+            n = this.nodes.get(n);
+        }
         if (n?.nodes) {
-          if (!checked)
-            checked = {};
+          let checked2 = {};
           const recursivelyRemove = (node) => {
-            if (node.children && !checked[node.tag]) {
-              checked[node.tag] = true;
-              if (Array.isArray(node.children)) {
-                node.children.forEach((c) => {
-                  if (c.stopNode)
-                    c.stopNode();
-                  if (c.tag) {
-                    if (this.nodes.get(c.tag))
-                      this.nodes.delete(c.tag);
-                  }
+            if (typeof node.children === "object" && !checked2[node.tag]) {
+              checked2[node.tag] = true;
+              for (const key in node.children) {
+                if (node.children[key]?.stopNode)
+                  node.children[key].stopNode();
+                if (node.children[key]?.tag) {
+                  if (this.nodes.get(node.children[key].tag))
+                    this.nodes.delete(node.children[key].tag);
                   this.nodes.forEach((n2) => {
-                    if (n2.nodes.get(c.tag))
-                      n2.nodes.delete(c.tag);
+                    if (n2.nodes.get(node.children[key].tag))
+                      n2.nodes.delete(node.children[key].tag);
+                    if (n2.children?.[key] instanceof GraphNode)
+                      delete n2.children[key];
                   });
-                  recursivelyRemove(c);
-                });
-              } else if (typeof node.children === "object") {
-                if (node.stopNode)
-                  node.stopNode();
-                if (node.tag) {
-                  if (this.nodes.get(node.tag))
-                    this.nodes.delete(node.tag);
+                  if (node.children[key].ondelete)
+                    node.children[key].ondelete(node.children[key]);
+                  recursivelyRemove(node.children[key]);
                 }
-                this.nodes.forEach((n2) => {
-                  if (n2.nodes.get(node.tag))
-                    n2.nodes.delete(node.tag);
-                });
-                recursivelyRemove(node);
               }
             }
           };
@@ -9711,17 +9065,23 @@ ${text}`;
             n.stopNode();
           if (n.tag) {
             this.nodes.delete(n.tag);
+            if (this.parent?.tag === n.tag)
+              delete this.parent;
+            if (this[n.tag] instanceof GraphNode)
+              delete this[n.tag];
             this.nodes.forEach((n2) => {
-              if (n2.nodes.get(n2.tag))
-                n2.nodes.delete(n2.tag);
+              if (n2?.tag) {
+                if (n2.nodes.get(n2.tag))
+                  n2.nodes.delete(n2.tag);
+                if (n2.children?.[n2.tag] instanceof GraphNode)
+                  delete n2.children[n2.tag];
+              }
             });
-            this.nNodes = this.nodes.size;
             recursivelyRemove(n);
+            if (n.ondelete)
+              n.ondelete(n);
           }
-          if (n.ondelete)
-            n.ondelete(n);
         }
-        return n;
       };
       this.remove = (n) => {
         if (typeof n === "string")
@@ -10551,7 +9911,7 @@ ${text}`;
         } else if (options3.routes || (Object.keys(this.routes).length > 0 || this.loadDefaultRoutes) && this.firstLoad)
           this.load(options3.routes, options3.includeClassName, options3.routeFormat, options3.customRoutes, options3.customChildren, options3.sharedState);
       };
-      this.load = (routes, includeClassName = true, routeFormat = ".", customRoutes, customChildren, sharedState = true) => {
+      this.load = (routes, includeClassName = true, routeFormat = ".", customRoutes = this.customRoutes, customChildren = this.customChildren, sharedState = true) => {
         if (!routes && !this.loadDefaultRoutes && (Object.keys(this.routes).length > 0 || this.firstLoad))
           return;
         if (this.firstLoad)
@@ -10819,7 +10179,7 @@ ${text}`;
           }
         } else
           this.setTree(this.routes);
-        for (const prop in this.routes) {
+        for (const prop in routes) {
           if (this.routes[prop]?.aliases) {
             let aliases = this.routes[prop].aliases;
             aliases.forEach((a) => {
@@ -11335,11 +10695,14 @@ ${text}`;
         });
         node.element = element;
         element.node = node;
-        const initialOptions = options3._initial ?? options3;
+        let initialOptions = options3._initial ?? options3;
         for (let key in initialOptions) {
-          if (typeof initialOptions[key] === "function")
+          if (typeof initialOptions[key] === "function") {
+            const desc = Object.getOwnPropertyDescriptor(initialOptions, key);
+            if (desc && desc.get && !desc.set)
+              initialOptions = Object.assign({}, initialOptions);
             initialOptions[key] = initialOptions[key].bind(node);
-          else if (key === "attributes") {
+          } else if (key === "attributes") {
             for (let key2 in initialOptions.attributes) {
               if (typeof initialOptions.attributes[key2] === "function") {
                 initialOptions.attributes[key2] = initialOptions.attributes[key2].bind(node);
@@ -12467,6 +11830,14 @@ ${text}`;
     #cache = {};
     #plugins = {};
     #active = false;
+    listeners = {
+      pool: {
+        in: {},
+        out: {}
+      },
+      active: {},
+      includeParent: {}
+    };
     plugins = {};
     #toRun = false;
     #runProps = true;
@@ -12494,23 +11865,22 @@ ${text}`;
       } while (this.initial instanceof ESPlugin);
       const isFunction = typeof this.initial === "function";
       const hasDefault = "default" in this.initial;
-      let hasGraph = !!node.graph;
-      if (!hasDefault && !hasGraph) {
-        let newNode = { graph: { nodes: {} } };
+      let hasComponents = !!node.components;
+      if (!hasDefault && !hasComponents) {
+        let newNode = { components: {} };
         for (let namedExport in node)
-          newNode.graph.nodes[namedExport] = { default: node[namedExport] };
+          newNode.components[namedExport] = { default: node[namedExport] };
         this.#initial = newNode;
-        hasGraph = true;
+        hasComponents = true;
         this.#runProps = false;
       }
-      if (hasDefault || isFunction) {
+      if (hasDefault || isFunction)
         this.graph = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
-      }
-      if (hasGraph) {
+      if (hasComponents) {
         const toNotify = [];
-        const nodes = this.initial.graph.nodes;
-        for (let tag in nodes) {
-          const node2 = nodes[tag];
+        const components = this.initial.components;
+        for (let tag in components) {
+          const node2 = components[tag];
           if (!(node2 instanceof ESPlugin)) {
             const clonedOptions = Object.assign({}, Object.assign(options2));
             const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
@@ -12549,67 +11919,10 @@ ${text}`;
         }
         tree[tag] = this.#create(tag, thisNode);
       }
-      let listeningFor = {};
-      let quickLookup = {};
-      let resolve3 = (path2) => {
-        if (quickLookup[path2] === void 0) {
-          const splitEdge = path2.split(".");
-          const first = splitEdge.shift();
-          const lastKey = splitEdge.pop();
-          let last = tree[first];
-          if (last) {
-            splitEdge.forEach((str) => last = last.nodes.get(str));
-            const resolved = lastKey ? last.nodes.get(lastKey) : last;
-            quickLookup[path2] = { resolved, last, lastKey };
-          } else
-            console.error(`Target associated with ${path2} was not found`);
-        }
-        return quickLookup[path2];
-      };
-      let activate = async (edges2, data) => {
-        for (let input in edges2) {
-          let { resolved, last, lastKey } = resolve3(input);
-          if (resolved) {
-            const target = resolved.node ?? resolved;
-            if (Array.isArray(data))
-              target.run(...data);
-            else
-              target.run(data);
-          } else {
-            const target = last.node ?? last;
-            let res;
-            if (typeof target[lastKey] === "function") {
-              if (Array.isArray(data))
-                res = await target[lastKey](...data);
-              else
-                res = await target[lastKey](data);
-            } else
-              res = target[lastKey] = data;
-            if (listeningFor[input])
-              activate(listeningFor[input], res);
-          }
-        }
-      };
-      const edges = this.initial.graph.edges;
-      for (let output in edges) {
-        let { resolved } = resolve3(output);
-        if (resolved) {
-          if (!resolved.children)
-            resolved.children = {};
-          const callback = (data) => {
-            activate(edges[output], data);
-          };
-          if (resolved instanceof GraphNode)
-            resolved.subscribe(callback);
-          else
-            this.#router.state.subscribeTrigger(resolved.tag, callback);
-        } else
-          listeningFor[output] = edges[output];
-      }
       return tree;
     };
     #activate = () => {
-      if (this.initial.graph) {
+      if (this.initial.components) {
         let tree = this.#createTree();
         const props = this.#instance ?? this.initial;
         this.graph = isNode ? new Graph(tree, this.#options.tag, props) : new DOMService({ routes: tree, name: this.#options.tag, props: this.#runProps ? props : void 0 }, this.#options.parentNode);
@@ -12632,13 +11945,88 @@ ${text}`;
           });
         }
         this.#activate();
-        const f = async () => {
+        const f = async (top) => {
+          const toRun = [];
           for (let f2 of activateFuncs)
-            await f2();
+            toRun.push(...await f2(top));
+          const listeners = [{ reference: {} }, { reference: {} }];
+          if (this.initial.listeners)
+            Object.entries(this.initial.listeners).forEach(([key, value]) => {
+              for (let target in value)
+                listeners[1].reference[target] = true;
+              listeners[0].reference[key] = true;
+            });
+          const targets = [
+            {
+              reference: this.initial.children,
+              condition: (child) => child === void 0
+            },
+            ...listeners
+          ];
+          targets.forEach((o) => {
+            for (let path2 in o.reference) {
+              if (!o.condition || o.condition(o.reference[path2])) {
+                const updated = `${top.graph.name}.${path2}`;
+                let split = updated.split(".");
+                const lastKey = split.pop();
+                let absolute, relative;
+                let last = top.graph;
+                let resolved = this.#router.nodes.get(updated);
+                if (resolved)
+                  last = this.#router.nodes.get(split.join(".")) ?? top.graph;
+                else {
+                  const get3 = (str, target) => target.nodes.get(str) ?? target[str];
+                  const basePath = this.getPath();
+                  absolute = path2.split(".").slice(0, -1);
+                  relative = [...basePath ? basePath.split(".") : [], ...absolute];
+                  split = relative;
+                  try {
+                    split.forEach((str) => last = get3(str, last));
+                    resolved = lastKey ? get3(lastKey, last) : last;
+                  } catch {
+                    last = top.graph;
+                    split = absolute;
+                    absolute.forEach((str) => last = get3(str, last));
+                    resolved = lastKey ? get3(lastKey, last) : last;
+                  }
+                }
+                o.reference[path2] = { resolved, last, lastKey, path: {
+                  used: split.join("."),
+                  absolute: absolute ? absolute.join(".") : null,
+                  relative: relative ? relative.join(".") : null
+                } };
+              }
+            }
+          });
+          let listenerPool = {
+            in: listeners[1].reference,
+            out: listeners[0].reference
+          };
+          for (let key in this.initial.listeners)
+            top.listeners.active[key] = this.initial.listeners[key];
+          for (let key in this.listeners.includeParent)
+            top.listeners.includeParent[key] = this.listeners.includeParent[key];
+          for (let type in listenerPool) {
+            top.listeners.pool[type] = {
+              ...listenerPool[type],
+              ...top.listeners.pool[type]
+            };
+          }
+          this.listeners = top.listeners;
+          for (let key in listenerPool.out) {
+            const node = listenerPool.out[key].resolved;
+            if (node instanceof GraphNode) {
+              const path2 = this.getPath(node, true);
+              if (this.listeners.includeParent[path2])
+                this.listeners.includeParent[path2] = true;
+              this.subscribe(node);
+            }
+          }
           if (this.#toRun)
-            await this.run();
+            toRun.push(this.run);
+          return toRun;
         };
-        const graph = this.initial.graph;
+        const graph = this.initial.components;
         if (graph) {
           const ports = graph.ports;
           let firstNode, lastNode;
@@ -12650,11 +12038,10 @@ ${text}`;
             firstNode = nodes[0];
             lastNode = nodes.slice(-1)[0];
           }
-          if (lastNode)
-            lastNode.subscribe((...args) => {
-              for (let tag in lastNode.graph.children)
-                this.#runGraph(lastNode.graph.children[tag], ...args);
-            });
+          if (lastNode) {
+            const path2 = this.getPath(lastNode, true);
+            this.listeners.includeParent[path2] = lastNode;
+          }
           if (firstNode)
             this.#initial.operator = async function(...args) {
               await firstNode.run(...args);
@@ -12662,8 +12049,78 @@ ${text}`;
         }
         if (typeof defer === "function")
           defer(f);
+        else {
+          const toRun = await f(this);
+          for (let key in this.listeners.includeParent) {
+            const toResolve = this.listeners.includeParent[key];
+            if (toResolve !== true) {
+              this.subscribe(toResolve);
+              this.listeners.includeParent[key] = true;
+            }
+          }
+          await Promise.all(toRun.map((f2) => f2()));
+        }
+      }
+    };
+    getPath = (graph = this.graph, includeTag = false) => {
+      const basePath = [];
+      let target = graph;
+      do {
+        if (target.node) {
+          basePath.push(target.node.name);
+          target = target.node.graph;
+        }
+      } while (target.node);
+      if (includeTag)
+        return [...basePath.reverse(), graph.tag].join(".");
+      else
+        return basePath.reverse().join(".");
+    };
+    subscribe = (node) => {
+      const path2 = this.getPath(node) || node.tag;
+      const targets = [node.children];
+      for (let key in this.listeners.active[path2]) {
+        const res = this.listeners.pool.in[key];
+        if (res)
+          this.listeners.active[path2][key] = res;
         else
-          await f();
+          delete this.listeners.active[path2][key];
+      }
+      targets.push(this.listeners.active[path2]);
+      node.subscribe((args) => {
+        const thisTargets = [...targets];
+        if (path2 in this.listeners.includeParent)
+          thisTargets.push(node.graph.children);
+        thisTargets.forEach((target) => {
+          for (let tag in target) {
+            let info = target[tag];
+            this.resolve(args, info);
+          }
+        });
+      });
+    };
+    resolve = (args, info) => {
+      if (info.resolved instanceof GraphNode)
+        info = info.resolved;
+      if (info instanceof GraphNode) {
+        if (Array.isArray(args))
+          this.#runGraph(info, ...args);
+        else
+          this.#runGraph(info, args);
+      } else {
+        let res;
+        if (typeof info.resolved === "function") {
+          if (Array.isArray(args))
+            res = info.resolved(...args);
+          else
+            res = info.resolved(args);
+        } else
+          res = info.resolved = info.last[info.lastKey] = args;
+        let resolved = this.listeners.active[`${info.path.used}.${info.lastKey}`];
+        if (!resolved)
+          resolved = this.listeners.active[info.lastKey];
+        for (let key in resolved)
+          this.resolve(res, this.listeners.pool.in[key]);
       }
     };
     stop = () => {
@@ -12756,7 +12213,7 @@ ${text}`;
 
   // src/core/index.ts
   var basePkgPath = "./package.json";
-  var startTime = Date.now();
+  var moduleStringTag = "[object Module]";
   var _filesystem, _input, _options, _url, _cache, _main, _mode, _onImport, _throw;
   var WASL = class {
     constructor(urlOrObject, options2 = {}, url) {
@@ -12764,6 +12221,7 @@ ${text}`;
       this.warnings = [];
       this.files = {};
       this.original = {};
+      this.resolved = {};
       this.debug = void 0;
       __privateAdd(this, _filesystem, void 0);
       __privateAdd(this, _input, {});
@@ -12782,13 +12240,7 @@ ${text}`;
         const arr = e.type === "warning" ? this.warnings : this.errors;
         arr.push(item);
       });
-      this.get = async (...args) => {
-        const path2 = args[0];
-        return await get_default(args[0], args[1], __privateGet(this, _onImport)).catch((e) => __privateGet(this, _throw).call(this, {
-          message: e.message,
-          file: path2
-        }));
-      };
+      this.get = async (...args) => await get_default(args[0], args[1], __privateGet(this, _onImport), __privateGet(this, _options)).catch((e) => e);
       this.load = async (node, info, options2, id, symbols, counter) => {
         if (node.plugins) {
           for (let nestedName in node.plugins) {
@@ -12806,7 +12258,7 @@ ${text}`;
                     optsCopy._deleteSrc = false;
                   else
                     optsCopy._deleteSrc = true;
-                  newInfoForNode = await this.resolve({ [key]: newInfo }, info, optsCopy, {
+                  newInfoForNode = await this.resolveOld({ [key]: newInfo }, info, optsCopy, {
                     nodes: newInfo
                   }, symbols, counter);
                   if (id) {
@@ -12839,7 +12291,7 @@ ${text}`;
           }
         }
       };
-      this.resolve = async (target, info, options2, graph = {}, symbols = [], counter) => {
+      this.resolveOld = async (target, info, options2, graph = {}, symbols = [], counter) => {
         const nodes = graph.nodes;
         const edges = graph.edges;
         counter++;
@@ -12868,41 +12320,26 @@ ${text}`;
                   fullPath = `${ogSrc.split("://").slice(1).join("/")}`;
               } catch {
                 if (ogSrc)
-                  fullPath = mainPath ? resolve2(ogSrc, mainPath) : resolve2(ogSrc);
+                  fullPath = mainPath ? resolve(ogSrc, mainPath) : resolve(ogSrc);
               }
               let mode = options2._modeOverride ?? __privateGet(this, _mode);
               if (ogSrc) {
-                if (this.debug) {
-                  let target2 = this.debug.flow;
-                  symbolsCopy.forEach((str) => {
-                    if (str) {
-                      if (!target2[str])
-                        target2[str] = {};
-                      target2 = target2[str];
-                    }
-                  });
-                  if (!this.debug.resolutions[name2])
-                    this.debug.resolutions[name2] = {};
-                  let nameRes = this.debug.resolutions[name2];
-                  if (!nameRes[fullPath])
-                    nameRes[fullPath] = { _resolutions: 0, _depth: [], _time: [] };
-                  nameRes[fullPath]._resolutions++;
-                  nameRes[fullPath]._depth.push(counter);
-                  nameRes[fullPath]._time.push(Date.now() - startTime);
-                  if (target2)
-                    target2[fullPath] = {};
-                }
                 if (_internal || mode === "import") {
                   let res = await this.get(fullPath, void 0);
-                  if (res)
+                  const isError = res instanceof Error;
+                  if (res && !isError)
                     node.src = res;
-                  if (!node.src && !node.graph)
-                    remove(ogSrc, fullPath, name2, target);
+                  if (!node.src && !node.graph) {
+                    remove(ogSrc, fullPath, name2, target, res);
+                    if (res)
+                      __privateGet(this, _throw).call(this, { message: res.message, file: fullPath, type: "warning" });
+                  }
                 } else {
                   if (__privateGet(this, _filesystem)) {
                     let res;
                     res = checkFiles(fullPath, __privateGet(this, _filesystem));
-                    if (res) {
+                    const isError = res instanceof Error;
+                    if (res && !isError) {
                       if (res.default || fullPath.includes(".json"))
                         node.src = res;
                       else {
@@ -12914,8 +12351,11 @@ ${text}`;
                         node.src = { default: res };
                       }
                       _internal = fullPath;
-                    } else if (ogSrc)
-                      remove(ogSrc, fullPath, name2, target);
+                    } else if (ogSrc) {
+                      remove(ogSrc, fullPath, name2, target, res);
+                      if (res)
+                        __privateGet(this, _throw).call(this, { message: res.message, file: fullPath, type: "warning" });
+                    }
                   } else {
                     __privateGet(this, _throw).call(this, {
                       message: "No options.filesystem field to get JavaScript objects",
@@ -12925,7 +12365,7 @@ ${text}`;
                 }
               }
               if (!_internal)
-                _internal = ogSrc ? resolve2(ogSrc, url, true) : true;
+                _internal = ogSrc ? resolve(ogSrc, url, true) : true;
               let _top = false;
               if (node.graph) {
                 _top = true;
@@ -12941,7 +12381,7 @@ ${text}`;
                   _top,
                   _modeOverride,
                   _overrideRemote: options2._overrideRemote
-                }, void 0, symbolsCopy, counter);
+                }, void 0);
               } else
                 symbolsCopy.push(fullPath);
             }
@@ -12952,7 +12392,7 @@ ${text}`;
                   if (node.src.text) {
                     const esmImport = async (text) => {
                       try {
-                        let imported = await importFromText2(text);
+                        let imported = await importFromText(text);
                         if (imported.default && Object.keys(imported).length === 1)
                           imported = imported.default;
                         return imported;
@@ -13002,7 +12442,7 @@ ${text}`;
                 if (typeof node[key] === "object" && !Array.isArray(node[key])) {
                   const optsCopy = Object.assign({}, options2);
                   optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
-                  await this.resolve(node[key], info, optsCopy, { nodes: node[key] }, symbolsCopy, counter);
+                  await this.resolveOld(node[key], info, optsCopy, { nodes: node[key] }, symbolsCopy, counter);
                 }
               }
             }
@@ -13021,18 +12461,312 @@ ${text}`;
                 });
               }
             }
-            nodes[name2] = merge(node.src, node, options2._deleteSrc);
+            nodes[name2] = merge(node.src, node);
             if (nodes[name2].src?.graph)
               nodes[name2].src.graph = JSON.parse(JSON.stringify(nodes[name2].graph));
           }
         }
         return target;
       };
-      this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "", symbols = [], counter = 0) => {
-        if (options2.debug)
-          this.debug = { flow: {}, resolutions: {} };
-        else
-          this.debug = void 0;
+      this.resolveSource = async (path2, modeOverride, {
+        useCache = true,
+        mode = "reference"
+      } = {}) => {
+        const activeMode = modeOverride ?? mode;
+        let res = null;
+        if (activeMode === "import") {
+          if (__privateGet(this, _cache)[path2] && useCache) {
+            console.warn("Found cached component", path2);
+            res = __privateGet(this, _cache)[path2];
+          } else
+            res = await this.get(path2, void 0);
+        } else if (__privateGet(this, _filesystem))
+          res = checkFiles(path2, __privateGet(this, _filesystem));
+        else {
+          __privateGet(this, _throw).call(this, {
+            message: "No options.filesystem field to get JavaScript objects",
+            file: path2
+          });
+        }
+        return res;
+      };
+      this.search = async (input, searchKey = "src", {
+        condition = (value) => typeof value === "string",
+        onFound = async (o, acc = []) => acc.push(o),
+        mainPath,
+        nestedKey,
+        mode
+      }) => {
+        const top = input;
+        let found;
+        const pathMap = {};
+        const drill = async (input2, tree = []) => {
+          const parentInfo = tree[tree.length - 1];
+          const path2 = tree.map((o) => o.key);
+          const graphSlice = path2.slice(-3);
+          const get3 = (pathInfo = path2) => {
+            let target = top;
+            pathInfo.forEach((str, i) => target = target[str]);
+            return target;
+          };
+          const set = (input3, key = searchKey, pathInfo = path2) => {
+            let target = top;
+            pathInfo.forEach((str, i) => target = target[str]);
+            target[key] = input3;
+          };
+          if (condition(input2[searchKey])) {
+            const isComponent = graphSlice.slice(-2)[0] === "components";
+            let target = pathMap;
+            path2.forEach((str, i) => target = target[str] ?? target);
+            const pathArray = Array.isArray(target) ? path2.map((str, i) => target[i] ?? str) : path2;
+            let o = {
+              mainPath,
+              mode,
+              isComponent,
+              paths: {
+                original: path2,
+                remapped: pathArray
+              },
+              get: get3,
+              set,
+              key: searchKey,
+              value: input2[searchKey],
+              setParent: function(input3, path3 = this.paths.remapped) {
+                let target2 = top;
+                path3.forEach((str, i) => {
+                  if (i === path3.length - 1)
+                    target2[str] = input3;
+                  else
+                    target2 = target2[str];
+                });
+              },
+              parent: parentInfo?.reference,
+              name: parentInfo?.key
+            };
+            input2[searchKey] = null;
+            if (onFound) {
+              const got = await onFound(o, found);
+              if (got && typeof got === "object")
+                found = got;
+            }
+          }
+          if (nestedKey) {
+            const offset = path2.length - graphSlice.length;
+            for (let key in nestedKey) {
+              let i = 0;
+              const pattern = nestedKey[key].pattern;
+              const match = pattern ? pattern.reduce((a, o) => {
+                let str = o?.key ?? o;
+                let adjacencies = o?.adjacencies;
+                if (typeof str === "string")
+                  a *= graphSlice[i] === str ? 1 : 0;
+                if (adjacencies)
+                  a *= adjacencies.reduce((a2, str2) => {
+                    a2 *= str2 in get3(path2.slice(0, offset + i)) ? 1 : 0;
+                    return a2;
+                  }, 1);
+                i++;
+                return a;
+              }, 1) : 1;
+              const projection = nestedKey[key].projection ?? pattern;
+              const update = nestedKey[key].update;
+              if (match) {
+                await nestedKey[key].function(input2, {
+                  get: (key2) => get3([...path2, key2]),
+                  set: (key2, name2, value) => {
+                    const base = [...path2.slice(0, offset), ...projection.map((str, i2) => !str ? graphSlice[i2] : str)];
+                    const passed = [...base, name2];
+                    set(value, key2, passed);
+                    let targets = [
+                      {
+                        target: pathMap,
+                        update: passed,
+                        array: graphSlice
+                      }
+                    ];
+                    const create = (target, array) => {
+                      array.forEach((str) => {
+                        if (!target[str])
+                          target[str] = {};
+                        target = target[str];
+                      });
+                      return target;
+                    };
+                    targets.forEach((o) => {
+                      const target = create(o.target, o.array);
+                      if (o.update)
+                        target[name2] = o.update;
+                      o.target = target;
+                    });
+                  },
+                  delete: () => delete get3([...path2])[key]
+                });
+              }
+            }
+          }
+          for (let key in input2) {
+            if (input2[key] && typeof input2[key] === "object")
+              await drill(input2[key], [...tree, { reference: input2, key }]);
+          }
+        };
+        await drill(input);
+        return found;
+      };
+      this.findSources = async (graph, events, opts) => {
+        return await this.search(graph, void 0, {
+          mode: opts.mode,
+          nestedKey: events.nested,
+          onFound: async (o, acc = {}) => {
+            o.type = "local";
+            try {
+              new URL(o.value);
+              o.type = "remote";
+            } catch {
+            }
+            const isRemote = o.type === "remote";
+            const main = o.mainPath || __privateGet(this, _main);
+            o.path = isRemote ? o.value : main ? resolve(o.value, main) : resolve(o.value);
+            if (isRemote)
+              o.mode = "import";
+            const ext = o.value.split("/").pop().split(".").slice(1).join(".");
+            if (ext === "wasl.json") {
+              if (events.components)
+                await events.components(o);
+              return null;
+            } else {
+              if (!acc[ext])
+                acc[ext] = {};
+              if (!acc[ext][o.path])
+                acc[ext][o.path] = [];
+              acc[ext][o.path].push(o);
+              return acc;
+            }
+          },
+          mainPath: opts.mainPath
+        });
+      };
+      this.resolve = async (graph, context, opts = {}) => {
+        const remote = [];
+        const nested = [];
+        const foundInternal = {};
+        const events = {
+          components: (info) => this.handleComponent(info, events, context, opts, remote, foundInternal),
+          nested: {
+            overrides: {
+              pattern: ["components", null, { key: "overrides", adjacencies: ["src"] }],
+              projection: ["components", null, "components"],
+              function: (value, info) => this.handleOverride(value, info, nested),
+              update: (o, info) => {
+                o.mainPath = info.path;
+              }
+            }
+          }
+        };
+        const found = await this.findSources(graph, events, context) ?? {};
+        this.flattenInto(foundInternal, found);
+        const tic = performance.now();
+        const total = Object.keys(found).reduce((acc, key) => acc + Object.keys(found[key]).length, 0);
+        let i = 0;
+        await Promise.all(Object.values(found).map(async (typeInfo) => {
+          await Promise.all(Object.entries(typeInfo).map(async ([path2, pathInfo]) => {
+            const res = await this.resolveSource(path2, pathInfo[0].mode);
+            await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)));
+            i++;
+            if (opts.callbacks?.sourceProgress instanceof Function)
+              opts.callbacks.sourceProgress(path2, i, total);
+          }));
+        }));
+        const toc = performance.now();
+        console.log("Resolved", total, "sources in", toc - tic, "ms");
+        return graph;
+      };
+      this.updateContext = (info, context) => {
+        return {
+          ...context,
+          mainPath: info.path,
+          mode: info.type === "remote" ? "import" : context.mode
+        };
+      };
+      this.flattenInto = (o1, o2) => {
+        for (let type in o1) {
+          for (let path2 in o1[type]) {
+            if (!o2[type])
+              o2[type] = {};
+            if (!o2[type][path2])
+              o2[type][path2] = [];
+            o2[type][path2].push(...o1[type][path2]);
+          }
+        }
+      };
+      this.handleResolved = (res, info) => {
+        const ogSrc = info.value;
+        const name2 = info.name;
+        const isError = res instanceof Error;
+        const isModule = res && (!!Object.keys(res).reduce((a, b) => {
+          const desc = Object.getOwnPropertyDescriptor(res, b);
+          const isModule2 = desc && desc.get && !desc.set ? 1 : 0;
+          return a + isModule2;
+        }, 0) || Object.prototype.toString.call(res) === moduleStringTag);
+        const hasDefault = !!res?.default;
+        const isWASL = info.path.includes("wasl.json");
+        if (res && !isError) {
+          if (isModule && !hasDefault && !isWASL)
+            __privateGet(this, _throw).call(this, {
+              type: "warning",
+              message: `Node (${name2}) at ${info.path} does not have a default export.`,
+              file: ogSrc
+            });
+        } else {
+          remove(ogSrc, info.path, name2, info.parent, res);
+          if (res)
+            __privateGet(this, _throw).call(this, { message: res.message, file: info.path, type: "warning" });
+          return;
+        }
+        if (res !== void 0) {
+          if ((!isModule || !info.isComponent) && !isWASL)
+            info.setParent(isModule ? res.default : res);
+          else {
+            info.set(res);
+            const ref = info.get();
+            info.setParent(merge(ref[info.key], ref));
+          }
+          return res;
+        }
+      };
+      this.handleComponent = async (info, events, context, opts, acc = [], list = {}) => {
+        const newContext = this.updateContext(info, context);
+        info.mode = newContext.mode;
+        const res = await this.resolveSource(info.path, info.mode, newContext);
+        const found = await this.findSources(res, events, newContext);
+        if (opts.callbacks?.componentProgress instanceof Function)
+          opts.callbacks.componentProgress(info.path, acc.length, res);
+        if (found)
+          this.flattenInto(found, list);
+        await this.handleResolved(res, info);
+        acc.push(info);
+        return acc;
+      };
+      this.handleOverride = async (value, info, acc = []) => {
+        for (let nestedName in value) {
+          const nestedNode = info.get(nestedName);
+          if (nestedNode) {
+            for (let key in value[nestedName]) {
+              const newInfo = value[nestedName][key];
+              if (newInfo)
+                info.set(key, nestedName, newInfo);
+            }
+          } else
+            __privateGet(this, _throw).call(this, {
+              message: `Plugin target '${nestedName}' does not exist`,
+              node: name
+            });
+          acc.push(value);
+          return acc;
+        }
+        info.delete();
+      };
+      this.init = async (urlOrObject = __privateGet(this, _input), options2 = __privateGet(this, _options), url = "") => {
+        this.debug = void 0;
         const internalLoadCall = options2._internal;
         const isFromValidator = !__privateGet(this, _main) && typeof internalLoadCall === "string";
         if (!__privateGet(this, _input))
@@ -13060,11 +12794,11 @@ ${text}`;
         if (typeof urlOrObject === "object") {
           object = Object.assign({}, urlOrObject);
           if (typeof internalLoadCall === "string")
-            url = mainPath = resolve2(internalLoadCall);
+            url = mainPath = resolve(internalLoadCall);
           mode = "reference";
         } else if (url || isString) {
           if (!url)
-            url = resolve2(urlOrObject, options2.relativeTo ?? "");
+            url = urlOrObject[0] === "." ? resolve(urlOrObject, options2.relativeTo ?? "") : urlOrObject;
           mode = "import";
         } else
           console.error("Mode is not supported...");
@@ -13076,7 +12810,7 @@ ${text}`;
           case "reference":
             if (!innerTopLevel) {
               if (__privateGet(this, _filesystem)) {
-                const pkgPath = resolve2(basePkgPath, url);
+                const pkgPath = resolve(basePkgPath, url);
                 const pkg = checkFiles(pkgPath, __privateGet(this, _filesystem));
                 if (pkg)
                   object = Object.assign(pkg, isString ? {} : object);
@@ -13084,10 +12818,10 @@ ${text}`;
             }
           default:
             if (!object) {
-              mainPath = await resolve2(url);
+              mainPath = await resolve(url);
               object = await this.get(mainPath, void 0);
               if (!innerTopLevel) {
-                const pkgUrl = resolve2(basePkgPath, mainPath, true);
+                const pkgUrl = resolve(basePkgPath, mainPath, true);
                 const pkg = await this.get(pkgUrl, void 0);
                 if (pkg)
                   object = Object.assign(pkg, object);
@@ -13098,45 +12832,28 @@ ${text}`;
           __privateSet(this, _main, mainPath);
         else if (__privateGet(this, _mode) === "reference" && !__privateGet(this, _main))
           __privateSet(this, _main, "");
-        if (this.debug) {
-          let target = this.debug.flow;
-          symbols.forEach((str) => target = target[str]);
-          target[mainPath] = {};
-          symbols.push(mainPath);
-          if (mainPath) {
-            if (!this.debug.resolutions[mainPath])
-              this.debug.resolutions[mainPath] = { _resolutions: 0, _depth: [], _time: [] };
-            const res = this.debug.resolutions;
-            res[mainPath]._resolutions++;
-            res[mainPath]._depth.push(counter);
-            res[mainPath]._time.push(Date.now() - startTime);
-          }
-        }
         if (this.errors.length === 0) {
-          const nodes = object.graph.nodes;
-          await this.resolve(nodes, {
-            mainPath,
-            url,
-            object
-          }, clonedOptions, object.graph, symbols, counter);
+          this.original = object;
+          const copy = JSON.parse(JSON.stringify(this.original));
+          this.resolved = await this.resolve(copy, { mainPath, mode }, options2);
           const drill = (parent, callback) => {
-            const nodes2 = parent.graph.nodes;
-            for (let tag in nodes2) {
-              const res = callback(nodes2[tag], {
+            const nodes = parent.components;
+            for (let tag in nodes) {
+              const res = callback(nodes[tag], {
                 tag,
                 parent,
                 options: clonedOptions
               });
               if (res)
-                nodes2[tag] = res;
+                nodes[tag] = res;
             }
           };
           const drillToTest = (target) => {
             drill(target, (node, info) => {
-              const edges = info.parent.graph.edges;
-              for (let output in edges) {
-                const getTarget = (o, str) => o.graph?.nodes?.[str] ?? o[str];
-                let outTarget = info.parent.graph.nodes;
+              const connections = info.parent.connections;
+              for (let output in connections) {
+                const getTarget = (o, str) => o.components?.[str] ?? o[str];
+                let outTarget = info.parent.components;
                 output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
                 if (!outTarget) {
                   __privateGet(this, _throw).call(this, {
@@ -13144,8 +12861,8 @@ ${text}`;
                     file: url
                   });
                 }
-                for (let input in edges[output]) {
-                  let inTarget = nodes;
+                for (let input in connections[output]) {
+                  let inTarget = this.resolved.components;
                   input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
                   if (!inTarget) {
                     __privateGet(this, _throw).call(this, {
@@ -13159,31 +12876,16 @@ ${text}`;
           };
           if (internalLoadCall === void 0) {
             if (clonedOptions.output !== "object") {
-              this.plugin = new src_default(object, {
+              this.plugin = new src_default(this.resolved, {
                 activate: clonedOptions.activate,
                 parentNode: clonedOptions.parentNode
               });
-              this.original = Object.assign({}, this.plugin.initial);
-              let drillCopy = (target) => {
-                if (target?.graph) {
-                  let graph = Object.assign({}, target.graph);
-                  let nodes2 = graph.nodes = Object.assign({}, graph.nodes);
-                  if (nodes2) {
-                    for (let k in nodes2) {
-                      nodes2[k] = Object.assign({}, nodes2[k].initial);
-                      drillCopy(nodes2[k]);
-                    }
-                  }
-                  target.graph = graph;
-                }
-              };
-              drillCopy(this.original);
               return this.plugin;
             } else
-              this.original = object;
-            drillToTest(object);
+              this.original = this.resolved;
+            drillToTest(this.resolved);
           }
-          return object;
+          return this.resolved;
         }
       };
       this.start = async () => {
@@ -13221,244 +12923,177 @@ ${text}`;
     title: "Component",
     description: "A component for the Web Application Specification Language",
     type: "object",
-    properties: {
-      name: {
-        type: "string"
-      },
-      description: {
-        type: "string"
-      },
-      version: {
-        type: "string",
-        pattern: "^([^.]+)(.[^.]+)*?$"
-      },
-      author: {
-        type: "string"
-      },
-      main: {
-        type: "string",
-        format: "uri-reference"
-      },
-      type: {
-        type: "string",
-        pattern: "^(module|commonjs)$"
-      },
-      repository: {
-        type: "string",
-        format: "uri"
-      },
-      graph: {
-        $ref: "graph.schema.json"
-      }
-    },
-    required: ["graph"]
-  };
-
-  // versions/0.0.0/graph.schema.json
-  var graph_schema_default = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/graph.schema.json",
-    title: "Graph",
-    description: "The logic of the application to assemble.",
-    type: "object",
-    properties: {
-      nodes: {
-        $ref: "nodes.schema.json"
-      },
-      edges: {
-        $ref: "edges.schema.json"
-      },
-      ports: {
-        $ref: "ports.schema.json"
-      }
-    },
-    required: ["nodes"]
-  };
-
-  // versions/0.0.0/edges.schema.json
-  var edges_schema_default = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/edges.schema.json",
-    title: "Edges",
-    description: "The way that nodes are connected",
-    type: "object",
-    patternProperties: {
-      "^([^.]+)(.[^.]+)*?$": {
-        type: "object",
-        patternProperties: {
-          "^([^.]+)(.[^.]+)*?$": {
+    anyOf: [
+      {
+        properties: {
+          name: {
+            type: "string"
+          },
+          description: {
+            type: "string"
+          },
+          version: {
+            type: "string",
+            pattern: "^([^.]+)(.[^.]+)*?$"
+          },
+          author: {
+            type: "string"
+          },
+          main: {
+            type: "string",
+            format: "uri-reference"
+          },
+          type: {
+            type: "string",
+            pattern: "^(module|commonjs)$"
+          },
+          repository: {
+            type: "string",
+            format: "uri"
+          },
+          components: {
             type: "object",
-            properties: {
-              protocol: {
-                $comment: "Can be inferred from the href property of each node",
+            patternProperties: {
+              "^(.+)$": {
+                $ref: "module.schema.json"
+              }
+            }
+          }
+        }
+      }
+    ]
+  };
+
+  // versions/0.0.0/module.schema.json
+  var module_schema_default = {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/module.schema.json",
+    title: "Module",
+    description: "The composable units of the graph",
+    type: "object",
+    anyOf: [
+      {
+        properties: {
+          src: {
+            anyOf: [
+              {
                 type: "string",
-                pattern: "^(http|websockets|webrtc)$"
+                format: "uri-reference"
+              },
+              {
+                type: "object",
+                $ref: "component.schema.json"
+              },
+              {
+                type: "object",
+                $comment: "The raw JSON",
+                properties: {
+                  default: {
+                    description: "The stringified stateless function that this node uses to handle upstream information in the graph"
+                  },
+                  tagName: {
+                    type: "string"
+                  },
+                  style: {
+                    anyOf: [
+                      {
+                        type: "string",
+                        format: "uri-reference"
+                      },
+                      {
+                        type: "object"
+                      }
+                    ]
+                  },
+                  attributes: {
+                    type: "object",
+                    description: "A set of HTML Element events for the node to listen to",
+                    patternProperties: {
+                      "^on(.+)$": {
+                        description: "A stringified function to handle an event"
+                      }
+                    }
+                  },
+                  oncreate: {
+                    description: "A stringified function that responds to when this node's information is rendered as an HTML element"
+                  }
+                },
+                required: [
+                  "default"
+                ]
+              },
+              {
+                type: "object",
+                properties: {
+                  language: {
+                    type: "string"
+                  },
+                  text: {
+                    type: "string"
+                  }
+                },
+                additionalProperties: false
+              }
+            ]
+          },
+          href: {
+            anyOf: [
+              {
+                type: "string"
+              }
+            ]
+          },
+          extensions: {
+            type: "object",
+            patternProperties: {
+              "^.*$": {
+                type: "object",
+                patternProperties: {
+                  "^.*$": {}
+                },
+                additionalProperties: false
               }
             },
             additionalProperties: false
           },
-          additionalProperties: false
-        }
-      },
-      additionalProperties: false
-    }
-  };
-
-  // versions/0.0.0/nodes.schema.json
-  var nodes_schema_default = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/nodes.schema.json",
-    title: "Nodes",
-    description: "The composable units of the graph",
-    type: "object",
-    patternProperties: {
-      "^(.+)$": {
-        type: "object",
-        anyOf: [{
-          properties: {
-            src: {
-              anyOf: [
-                {
-                  type: "string",
-                  format: "uri-reference"
+          overrides: {
+            type: "object",
+            patternProperties: {
+              "^.*$": {
+                type: "object",
+                patternProperties: {
+                  "^.*$": {}
                 },
-                {
-                  type: "object",
-                  $ref: "component.schema.json"
-                },
-                {
-                  type: "object",
-                  $comment: "The raw JSON",
-                  properties: {
-                    default: {
-                      description: "The stringified stateless function that this node uses to handle upstream information in the graph"
-                    },
-                    tagName: {
-                      type: "string"
-                    },
-                    style: {
-                      anyOf: [
-                        {
-                          type: "string",
-                          format: "uri-reference"
-                        },
-                        {
-                          type: "object"
-                        }
-                      ]
-                    },
-                    attributes: {
-                      type: "object",
-                      description: "A set of HTML Element events for the node to listen to",
-                      patternProperties: {
-                        "^on(.+)$": {
-                          description: "A stringified function to handle an event"
-                        }
-                      }
-                    },
-                    oncreate: {
-                      description: "A stringified function that responds to when this node's information is rendered as an HTML element"
-                    }
-                  },
-                  required: ["default"]
-                },
-                {
-                  type: "object",
-                  properties: {
-                    language: {
-                      type: "string"
-                    },
-                    text: {
-                      type: "string"
-                    }
-                  },
-                  additionalProperties: false
-                }
-              ]
+                additionalProperties: false
+              }
             },
-            href: {
-              anyOf: [
-                {
-                  type: "string"
-                }
-              ]
-            },
-            extensions: {
-              type: "object",
-              patternProperties: {
-                "^.*$": {
-                  type: "object",
-                  patternProperties: {
-                    "^.*$": {}
-                  },
-                  additionalProperties: false
-                }
-              },
-              additionalProperties: false
-            },
-            plugins: {
-              type: "object",
-              patternProperties: {
-                "^.*$": {
-                  type: "object",
-                  patternProperties: {
-                    "^.*$": {}
-                  },
-                  additionalProperties: false
-                }
-              },
-              additionalProperties: false
-            },
-            arguments: {
-              type: ["object", "array"],
-              $comment: "Generated by wasl.load"
-            }
+            additionalProperties: false
           },
-          required: ["src"]
-        }, {
-          type: "object",
-          $ref: "component.schema.json"
-        }]
-      }
-    },
-    additionalProperties: false
-  };
-
-  // versions/0.0.0/ports.schema.json
-  var ports_schema_default = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/ports.schema.json",
-    title: "Ports",
-    description: "Parts of your application that you wish to expose as an API.",
-    type: "object",
-    properties: {
-      input: {
-        description: "Inputs to your application.",
-        $ref: "port.schema.json"
-      },
-      output: {
-        description: "Outputs of your application.",
-        $ref: "port.schema.json"
-      }
-    },
-    additionalProperties: false
-  };
-
-  // versions/0.0.0/port.schema.json
-  var port_schema_default = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://raw.github.com/brainsatplay/wasl/versions/0.0.0/port.schema.json",
-    title: "Port",
-    description: "Exposed components of your application.",
-    anyOf: [
-      {
-        type: "string"
+          children: {
+            description: "The connections for this node",
+            type: "object",
+            patternProperties: {
+              "^([^.]+)(.[^.]+)*?$": {
+                type: "boolean"
+              }
+            },
+            additionalProperties: false
+          },
+          arguments: {
+            type: [
+              "object",
+              "array"
+            ],
+            $comment: "Generated by wasl.load"
+          }
+        },
+        required: [
+          "src"
+        ]
       },
       {
         type: "object",
-        patternProperties: {
-          "^(.+)$": {}
-        }
+        $ref: "component.schema.json"
       }
     ]
   };
@@ -13466,12 +13101,8 @@ ${text}`;
   // src/common/utils/schema.registry.js
   var schema_registry_default = {
     ["0.0.0"]: {
-      "graph.schema.json": graph_schema_default,
-      "nodes.schema.json": nodes_schema_default,
-      "edges.schema.json": edges_schema_default,
       "component.schema.json": component_schema_default,
-      "ports.schema.json": ports_schema_default,
-      "port.schema.json": port_schema_default
+      "module.schema.json": module_schema_default
     }
   };
 
@@ -13550,19 +13181,21 @@ ${text}`;
       schemaValid = ajvValidate(data);
       if (ajvValidate.errors)
         errors.push(...ajvValidate.errors);
-      if (load && typeof options2.wasl === "function") {
-        if (inputIsValid && !clone._internal) {
-          clone.output = "object";
-          clone._internal = typeof urlOrObject === "string" ? urlOrObject : void 0;
-          const wasl = new options2.wasl(data, clone);
-          const loaded = await wasl.init();
-          if (loaded)
-            schemaValid = await validate(loaded, clone, false);
+      if (load) {
+        if (typeof options2.wasl === "function") {
+          if (inputIsValid && !clone._internal) {
+            clone.output = "object";
+            clone._internal = typeof urlOrObject === "string" ? urlOrObject : void 0;
+            const wasl = new options2.wasl(data, clone);
+            const loaded = await wasl.init();
+            if (loaded)
+              schemaValid = await validate(loaded, clone, false);
+          }
+        } else {
+          warnings.push({
+            message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.'
+          });
         }
-      } else {
-        warnings.push({
-          message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.'
-        });
       }
     }
     return schemaValid && inputIsValid;
@@ -13571,179 +13204,201 @@ ${text}`;
 
   // tests/0/0.0/0.0.0/external/index.wasl.json
   var index_wasl_default = {
-    graph: {
-      nodes: {
-        log: {
-          src: "../../../plugins/log.js"
+    components: {
+      average: {
+        src: "../../../plugins/average.js",
+        children: {
+          threshold: true
+        }
+      },
+      threshold: {
+        src: "../../../plugins/threshold.js",
+        threshold: 500
+      },
+      synthetic: {
+        src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js",
+        children: {
+          "datastreams.start": true
+        }
+      },
+      ganglion: {
+        src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/ganglion/index.js",
+        children: {
+          "datastreams.start": true
+        }
+      },
+      muse: {
+        src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/muse/index.js",
+        children: {
+          "datastreams.start": true
+        }
+      },
+      datastreams: {
+        src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/datastreams/index.wasl.json",
+        children: {
+          "ui.timeseries": true,
+          average: true
+        }
+      },
+      ui: {
+        tagName: "div",
+        style: {
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          width: "100%",
+          height: "100%"
         },
-        average: {
-          src: "../../../plugins/average.js"
-        },
-        threshold: {
-          src: "../../../plugins/threshold.js",
-          threshold: 500
-        },
-        synthetic: {
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js"
-        },
-        ganglion: {
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/ganglion/index.js"
-        },
-        muse: {
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/muse/index.js"
-        },
-        datastreams: {
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/datastreams/index.wasl.json"
-        },
-        ui: {
-          tagName: "div",
-          style: {
-            position: "absolute",
-            top: "0px",
-            left: "0px",
-            width: "100%",
-            height: "100%"
+        components: {
+          timeseries: {
+            style: {
+              position: "absolute",
+              bottom: "15px",
+              right: "15px",
+              width: "250px",
+              height: "150px"
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/brainsatplay-starter-kit/nightly/plugins/timeseries/index.js"
           },
-          graph: {
-            nodes: {
-              timeseries: {
-                style: {
-                  position: "absolute",
-                  bottom: "15px",
-                  right: "15px",
-                  width: "250px",
-                  height: "150px"
+          button_1: {
+            attributes: {
+              innerHTML: "Start synthetic data generation"
+            },
+            children: {
+              synthetic: true
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
+          },
+          button_2: {
+            attributes: {
+              innerHTML: "Connect Ganglion"
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
+            children: {
+              ganglion: true
+            }
+          },
+          button_3: {
+            attributes: {
+              innerHTML: "Connect Muse"
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
+            children: {
+              muse: true
+            }
+          },
+          jump: {
+            attributes: {
+              innerHTML: "Jump Main Character"
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
+            children: {
+              "ui.phaser.game.player.jump": true
+            }
+          },
+          companionJump: {
+            attributes: {
+              innerHTML: "Jump Companion"
+            },
+            src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
+            children: {
+              "ui.phaser.game.companion.jump": true
+            }
+          },
+          phaser: {
+            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
+            overrides: {
+              game: {
+                preload: {
+                  setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
+                  tilemapTiledJSON: [
+                    [
+                      "map",
+                      "map.json"
+                    ]
+                  ],
+                  spritesheet: [
+                    [
+                      "tiles",
+                      "tiles.png",
+                      {
+                        frameWidth: 70,
+                        frameHeight: 70
+                      }
+                    ]
+                  ],
+                  image: [
+                    [
+                      "coin",
+                      "coinGold.png"
+                    ]
+                  ],
+                  atlas: [
+                    [
+                      "player",
+                      "player.png",
+                      "player.json"
+                    ]
+                  ]
                 },
-                src: "https://raw.githubusercontent.com/brainsatplay/brainsatplay-starter-kit/nightly/plugins/timeseries/index.js"
-              },
-              button_1: {
-                attributes: {
-                  innerHTML: "Start synthetic data generation"
+                config: {
+                  physics: {
+                    default: "arcade",
+                    arcade: {
+                      gravity: {
+                        y: 500
+                      }
+                    }
+                  },
+                  scene: {
+                    key: "main",
+                    create: {
+                      src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/create.js"
+                    }
+                  }
                 },
-                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-              },
-              button_2: {
-                attributes: {
-                  innerHTML: "Connect Ganglion"
-                },
-                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-              },
-              button_3: {
-                attributes: {
-                  innerHTML: "Connect Muse"
-                },
-                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-              },
-              jump: {
-                attributes: {
-                  innerHTML: "Jump Main Character"
-                },
-                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-              },
-              companionJump: {
-                attributes: {
-                  innerHTML: "Jump Companion"
-                },
-                src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-              },
-              phaser: {
-                src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
-                plugins: {
-                  game: {
-                    preload: {
-                      setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
-                      tilemapTiledJSON: [
-                        [
-                          "map",
-                          "map.json"
-                        ]
-                      ],
-                      spritesheet: [
-                        [
-                          "tiles",
-                          "tiles.png",
-                          {
-                            frameWidth: 70,
-                            frameHeight: 70
-                          }
-                        ]
-                      ],
-                      image: [
-                        [
-                          "coin",
-                          "coinGold.png"
-                        ]
-                      ],
-                      atlas: [
-                        [
-                          "player",
-                          "player.png",
-                          "player.json"
-                        ]
-                      ]
+                components: {
+                  cursors: {
+                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/cursors/index.js"
+                  },
+                  player: {
+                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
+                    position: {
+                      x: 200,
+                      y: 200
                     },
-                    config: {
-                      physics: {
-                        default: "arcade",
-                        arcade: {
-                          gravity: {
-                            y: 500
-                          }
-                        }
-                      },
-                      scene: {
-                        key: "main",
-                        create: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/create.js"
-                        }
+                    size: {
+                      offset: {
+                        height: -8
                       }
                     },
-                    graph: {
-                      nodes: {
-                        cursors: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/cursors/index.js"
-                        },
-                        player: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
-                          position: {
-                            x: 200,
-                            y: 200
-                          },
-                          size: {
-                            offset: {
-                              height: -8
-                            }
-                          },
-                          bounce: 0.2,
-                          collideWorldBounds: false,
-                          create: {
-                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
-                          },
-                          update: {
-                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
-                          }
-                        },
-                        companion: {
-                          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
-                          position: {
-                            x: 100,
-                            y: 200
-                          },
-                          size: {
-                            offset: {
-                              height: -8
-                            }
-                          },
-                          bounce: 0.2,
-                          collideWorldBounds: false,
-                          create: {
-                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
-                          },
-                          update: {
-                            src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
-                          }
-                        }
+                    bounce: 0.2,
+                    collideWorldBounds: false,
+                    create: {
+                      src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
+                    },
+                    update: {
+                      src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
+                    }
+                  },
+                  companion: {
+                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
+                    position: {
+                      x: 100,
+                      y: 200
+                    },
+                    size: {
+                      offset: {
+                        height: -8
                       }
+                    },
+                    bounce: 0.2,
+                    collideWorldBounds: false,
+                    create: {
+                      src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
+                    },
+                    update: {
+                      src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
                     }
                   }
                 }
@@ -13751,43 +13406,42 @@ ${text}`;
             }
           }
         }
+      }
+    },
+    listeners: {
+      "ui.button_1": {
+        synthetic: {}
       },
-      edges: {
-        "ui.button_1": {
-          synthetic: {}
-        },
-        synthetic: {
-          "datastreams.start": {}
-        },
-        "ui.button_2": {
-          ganglion: {}
-        },
-        ganglion: {
-          "datastreams.start": {}
-        },
-        "ui.button_3": {
-          muse: {}
-        },
-        muse: {
-          "datastreams.start": {}
-        },
-        "datastreams.start": {
-          "ui.timeseries": {},
-          average: {}
-        },
-        "ui.jump": {
-          "ui.phaser.game.player.jump": {}
-        },
-        "ui.companionJump": {
-          "ui.phaser.game.companion.jump": {}
-        },
-        average: {
-          threshold: {},
-          log: {}
-        },
-        threshold: {
-          "ui.phaser.game.player.jump": {}
-        }
+      synthetic: {
+        "datastreams.start": {}
+      },
+      "ui.button_2": {
+        ganglion: {}
+      },
+      ganglion: {
+        "datastreams.start": {}
+      },
+      "ui.button_3": {
+        muse: {}
+      },
+      muse: {
+        "datastreams.start": {}
+      },
+      "datastreams.start": {
+        "ui.timeseries": {},
+        average: {}
+      },
+      "ui.jump": {
+        "ui.phaser.game.player.jump": {}
+      },
+      "ui.companionJump": {
+        "ui.phaser.game.companion.jump": {}
+      },
+      average: {
+        threshold: {}
+      },
+      threshold: {
+        "ui.phaser.game.player.jump": {}
       }
     }
   };
@@ -13829,8 +13483,7 @@ ${text}`;
   }
 
   // demos/external/0.0.0.js
-  var import_meta2 = {};
-  var path = "../../tests/0/0.0/0.0.0/external/index.wasl.json";
+  var path = "tests/0/0.0/0.0.0/external/index.wasl.json";
   var filesystem = {
     ["package.json"]: package_default,
     ["plugins/log.js"]: log_exports,
@@ -13838,12 +13491,12 @@ ${text}`;
     ["plugins/average.js"]: average_exports
   };
   var options = {
-    relativeTo: import_meta2.url,
     version: "0.0.0",
     filesystem
   };
 
   // index.js
+  var import_meta2 = {};
   var printError = (arr, type, severity = "Error") => {
     arr.forEach((e) => {
       const log = severity === "Warning" ? console.warn : console.error;
@@ -13855,8 +13508,22 @@ ${text}`;
   var startExecution = async () => {
     options.activate = true;
     options.wasl = core_default;
+    options.forceImportFromText = true;
     options.debug = true;
+    options.relativeTo = import_meta2.url;
+    options.callbacks = {
+      sourceProgress: (label, i, total) => {
+        console.log("Source", label, i, total);
+      },
+      componentProgress: (label, i, graph) => {
+        console.log("Remote Component", label, i, graph);
+      },
+      progress: (label, i, total) => {
+        console.log("Fetch", label, i, total);
+      }
+    };
     let ref, imported;
+    console.log("Starting import mode");
     const importOptions = Object.assign({ errors: [], warnings: [] }, options);
     importOptions.parentNode = document.getElementById("importcontainer");
     const res = await validate_default(path, importOptions);
@@ -13870,6 +13537,7 @@ ${text}`;
     printError(importOptions.errors, "import");
     printError(importOptions.warnings, "import", "Warning");
     if (index_wasl_default) {
+      console.log("Starting reference mode");
       const refOptions = Object.assign({ errors: [], warnings: [] }, options);
       refOptions.parentNode = document.getElementById("refcontainer");
       const res2 = await validate_default(index_wasl_default, refOptions);
@@ -13889,8 +13557,6 @@ ${text}`;
     ];
     let strArr = [];
     let refArr = [];
-    let flowArr = [];
-    let resArr = [];
     for (let i in info) {
       let o = info[i];
       if (o.wasl) {
@@ -13901,8 +13567,6 @@ ${text}`;
         o.div.value = str;
         strArr.push(str);
         refArr.push(o.wasl.original);
-        flowArr.push(o.wasl.flow);
-        resArr.push(o.wasl.resolutions);
       } else
         o.div.value = void 0;
     }

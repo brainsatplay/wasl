@@ -1,15 +1,16 @@
 import * as path from './utils/path'
 import * as remoteImport from 'remote-esm'
+import { Options } from './types'
 
 const cache = {}
 // ESM File Importer with Cache Support
-const get = async (relPath, relativeTo="", onImport?) => {
+const get = async (relPath, relativeTo="", onImport?, options:Options={}) => {
 
     let type = path.suffix(relPath)
     const isJSON = (!type || type.includes('json'))
 
     // Correct paths for the different locations in the filesystem
-    const fullPath = remoteImport.resolve(relPath, relativeTo)
+    const fullPath = (relPath[0] === '.') ? remoteImport.resolve(relPath, relativeTo) : relPath // Use Relative vs Absolute Path
     const isFunc = typeof onImport === 'function'
     const imported = cache[fullPath]?.imported ?? []
 
@@ -23,10 +24,12 @@ const get = async (relPath, relativeTo="", onImport?) => {
                     onImport(...args)
                 }
             }, 
-            outputText: true
+            outputText: true,
+            nodeModules: options.nodeModules,
+            rootRelativeTo: options.relativeTo,
+            forceImportFromText: true
         }).catch(e => {
-            if (e.message.includes("Failed to fetch")) throw new Error("404");
-            else throw e
+            throw e
         })
 
         cache[fullPath].imported = imported

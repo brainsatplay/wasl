@@ -19,7 +19,6 @@ const path =  'https://raw.githubusercontent.com/brainsatplay/brainsatplay-start
 main = path
 
 const options = {
-    relativeTo: import.meta.url,
     // filesystem: {
     //     'package.json': mainPkg,
     //     'src/package.json': phaserPkg,

@@ -1,2 +1,2 @@
 export const edges = ['protocol']
-export const nodes = ['src', 'href', 'extensions', "plugins"]
+export const nodes = ['src', 'href', 'extensions', "components"]

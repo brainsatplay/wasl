@@ -12,7 +12,7 @@ import * as multiply2 from "../../tests/0/plugins/math/multiply2.js"
 
 import number from '../../tests/0/0.0/0.0.0/basic/number.js'
 
-const path = '../../tests/0/0.0/0.0.0/basic/index.wasl.json'
+const path = 'tests/0/0.0/0.0.0/basic/index.wasl.json'
 const filesystem = {
     ['package.json']: pkg,
     ['plugins/plugin/index.wasl.json']: plugin,
@@ -28,7 +28,6 @@ const filesystem = {
 
 // Specify options
 const options = {
-    relativeTo: import.meta.url,
     version: '0.0.0',
     filesystem
 }

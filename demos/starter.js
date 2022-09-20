@@ -12,10 +12,7 @@ import * as bandpower from  '../../brainsatplay-starter-kit/plugins/focus/bandpo
 import * as fft from  '../../brainsatplay-starter-kit/plugins/focus/fft/index.js'
 import * as ratio from  '../../brainsatplay-starter-kit/plugins/focus/ratio/index.js'
 
-const path = '../../phaser/index.wasl.json'
-
 const options = {
-    relativeTo: import.meta.url,
     filesystem: {
         'package.json': mainPkg,
         'plugins/focus/package.json': focusPkg,
@@ -30,6 +27,7 @@ const options = {
         'plugins/focus/ratio/index.js': ratio,
     }
 }
+const path = ''
 
 export {
     path,

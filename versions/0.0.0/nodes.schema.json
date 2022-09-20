@@ -18,11 +18,6 @@
 
             {
               "type": "object",
-              "$ref": "component.schema.json"
-            },
-
-            {
-              "type": "object",
               "$comment": "The raw JSON",
               "properties": {
                 "default": {

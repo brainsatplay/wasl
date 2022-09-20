@@ -10,10 +10,7 @@ import * as muse from '../../htil/plugins/devices/muse/index.js'
 import * as ganglion from '../../htil/plugins/devices/ganglion/index.js'
 import * as start from '../../htil/plugins/datastreams/plugins/start/index.js'
 
-const path = '../../phaser/index.wasl.json'
-
 const options = {
-    relativeTo: import.meta.url,
     filesystem: {
         'package.json': mainPkg,
         'plugins/ui/button/index.js': button,
@@ -27,6 +24,8 @@ const options = {
         'plugins/datastreams/plugins/start/index.js': start
     }
 }
+
+const path = ''
 
 export {
     path,

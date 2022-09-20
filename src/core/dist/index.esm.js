@@ -1198,6 +1198,7 @@ var getURL = (path) => {
   } catch {
     url = get(path, globalThis.location.href);
   }
+
   return url;
 };
 var handleFetch = async (path, options = {}, progressCallback) => {

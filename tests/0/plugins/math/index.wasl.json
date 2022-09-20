@@ -1,24 +1,18 @@
 {
     "name": "Math Plugin",
-    "graph": {
-        "nodes": {
-            "addition": {
-                "src": "./add2.js"
-            },
-            "multiplication": {
-                "src": "./multiply2.js"
-            }
-        }, 
-        "edges": {
-            "addition": {
-                "multiplication": {}
+
+    "components": {
+        "addition": {
+            "src": "./add2.js",
+            "children": {
+                "multiplication": true
             }
         },
-        "ports": {
-            "input": "addition",
-            "output": "multiplication"
+        "multiplication": {
+            "src": "./multiply2.js"
         }
-    },
+    }, 
+
     "ports": {
         "input": "addition",
         "output": "multiplication"

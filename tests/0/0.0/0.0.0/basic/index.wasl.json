@@ -1,10 +1,9 @@
 {
     "name": "My Application",
-    "graph": {
-        "nodes": {
+    "components": {
             "plugin": {
                 "src": "../../../plugins/plugin/index.wasl.json",
-                "plugins": {
+                "overrides": {
                     "add": {
                         "arguments": {
                             "input": 15
@@ -13,50 +12,44 @@
                             "src": "number.js"
                         }
                     }
+                },
+                "children": {
+                    "log": true,
+                    "math": true
                 }
             },
             "math": {
-                "src": "../../../plugins/math/index.wasl.json"
+                "src": "../../../plugins/math/index.wasl.json",
+                "children": {
+                    "external": true,
+                    "log": true
+                }
             },
             "external": {
-                "graph": {
-                    "nodes": {
-                        "secondaddition": {
-                            "src": "../../../plugins/math/add2.js"
-                        },
-                        "secondmultiplication": {
-                            "src": "../../../plugins/math/multiply2.js"
+                "components": {
+                    "secondaddition": {
+                        "src": "../../../plugins/math/add2.js",
+                        "children": {
+                            "secondmultiplication": true
                         }
-                    }, 
-                    "edges": {
-                        "secondaddition": {
-                            "secondmultiplication": {}
-                        }
+                    },
+                    "secondmultiplication": {
+                        "src": "../../../plugins/math/multiply2.js"
                     }
-                },
+                }, 
+                
                 "ports": {
                     "input": "secondaddition",
                     "output": "secondmultiplication"
+                },
+
+                "children": {
+                    "log": true
                 }
             },
 
             "log": {
                 "src": "../../../plugins/log.js"
             }
-        },
-    
-        "edges": {
-            "plugin": {
-                "log": {},
-                "math": {}
-            },
-            "math": {
-                "external": {},
-                "log": {}
-            },
-            "external": {
-                "log": {}
-            }
         }
-    }
 }

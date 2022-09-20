@@ -4,36 +4,47 @@
   "title": "Component",
   "description": "A component for the Web Application Specification Language",
   "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "version": {
-      "type": "string",
-      "pattern": "^([^.]+)(.[^.]+)*?$"
-    },
-    "author": {
-      "type": "string"
-    },
-    "main": {
-      "type": "string",
-      "format": "uri-reference"
-    },
-    "type": {
-      "type": "string",
-      "pattern": "^(module|commonjs)$"
-    },
-    "repository": {
-      "type": "string",
-      "format": "uri"
-    },
+  "anyOf": [
+    {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^([^.]+)(.[^.]+)*?$"
+        },
+        "author": {
+          "type": "string"
+        },
+        "main": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(module|commonjs)$"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
 
-    "graph": {
-      "$ref": "graph.schema.json"
+
+
+        "components": {
+          "type": "object",
+          "patternProperties": {
+            "^(.+)$": {
+              "$ref": "module.schema.json"
+            }
+          }
+        }
+      }
+      
     }
-  },
-  "required": ["graph"]
+  ]
 }

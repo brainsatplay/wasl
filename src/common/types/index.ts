@@ -20,6 +20,12 @@ export type Options = {
     output?: 'plugin' | 'object'
     wasl?: WASL
 
+    nodeModules?: string
+    callbacks?: {
+        sourceProgress: (label: string, i: number, total: number) => void,
+        graphProgress: (label: string, i: number, graph: any) => void,
+        progress: (label: string, i: number, total: number) => void, // For remote-esm
+    }
    
     _internal?: string | boolean
     _deleteSrc?: boolean

@@ -22,27 +22,25 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
 ###  Example WASL File
 ```json
 {
-    "graph": {
-        "nodes": {
-            "first": {
-                "src": "first.wasl.json",
-                "extensions": {
-                    "arbitrary": {
-                        "x": 1080,
-                        "y": 720
-                    }
+    "components": {
+        "first": {
+            "src": "first.wasl.json",
+            "extensions": {
+                "arbitrary": {
+                    "x": 1080,
+                    "y": 720
                 }
-            } ,
-            "second": {
-                "href": "https://example.com/second"
-            } 
-        },
-        "edges": {
-            "first": {
-                "second" :{
-                    "protocol": "websockets"
-                }
-            } 
+            }
+        } ,
+        "second": {
+            "href": "https://example.com/second"
+        } 
+    },
+    "connections": {
+        "first": {
+            "second" :{
+                "protocol": "websockets"
+            }
         }
     }
 }

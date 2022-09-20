@@ -68,11 +68,11 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
         if (ajvValidate.errors) errors.push(...ajvValidate.errors)
 
     // Runtime Validation
-    if (load && typeof options.wasl === 'function'){
+    if (load) {
+        if (typeof options.wasl === 'function'){
         if (inputIsValid && !clone._internal){
             clone.output = 'object'
             clone._internal = (typeof urlOrObject === 'string') ? urlOrObject : undefined
-
             const wasl = new options.wasl(data, clone)
             const loaded = await wasl.init()
             if (loaded)  schemaValid = await validate(loaded, clone, false)
@@ -82,6 +82,7 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
             message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.',
         })
     }
+}
 }
 
     return schemaValid && inputIsValid

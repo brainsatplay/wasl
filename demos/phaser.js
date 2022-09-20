@@ -13,10 +13,7 @@ import * as createCompanion from  '../../phaser/scripts/player/create/companion.
 
 import * as updatePlayer from  '../../phaser/scripts/player/update.js'
 
-const path = '../../phaser/index.wasl.json'
-
 const options = {
-    relativeTo: import.meta.url,
     filesystem: {
         'package.json': mainPkg,
         'src/package.json': phaserPkg,
@@ -25,11 +22,14 @@ const options = {
         'src/plugins/player/index.js': player,
         'src/plugins/cursors/index.js': cursors,
         'scripts/create.js': create,
-        'src/scripts/player/create/main.js': createMain,
-        'src/scripts/player/create/companion.js': createCompanion,
-        'src/scripts/player/update.js': updatePlayer,
+        'scripts/player/create/main.js': createMain,
+        'scripts/player/create/companion.js': createCompanion,
+        'scripts/player/update.js': updatePlayer,
     }
 }
+
+const path = ''
+
 
 export {
     path,
