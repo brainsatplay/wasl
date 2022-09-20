@@ -42,6 +42,22 @@
               "$ref": "module.schema.json"
             }
           }
+        },
+        "listeners": {
+          "description": "Listeners for internal events",
+          "type": "object",
+          "patternProperties": {
+            "^([^.]+)(.[^.]+)*?$": {
+              "type": "object",
+              "patternProperties": {
+                "^([^.]+)(.[^.]+)*?$": {
+                  "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
         }
       }
       

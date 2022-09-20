@@ -8,7 +8,10 @@
         },
         "threshold": {
             "src": "../../../plugins/threshold.js",
-            "threshold": 500
+            "threshold": 500,
+            "children": {
+                "ui.phaser.game.player.jump": true
+            }
         },
         "synthetic": {
             "src": "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js",
@@ -104,6 +107,9 @@
                     "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
                     "overrides": {
                         "game": {
+                            "log": {
+                                "src": "../../../plugins/log.js"
+                            },
                             "preload": {
                                 "setBaseURL": "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
                                 "tilemapTiledJSON": [
@@ -203,40 +209,11 @@
             }
         }
     },
+    
     "listeners": {
-        "ui.button_1": {
-            "synthetic": {}
-        },
-        "synthetic": {
-            "datastreams.start": {}
-        },
-        "ui.button_2": {
-            "ganglion": {}
-        },
-        "ganglion": {
-            "datastreams.start": {}
-        },
-        "ui.button_3": {
-            "muse": {}
-        },
-        "muse": {
-            "datastreams.start": {}
-        },
         "datastreams.start": {
-            "ui.timeseries": {},
-            "average": {}
-        },
-        "ui.jump": {
-            "ui.phaser.game.player.jump": {}
-        },
-        "ui.companionJump": {
-            "ui.phaser.game.companion.jump": {}
-        },
-        "average": {
-            "threshold": {}
-        },
-         "threshold": {
-            "ui.phaser.game.player.jump": {}
+            "ui.timeseries": true,
+            "average": true
         }
     }
 }

@@ -11950,12 +11950,23 @@ ${text}`;
           for (let f2 of activateFuncs)
             toRun.push(...await f2(top));
           const listeners = [{ reference: {} }, { reference: {} }];
-          if (this.initial.listeners)
-            Object.entries(this.initial.listeners).forEach(([key, value]) => {
-              for (let target in value)
-                listeners[1].reference[target] = true;
-              listeners[0].reference[key] = true;
-            });
+          let toListenTo = {
+            ...this.initial.listeners
+          };
+          let listenTo = false;
+          for (let key in this.initial.children) {
+            if (!(this.initial.children[key] instanceof GraphNode))
+              listenTo = true;
+          }
+          const basePath = this.getPath();
+          if (listenTo) {
+            toListenTo[basePath] = true;
+          }
+          Object.entries(toListenTo).forEach(([key, value]) => {
+            for (let target in value)
+              listeners[1].reference[target] = true;
+            listeners[0].reference[key] = true;
+          });
           const targets = [
             {
               reference: this.initial.children,
@@ -11976,7 +11987,6 @@ ${text}`;
                   last = this.#router.nodes.get(split.join(".")) ?? top.graph;
                 else {
                   const get3 = (str, target) => target.nodes.get(str) ?? target[str];
-                  const basePath = this.getPath();
                   absolute = path2.split(".").slice(0, -1);
                   relative = [...basePath ? basePath.split(".") : [], ...absolute];
                   split = relative;
@@ -12002,8 +12012,8 @@ ${text}`;
             in: listeners[1].reference,
             out: listeners[0].reference
           };
-          for (let key in this.initial.listeners)
-            top.listeners.active[key] = this.initial.listeners[key];
+          for (let key in toListenTo)
+            top.listeners.active[key] = toListenTo[key];
           for (let key in this.listeners.includeParent)
             top.listeners.includeParent[key] = this.listeners.includeParent[key];
           for (let type in listenerPool) {
@@ -12066,6 +12076,8 @@ ${text}`;
       const basePath = [];
       let target = graph;
       do {
+        if (target instanceof GraphNode)
+          target = { node: target };
         if (target.node) {
           basePath.push(target.node.name);
           target = target.node.graph;
@@ -12087,16 +12099,37 @@ ${text}`;
           delete this.listeners.active[path2][key];
       }
       targets.push(this.listeners.active[path2]);
-      node.subscribe((args) => {
-        const thisTargets = [...targets];
-        if (path2 in this.listeners.includeParent)
-          thisTargets.push(node.graph.children);
-        thisTargets.forEach((target) => {
-          for (let tag in target) {
-            let info = target[tag];
-            this.resolve(args, info);
+      let aggregatedParent = false;
+      const aggregate = (arr) => {
+        const aggregate2 = {};
+        arr.forEach((o) => {
+          for (let key in o) {
+            if (!(key in aggregate2))
+              aggregate2[key] = [o[key]];
+            else {
+              const ref1 = aggregate2[key];
+              const ref2 = o[key];
+              const message = `Both children and listeners are declared for ${key}`;
+              const getId = (o2) => o2._unique ?? o2.resolved._unique ?? o2.last._unique;
+              const aggregateIds = ref1.map(getId);
+              if (!aggregateIds.includes(getId(ref2))) {
+                console.warn(`${message}. Aggregating`, ref1, ref2);
+                ref1.push(ref2);
+              } else
+                console.warn(`${message}. Removing`, ref2);
+            }
           }
         });
+        return aggregate2;
+      };
+      let aggregated = aggregate(targets);
+      node.subscribe((args) => {
+        if (path2 in this.listeners.includeParent && !aggregatedParent) {
+          aggregated = aggregate([aggregated, node.graph.children]);
+          aggregatedParent = true;
+        }
+        for (let tag in aggregated)
+          aggregated[tag].forEach((info) => this.resolve(args, info, aggregated));
       });
     };
     resolve = (args, info) => {
@@ -12111,9 +12144,9 @@ ${text}`;
         let res;
         if (typeof info.resolved === "function") {
           if (Array.isArray(args))
-            res = info.resolved(...args);
+            res = info.resolved.call(info.last, ...args);
           else
-            res = info.resolved(args);
+            res = info.resolved.call(info.last, args);
         } else
           res = info.resolved = info.last[info.lastKey] = args;
         let resolved = this.listeners.active[`${info.path.used}.${info.lastKey}`];
@@ -12569,7 +12602,6 @@ ${text}`;
                 return a;
               }, 1) : 1;
               const projection = nestedKey[key].projection ?? pattern;
-              const update = nestedKey[key].update;
               if (match) {
                 await nestedKey[key].function(input2, {
                   get: (key2) => get3([...path2, key2]),
@@ -12958,6 +12990,22 @@ ${text}`;
                 $ref: "module.schema.json"
               }
             }
+          },
+          listeners: {
+            description: "Listeners for internal events",
+            type: "object",
+            patternProperties: {
+              "^([^.]+)(.[^.]+)*?$": {
+                type: "object",
+                patternProperties: {
+                  "^([^.]+)(.[^.]+)*?$": {
+                    type: "boolean"
+                  }
+                },
+                additionalProperties: false
+              }
+            },
+            additionalProperties: false
           }
         }
       }
@@ -13213,7 +13261,10 @@ ${text}`;
       },
       threshold: {
         src: "../../../plugins/threshold.js",
-        threshold: 500
+        threshold: 500,
+        children: {
+          "ui.phaser.game.player.jump": true
+        }
       },
       synthetic: {
         src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js",
@@ -13309,6 +13360,9 @@ ${text}`;
             src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
             overrides: {
               game: {
+                log: {
+                  src: "../../../plugins/log.js"
+                },
                 preload: {
                   setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
                   tilemapTiledJSON: [
@@ -13409,39 +13463,9 @@ ${text}`;
       }
     },
     listeners: {
-      "ui.button_1": {
-        synthetic: {}
-      },
-      synthetic: {
-        "datastreams.start": {}
-      },
-      "ui.button_2": {
-        ganglion: {}
-      },
-      ganglion: {
-        "datastreams.start": {}
-      },
-      "ui.button_3": {
-        muse: {}
-      },
-      muse: {
-        "datastreams.start": {}
-      },
       "datastreams.start": {
-        "ui.timeseries": {},
-        average: {}
-      },
-      "ui.jump": {
-        "ui.phaser.game.player.jump": {}
-      },
-      "ui.companionJump": {
-        "ui.phaser.game.companion.jump": {}
-      },
-      average: {
-        threshold: {}
-      },
-      threshold: {
-        "ui.phaser.game.player.jump": {}
+        "ui.timeseries": true,
+        average: true
       }
     }
   };

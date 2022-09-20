@@ -536,7 +536,7 @@ class WASL {
                     }, 1) : 1
 
                     const projection = nestedKey[key].projection ?? pattern
-                    const update = nestedKey[key].update
+                    // const update = nestedKey[key].update
 
                     if (match) {
 
