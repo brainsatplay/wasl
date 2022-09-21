@@ -107,9 +107,6 @@
                     "src": "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
                     "overrides": {
                         "game": {
-                            "log": {
-                                "src": "../../../plugins/log.js"
-                            },
                             "preload": {
                                 "setBaseURL": "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
                                 "tilemapTiledJSON": [
@@ -209,7 +206,7 @@
             }
         }
     },
-    
+
     "listeners": {
         "datastreams.start": {
             "ui.timeseries": true,

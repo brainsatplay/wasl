@@ -585,11 +585,14 @@
 
 "wasl-validate@file:/Users/garrettflynn/Documents/Github/wasl/src/validate":
   "resolved" "file:src/validate"
-  "version" "0.0.13"
+  "version" "0.0.14"
+  dependencies:
+    "node-fetch" "^3.2.10"
+    "remote-esm" "^0.0.23"
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"
-  "version" "0.0.15"
+  "version" "0.0.16"
   dependencies:
     "node-fetch" "^3.2.10"
 
