@@ -56,6 +56,7 @@ class WASL {
         this.#input = urlOrObject
         this.#options = options
         this.#url = url
+
     }
 
     get = async (...args) => await get(args[0], args[1], this.#onImport, this.#options).catch(e => e)
@@ -486,10 +487,15 @@ class WASL {
                     value: input[searchKey],
                     
                     // Set Parent Reference
-                    setParent: function (input, path=this.paths.remapped) {
+                    setParent: function (input, path=this.paths.remapped, fallbackKey) {
                         let target = top
                         path.forEach((str,i) => {
-                            if (i === path.length - 1) target[str] = input
+                            if (i === path.length - 1) {
+                                if (fallbackKey && Object.keys(target[str]).length > 1) {
+                                    console.warn(`Setting ${fallbackKey} instead of replacing parent for ${path.join('.')}`)
+                                    target[str][fallbackKey] = input;
+                                } else target[str] = input;
+                            }
                             else target = target[str]
                         })
                     },
@@ -762,7 +768,7 @@ class WASL {
         if (res !== undefined) {
 
             // Set Source
-            if ((!isModule || !info.isComponent) && !isWASL) info.setParent((isModule) ? res.default : res)
+            if ((!isModule || !info.isComponent) && !isWASL) info.setParent((isModule) ? res.default : res, undefined, info.key)
             else {
                 info.set(res) // set src key on the main reference
                 const ref = info.get()
@@ -884,26 +890,31 @@ class WASL {
         switch (mode) {
             case 'reference':
 
+                this.original = object
+
                 // Graphs Nested in the Top Level Don't Have a package.json File
                 if (!innerTopLevel) {
                     if (this.#filesystem) {
                         const pkgPath = remoteImport.resolve(basePkgPath, url)
                         const pkg = utils.checkFiles(pkgPath, this.#filesystem)
                         if (pkg) object = Object.assign(pkg, isString ? {} : object) as any
-                        // else utils.remove(basePkgPath, pkgPath) // Package.json files are not required...
                     }
                 }
+                break;
 
             default:
                 if (!object) {
                     mainPath = await remoteImport.resolve(url)
-                    object = await this.get(mainPath, undefined) as LatestWASL
+                    this.original = await this.get(mainPath, undefined) as LatestWASL
+                    object = JSON.parse(JSON.stringify(this.original))
                     if (!innerTopLevel) {
                         const pkgUrl = remoteImport.resolve(basePkgPath, mainPath, true)
                         const pkg = await this.get(pkgUrl, undefined)
                         if (pkg) object = Object.assign(pkg, object) as any
                     }
                 }
+                break;
+
         }
 
         if (!internalLoadCall) this.#main = mainPath // save global main path
@@ -911,8 +922,8 @@ class WASL {
 
         if (this.errors.length === 0) {
 
-            this.original = object
             const copy = JSON.parse(JSON.stringify(this.original))
+            // Resolve without including information from pkg
             this.resolved = await this.resolve(copy, { mainPath, mode }, options)
 
             // convert valid nodes to ES Plugins
@@ -934,7 +945,8 @@ class WASL {
                 drill(target, (node, info) => {
 
                     // VALIDATE: Check that all edges point to valid nodes
-                    const connections = info.parent.connections
+                    // TODO: Validate children...
+                    const connections = info.parent.listeners
                     for (let output in connections) {
 
                         const getTarget = (o, str) => o.components?.[str] ?? o[str]

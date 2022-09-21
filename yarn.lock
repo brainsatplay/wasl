@@ -46,19 +46,19 @@
   "version" "7.0.11"
 
 "@types/lodash@^4.14.182":
-  "integrity" "sha512-RoZphVtHbxPZizt4IcILciSWiC6dcn+eZ8oX9IWEYfDMcocdd42f7NPI6fQj+6zI8y4E0L7gu2pcZKLGTRaV9Q=="
-  "resolved" "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.184.tgz"
-  "version" "4.14.184"
+  "integrity" "sha512-evMDG1bC4rgQg4ku9tKpuMh5iBNEwNa3tf9zRHdP1qlv+1WUg44xat4IxCE14gIpZRGUUWAx2VhItCZc25NfMA=="
+  "resolved" "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.185.tgz"
+  "version" "4.14.185"
 
 "@types/minimatch@*":
-  "integrity" "sha512-v55NF6Dz0wrj14Rn8iEABTWrhYRmgkJYuokduunSiq++t3hZ9VZ6dvcDt+850Pm5sGJZk8RaHzkFCXPxVINZ+g=="
-  "resolved" "https://registry.npmjs.org/@types/minimatch/-/minimatch-5.1.1.tgz"
-  "version" "5.1.1"
+  "integrity" "sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA=="
+  "resolved" "https://registry.npmjs.org/@types/minimatch/-/minimatch-5.1.2.tgz"
+  "version" "5.1.2"
 
 "@types/node@*":
-  "integrity" "sha512-6bbDaETVi8oyIARulOE9qF1/Qdi/23z6emrUh0fNJRUmjznqrixD4MpGDdgOFk5Xb0m2H6Xu42JGdvAxaJR/wA=="
-  "resolved" "https://registry.npmjs.org/@types/node/-/node-18.7.14.tgz"
-  "version" "18.7.14"
+  "integrity" "sha512-m+6nTEOadJZuTPkKR/SYK3A2d7FZrgElol9UP1Kae90VVU4a6mxnPuLiIW1m4Cq4gZ/nWb9GrdVXJCoCazDAbg=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-18.7.18.tgz"
+  "version" "18.7.18"
 
 "@types/prettier@^2.6.1":
   "integrity" "sha512-RI1L7N4JnW5gQw2spvL7Sllfuf1SaHdrZpCHiBlCXjIlufi1SMNnbu2teze3/QE67Fg2tBlH7W+mi4hVNk4p0A=="
@@ -127,7 +127,7 @@
     "balanced-match" "^1.0.0"
     "concat-map" "0.0.1"
 
-"brainsatplay-math@~0.0.22", "brainsatplay-math@~0.0.23":
+"brainsatplay-math@~0.0.23":
   "integrity" "sha512-zoAaKTwFsclvkvlaFaOzHMAlPBQ5hK0Q5KpwadaamWlqqSRgR9zS9NX16SI8B1GetPWaOLwySfGMeZFz1QnoBw=="
   "resolved" "https://registry.npmjs.org/brainsatplay-math/-/brainsatplay-math-0.0.23.tgz"
   "version" "0.0.23"
@@ -188,19 +188,22 @@
   "version" "4.0.0"
 
 "device-decoder@^0.1.39":
-  "integrity" "sha512-Ami7d0p39FkdOoZ8wj2sgtQs8xPMzG/mKZDJd1LU/5WJOsbIEHRrUQDdJjtmbjS9OALhjJ/kRs9e9bjaV7wnHA=="
-  "resolved" "https://registry.npmjs.org/device-decoder/-/device-decoder-0.1.39.tgz"
-  "version" "0.1.39"
+  "integrity" "sha512-FnLDD1J1HGoovOCFZ44nW52qwboaK38wcSHU/77KrYSl7FnCE/sYioE8TCPQhIAg692FKMC33CVGBkRYEY4wDw=="
+  "resolved" "https://registry.npmjs.org/device-decoder/-/device-decoder-0.1.53.tgz"
+  "version" "0.1.53"
   dependencies:
     "@capacitor-community/bluetooth-le" "~2.0.0"
     "brainsatplay-math" "~0.0.23"
-    "graphscript" "~0.1.40"
-    "graphscript-services" "~0.1.41"
+    "graphscript" "~0.1.41"
+    "graphscript-services" "~0.1.46"
+    "graphscript-services.gpu" "~0.1.49"
+    "graphscript-services.storage" "~0.1.46"
+    "webgl-plot-utils" "~0.2.4"
 
-"es-plugins@0.0.19":
-  "integrity" "sha512-iDm/6CygTxABJlJGwLlqvn1cVFb/vg7C9EmFJuEeOyJsKJRWPdNcmSbV7QTXOtW5ZyyffdPBVbrc7WCiu/isZA=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.19.tgz"
-  "version" "0.0.19"
+"es-plugins@0.0.20":
+  "integrity" "sha512-EAqIi3VfO7WIQ/NlXkbImgbEnBocO0TXDr+nPEo9RZw9NxHSGB8inoSfCvZPSSs6QbL3IhY894PTUUa77QyOdQ=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.20.tgz"
+  "version" "0.0.20"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="
@@ -247,11 +250,11 @@
     "es5-ext" "~0.10.14"
 
 "ext@^1.1.2":
-  "integrity" "sha512-sdBImtzkq2HpkdRLtlLWDa6w4DX22ijZLKx8BMPUuKe1c5lbN6xwQDQCxSfxBQnHZ13ls/FH0MQZx/q/gr6FQg=="
-  "resolved" "https://registry.npmjs.org/ext/-/ext-1.6.0.tgz"
-  "version" "1.6.0"
+  "integrity" "sha512-6hxeJYaL110a9b5TEJSj0gojyHQAmA2ch5Os+ySCiA1QGdS697XWY1pzsrSjqA9LDEEgdB/KypIlR59RcLuHYw=="
+  "resolved" "https://registry.npmjs.org/ext/-/ext-1.7.0.tgz"
+  "version" "1.7.0"
   dependencies:
-    "type" "^2.5.0"
+    "type" "^2.7.2"
 
 "fast-deep-equal@^3.1.1":
   "integrity" "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="
@@ -307,23 +310,43 @@
   "resolved" "https://registry.npmjs.org/gpujsutils/-/gpujsutils-1.0.12.tgz"
   "version" "1.0.12"
 
-"graphscript-services@~0.1.41":
-  "integrity" "sha512-NE2aliZDR5eidr/5uSOoR27QtE90kHPZplhHelKliaC0rtwrycCFKqtcZPgsHtjIeGu6Q8SYuCERueRFMcO18w=="
-  "resolved" "https://registry.npmjs.org/graphscript-services/-/graphscript-services-0.1.41.tgz"
-  "version" "0.1.41"
+"graphscript-services.gpu@~0.1.49":
+  "integrity" "sha512-c4i6mrdj3jdpfwnX3Gh7MKODoDy5wzsqG4+8XPvxcHhJr0SbfQYedoUATmGxd2VhvyUtCRxHE9Mp3fpgS/Ksrw=="
+  "resolved" "https://registry.npmjs.org/graphscript-services.gpu/-/graphscript-services.gpu-0.1.52.tgz"
+  "version" "0.1.52"
   dependencies:
     "brainsatplay-math" "~0.0.23"
     "browserfs" "^1.4.3"
     "bson-objectid" "~2.0.3"
     "gpujsutils" "~1.0.12"
 
-"graphscript@~0.1.40":
-  "integrity" "sha512-rKdUQtn8or1hXHjoz1P1AHmRWqEhXitc3MwTQuTFAjNDTdHajScDpCjdE07MhlDWfXTgiIMrLQ6bihglJ7xppg=="
-  "resolved" "https://registry.npmjs.org/graphscript/-/graphscript-0.1.40.tgz"
-  "version" "0.1.40"
+"graphscript-services.storage@~0.1.46":
+  "integrity" "sha512-yXyb1+16jvNwGaV8YCEwHZOq96TbOIzVAsYocRPXp7TNk+foTdFSgM+3HKcGqJiOopqfDUijNDx+WmNCxwi/KA=="
+  "resolved" "https://registry.npmjs.org/graphscript-services.storage/-/graphscript-services.storage-0.1.46.tgz"
+  "version" "0.1.46"
+  dependencies:
+    "brainsatplay-math" "~0.0.23"
+    "browserfs" "^1.4.3"
+    "bson-objectid" "~2.0.3"
+    "gpujsutils" "~1.0.12"
+
+"graphscript-services@~0.1.46":
+  "integrity" "sha512-kqWgda1du5G/u+U7JU2xa94PWAR5OpVSVi7BkPPash8GhE726keHOwiBgflL+Iq+S/KruZqtGulTiA55bkfjIQ=="
+  "resolved" "https://registry.npmjs.org/graphscript-services/-/graphscript-services-0.1.46.tgz"
+  "version" "0.1.46"
+  dependencies:
+    "brainsatplay-math" "~0.0.23"
+    "browserfs" "^1.4.3"
+    "bson-objectid" "~2.0.3"
+    "gpujsutils" "~1.0.12"
+
+"graphscript@~0.1.41":
+  "integrity" "sha512-ghgUJWSzmal9OcInneC4OsAfRS9wEz8+8Z98KLrgHhOyyuRFXLPRWpCJ+n3SCv7wDTtftcsutf5gn0BfSkpx1Q=="
+  "resolved" "https://registry.npmjs.org/graphscript/-/graphscript-0.1.41.tgz"
+  "version" "0.1.41"
   dependencies:
     "better-sse" "~0.8.0"
-    "brainsatplay-math" "~0.0.22"
+    "brainsatplay-math" "~0.0.23"
     "bson-objectid" "~2.0.3"
     "web-worker" "~1.2.0"
     "ws" "~8.8.1"
@@ -498,10 +521,10 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"remote-esm@^0.0.17", "remote-esm@0.0.17":
-  "integrity" "sha512-r2MMsmY2LyDOMtRKVjPO3KSTR5I9P1FEQKF+LpJz/9fyKA5hMzAubh0JHKkPFUeZvVnBpDyIG/huyCLYIVxGuw=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.17.tgz"
-  "version" "0.0.17"
+"remote-esm@^0.0.23":
+  "integrity" "sha512-iqYSlZGL2PK3ERRLzqh0h3maX/BPezoweKyZCEOR/2YDgR1ht/KYq/CJGZRWjkEbCnzPcDpvTvTSGyt2u3Tgrg=="
+  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.23.tgz"
+  "version" "0.0.23"
   dependencies:
     "cross-blob" "^3.0.1"
     "node-fetch" "^3.2.10"
@@ -538,14 +561,6 @@
     "es5-ext" "~0.10.46"
     "next-tick" "1"
 
-"tinybuild@file:../tinybuild":
-  "resolved" "file:../tinybuild"
-  "version" "0.3.183"
-  dependencies:
-    "chokidar" "~3.5.3"
-    "esbuild" "~0.14.49"
-    "ws" "^8.5.0"
-
 "tslib@^2.1.0":
   "integrity" "sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ=="
   "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.4.0.tgz"
@@ -556,7 +571,7 @@
   "resolved" "https://registry.npmjs.org/type/-/type-1.2.0.tgz"
   "version" "1.2.0"
 
-"type@^2.5.0":
+"type@^2.7.2":
   "integrity" "sha512-dzlvlNlt6AXU7EBSfpAscydQ7gXB+pPGsPnfJnZpiNJBDj7IaJzQlBZYGdEi4R9HmPdBv2XmWJ6YUtoTa7lmCw=="
   "resolved" "https://registry.npmjs.org/type/-/type-2.7.2.tgz"
   "version" "2.7.2"
@@ -571,13 +586,12 @@
 "wasl-validate@file:/Users/garrettflynn/Documents/Github/wasl/src/validate":
   "resolved" "file:src/validate"
   "version" "0.0.13"
-  dependencies:
-    "node-fetch" "^3.2.10"
-    "remote-esm" "^0.0.17"
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"
   "version" "0.0.15"
+  dependencies:
+    "node-fetch" "^3.2.10"
 
 "web-streams-polyfill@^3.0.3":
   "integrity" "sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q=="
@@ -588,6 +602,18 @@
   "integrity" "sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA=="
   "resolved" "https://registry.npmjs.org/web-worker/-/web-worker-1.2.0.tgz"
   "version" "1.2.0"
+
+"webgl-plot-utils@~0.2.4":
+  "integrity" "sha512-8clytey2D4sTov0oBN3mPMBdhgpHa4MrfJyOZa9fTZ10Eh/bLmK3ZO7JoA+hFtSMBbV7ap/drZJc57YpkZdQ6w=="
+  "resolved" "https://registry.npmjs.org/webgl-plot-utils/-/webgl-plot-utils-0.2.4.tgz"
+  "version" "0.2.4"
+  dependencies:
+    "webgl-plot" "~0.7.0"
+
+"webgl-plot@~0.7.0":
+  "integrity" "sha512-/prs3XMFKlXcov3qvx3LxqMws0Dg68kmmHmO82Qm6FFGpeKME7c3nuVqSe9CG47BvG9mGVPxDMjRc0DP/jTc2A=="
+  "resolved" "https://registry.npmjs.org/webgl-plot/-/webgl-plot-0.7.0.tgz"
+  "version" "0.7.0"
 
 "wrappy@1":
   "integrity" "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="

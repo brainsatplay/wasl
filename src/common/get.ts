@@ -25,6 +25,7 @@ const get = async (relPath, relativeTo="", onImport?, options:Options={}) => {
                 }
             }, 
             outputText: true,
+            filesystem: options.filesystem,
             nodeModules: options.nodeModules,
             rootRelativeTo: options.relativeTo,
             forceImportFromText: true

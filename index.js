@@ -8,10 +8,11 @@ import validate from "./src/validate/index"
 // import { path, main, options } from './demos/basic/0.0.0.js'
 // import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/remote.js'
+// import { path, main, options } from './demos/external/0.0.0.js'
+// import { path, main, options } from './demos/audiofeedback.js'
 
 // Broken
-import { path, main, options } from './demos/external/0.0.0.js'
-// import { path, main, options } from './demos/audiofeedback.js'
+// ...
 
 const printError = (arr, type, severity='Error') => {
     arr.forEach(e => {
@@ -91,6 +92,7 @@ const startExecution = async () => {
 
     for (let i in info){
         let o = info[i]
+        console.log('info', o)
         if (o.wasl) {
             console.log(`------------------ ${o.name.toUpperCase()} MODE ------------------`)
             await o.wasl.init()

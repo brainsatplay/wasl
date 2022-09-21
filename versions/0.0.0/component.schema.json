@@ -43,6 +43,7 @@
             }
           }
         },
+
         "listeners": {
           "description": "Listeners for internal events",
           "type": "object",

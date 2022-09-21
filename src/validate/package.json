@@ -27,9 +27,5 @@
   },
   "peerDependencies": {
     "wasl": "*"
-  },
-  "dependencies": {
-    "node-fetch": "^3.2.10",
-    "remote-esm": "^0.0.17"
   }
 }
