@@ -16,7 +16,7 @@ The specification is written in [JSON Schema](https://json-schema.org/) and vali
 Each version of `wasl` is archived in the `versions` folder of this repository.
 
 ## Design Highlights
-- A new `graph` key/value pair to declare application logic and associations with other code files.
+- New `components` and `listeners` fields that declare application code files and associations with other files.
 - The adoption of [ES Plugins]('https://github.com/brainsatplay/es-plugins') to instantiate Web Components through a configuration object
 
 ###  Example WASL File
@@ -33,14 +33,19 @@ Each version of `wasl` is archived in the `versions` folder of this repository.
             }
         } ,
         "second": {
-            "href": "https://example.com/second"
+            "href": "https://example.com/second",
+            "children": {
+                "third": true
+            }
+        },
+         "third": {
+            "src": "./test.js"
         } 
     },
-    "connections": {
-        "first": {
-            "second" :{
-                "protocol": "websockets"
-            }
+
+    "listeners": {
+        "first.component": {
+            "second": true
         }
     }
 }
