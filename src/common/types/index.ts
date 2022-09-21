@@ -15,6 +15,8 @@ export type Options = {
     filesystem?: {
         [x:string]: LatestWASL
     },
+    path?: string, // Same as URL, for HTML...
+    
 
     debug?: boolean
     output?: 'plugin' | 'object'

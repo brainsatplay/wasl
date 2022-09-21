@@ -43,7 +43,7 @@
            height: 50%;
         }
 
-        #importcontainer, #refcontainer {
+        #importcontainer, #referencecontainer, #htmlcontainer {
             position: relative;
             overflow: hidden;
         }
@@ -60,8 +60,14 @@
 
         <div>
             <h2>Reference Mode</h2>
-            <div id="refcontainer"></div>
+            <div id="referencecontainer"></div>
             <textarea id="reference"></textarea>
+        </div>
+        <div>
+            <h2>HTML Generation</h2>
+            <div id="generatedcontainer">
+            </div>
+            <textarea id="generated"></textarea>
         </div>
     </div>
 </body>

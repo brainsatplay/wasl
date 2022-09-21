@@ -1,6 +1,7 @@
 // import * as wasl from "./dist/index.esm.js"
-import wasl from "./src/core/index"
+import WASL from "./src/core/index"
 import validate from "./src/validate/index"
+import * as html from "./src/core/html"
 
 // Working Demos
 // import { path, main, options } from './demos/starter.js'
@@ -8,9 +9,11 @@ import validate from "./src/validate/index"
 // import { path, main, options } from './demos/basic/0.0.0.js'
 // import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/remote.js'
-import { path, main, options } from './demos/external/0.0.0.js'
-// import { path, main, options } from './demos/audiofeedback.js'
+// import { path, main, options } from './demos/external/0.0.0.js'
+import { path, main, options } from './demos/audiofeedback.js'
 
+
+const useHTML = false
 // Broken
 // ...
 
@@ -23,11 +26,14 @@ const printError = (arr, type, severity='Error') => {
 
 const referenceDiv = document.getElementById('reference') 
 const importDiv = document.getElementById('import')
+const htmlDiv = document.getElementById('html')
+const generatedDiv = document.getElementById('generated')
 
 const startExecution = async () => {
 
+    options.path = path // must include
     options.activate = true // use internal graph system
-    options.wasl = wasl
+    options.wasl = WASL
     // options.output = 'object'
     options.forceImportFromText = true
     options.debug = true
@@ -44,50 +50,27 @@ const startExecution = async () => {
         },
     }
 
-    let ref, imported
-
     // Option #1: Import Mode
-    console.log('Starting import mode')
-    const importOptions = Object.assign({errors: [], warnings: []}, options)
-    importOptions.parentNode = document.getElementById('importcontainer') // set parent node
-    const res = await validate(path, importOptions)
-    console.log('validate (import)', res)
-    
-
-    if (res) {
-        imported = new wasl(path, importOptions)
-        console.log('load (import)', imported)
-        importOptions.errors = imported.errors
-        importOptions.warnings = imported.warnings
-    }
-
-    printError(importOptions.errors, 'import')
-    printError(importOptions.warnings, 'import', "Warning")
+    let imported = await runMode(path, options, 'import')
 
     // // Option #2: Reference Mode (not possible for remote files in Node.js)
-    if (main){
-        console.log('Starting reference mode')
-        const refOptions = Object.assign({errors: [], warnings: []}, options)
-        refOptions.parentNode = document.getElementById('refcontainer') // set parent node
-        const res = await validate(main, refOptions)
-        console.log('validate (reference)', res)
-        if (res) {
-            ref = new wasl(main, refOptions)
-            console.log('load (reference)', ref)
-            refOptions.errors = ref.errors
-            refOptions.warnings = ref.warnings
-        }
-        printError(refOptions.errors, 'reference')
-        printError(refOptions.warnings, 'reference', 'Warning')
-    }
-
+    let ref = await runMode(main, options, 'reference')
 
     let info = [
         {wasl: imported, div: importDiv,  name: "Import"}, 
-        {wasl: ref, div: referenceDiv,  name: "Reference"}
+        {wasl: ref, div: referenceDiv,  name: "Reference"},
     ]
 
-    let strArr = []
+    // Option #3: HTML Mode
+    const generationContainer = document.getElementById('generatedcontainer') 
+    if (useHTML){
+        const copy = Object.assign({}, options)
+        copy.parentNode = generationContainer
+        html.to(main, copy)
+        let generated = await runMode(generationContainer, options, 'generated')
+        info.push( {wasl: generated, div: generatedDiv,  name: "HTML"})
+    } else generationContainer.parentNode.remove()
+
     let refArr = []
 
     for (let i in info){
@@ -97,19 +80,53 @@ const startExecution = async () => {
             console.log(`------------------ ${o.name.toUpperCase()} MODE ------------------`)
             await o.wasl.init()
             await o.wasl.start()
-            const str = JSON.stringify(o.wasl.original, null, 2)
-            o.div.value = str
 
-            strArr.push(str)
+
+            console.log('Original', o.wasl.original)
+            console.log('Resolved', o.wasl.resolved)
+
+            try {
+                const str = JSON.stringify(o.wasl.original, null, 2)
+                o.div.value = str
+            } catch {
+                o.div.value = o.wasl.original
+            }
+
             refArr.push(o.wasl.original)
 
         } else o.div.value = undefined
     }
 
-    if (refArr[0] && refArr[1]) console.warn('Same Original Input to ESPlugins', strArr[0] === strArr[1])
-    else console.warn('One of the modes has failed for this example!')
+    if (refArr[0] && refArr[1] && refArr[2])  console.warn('One of the modes has failed for this example!')
 
 } 
 
 
 startExecution()
+
+
+async function runMode(input, options, name='import') {
+
+    let wasl;
+
+    if (input) {
+        console.log(`Starting ${name} mode`)
+        const optionsCopy = Object.assign({errors: [], warnings: []}, options)
+        optionsCopy.parentNode = document.getElementById(`${name}container`) // set parent node
+        const res = await validate(input, optionsCopy)
+        console.log(`validate (${name})`, res)
+        
+
+        if (res) {
+            wasl = new WASL(input, optionsCopy)
+            console.log(`load (${name})`, wasl)
+            optionsCopy.errors = wasl.errors
+            optionsCopy.warnings = wasl.warnings
+        }
+
+        printError(optionsCopy.errors, 'import')
+        printError(optionsCopy.warnings, 'import', "Warning")
+    }
+
+    return wasl
+}
