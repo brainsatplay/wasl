@@ -14,11 +14,11 @@ var __export = (target, all) => {
   for (var name2 in all)
     __defProp(target, name2, { get: all[name2], enumerable: true });
 };
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
+var __copyProps = (to, from2, except, desc) => {
+  if (from2 && typeof from2 === "object" || typeof from2 === "function") {
+    for (let key of __getOwnPropNames(from2))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, { get: () => from2[key], enumerable: !(desc = __getOwnPropDesc(from2, key)) || desc.enumerable });
   }
   return to;
 };
@@ -585,15 +585,6 @@ var init_browser = __esm({
   }
 });
 
-// ../common/utils/languages.ts
-var languages_exports = {};
-__export(languages_exports, {
-  js: () => js,
-  json: () => json
-});
-var js = ["js", "mjs", "cjs", "javascript"];
-var json = ["json"];
-
 // ../common/utils/path.ts
 var fullSuffix = (fileName = "") => fileName.split(".").slice(1);
 var suffix = (fileName = "") => {
@@ -1014,9 +1005,6 @@ var valid = (input, options, location) => {
 };
 
 // utils.ts
-var isSrc = (str) => {
-  return typeof str === "string" && Object.values(languages_exports).find((arr) => arr.includes(str.split(".").slice(-1)[0]));
-};
 var merge = (main, override) => {
   const copy = Object.assign({}, main);
   if (override) {
@@ -1053,6 +1041,53 @@ var remove = (original, search, key = original, o, message) => {
   if (o)
     delete o[key];
 };
+
+// html.ts
+function from(element, options) {
+  options.parentNode = element;
+  const ref = { components: {} };
+  const toIgnore = ["id"];
+  const drill = (el, ref2) => {
+    if (ref2.components) {
+      for (let child of el.children) {
+        const childRef = ref2.components[child.id] = { element: child };
+        if (child.children.length > 0)
+          childRef.components = {};
+        for (let attribute of child.attributes) {
+          if (!toIgnore.includes(attribute.name)) {
+            const split = attribute.name.split(".");
+            let target = childRef;
+            split.forEach((substr, i) => {
+              substr = substr.split("-").map((str, i2) => {
+                if (i2 > 0)
+                  return str[0].toUpperCase() + str.slice(1);
+                else
+                  return str;
+              }).join("");
+              if (i === split.length - 1) {
+                const val = attribute.value;
+                if (val !== "") {
+                  if (!isNaN(val))
+                    target[substr] = Number(val);
+                  else
+                    target[substr] = val;
+                } else
+                  target[substr] = true;
+              } else {
+                if (!target[substr])
+                  target[substr] = {};
+                target = target[substr];
+              }
+            });
+          }
+        }
+        drill(child, childRef);
+      }
+    }
+  };
+  drill(element, ref);
+  return ref;
+}
 
 // ../../node_modules/es-plugins/dist/index.esm.js
 function parseFunctionFromText(method = "") {
@@ -1896,8 +1931,8 @@ var GraphNode = class {
         return JSON.stringify(jsonToPrint);
       }
     };
-    this.reconstruct = (json2) => {
-      let parsed = reconstructObject(json2);
+    this.reconstruct = (json) => {
+      let parsed = reconstructObject(json);
       if (parsed)
         return this.add(parsed);
     };
@@ -2381,8 +2416,8 @@ var Graph = class {
         return printed;
       }
     };
-    this.reconstruct = (json2) => {
-      let parsed = reconstructObject(json2);
+    this.reconstruct = (json) => {
+      let parsed = reconstructObject(json);
       if (parsed)
         return this.add(parsed);
     };
@@ -2412,9 +2447,9 @@ var Graph = class {
       this.setTree(tree);
   }
 };
-function reconstructObject(json2 = "{}") {
+function reconstructObject(json = "{}") {
   try {
-    let parsed = typeof json2 === "string" ? JSON.parse(json2) : json2;
+    let parsed = typeof json === "string" ? JSON.parse(json) : json;
     const parseObj = (obj) => {
       for (const prop in obj) {
         if (typeof obj[prop] === "string") {
@@ -5390,9 +5425,12 @@ var ESPlugin = class {
             if (i == 0)
               this.#toRun = true;
           } else {
-            args.get(key).state = v;
-            if (input === key)
-              this.#toRun = true;
+            const got = args.get(key);
+            if (got) {
+              got.state = v;
+              if (input === key)
+                this.#toRun = true;
+            }
           }
           i++;
         }
@@ -5468,234 +5506,152 @@ var WASL = class {
       const arr = e.type === "warning" ? this.warnings : this.errors;
       arr.push(item);
     });
-    this.get = async (...args) => await get_default(args[0], args[1], __privateGet(this, _onImport), __privateGet(this, _options)).catch((e) => e);
-    this.load = async (node, info, options, id, symbols, counter) => {
-      if (node.plugins) {
-        for (let nestedName in node.plugins) {
-          const nestedNode = node.src.graph?.nodes?.[nestedName];
-          for (let key in node.plugins[nestedName]) {
-            const newInfo = node.plugins[nestedName][key];
-            if (typeof newInfo === "object" && !Array.isArray(newInfo)) {
-              const ogSrc = newInfo.src;
-              let newInfoForNode;
-              if (id)
-                newInfoForNode = __privateGet(this, _cache)[id]?.[key];
-              if (!newInfoForNode) {
-                const optsCopy = Object.assign({}, options);
-                if (key === "graph")
-                  optsCopy._deleteSrc = false;
-                else
-                  optsCopy._deleteSrc = true;
-                newInfoForNode = await this.resolveOld({ [key]: newInfo }, info, optsCopy, {
-                  nodes: newInfo
-                }, symbols, counter);
-                if (id) {
-                  if (!__privateGet(this, _cache)[id])
-                    __privateGet(this, _cache)[id] = {};
-                  __privateGet(this, _cache)[id][key] = newInfoForNode;
-                }
-              }
-              if (nestedNode) {
-                const newVal = newInfoForNode[key];
-                if (newVal) {
-                  let chosenVal = newVal.src ?? newVal;
-                  if ("default" in chosenVal && Object.keys(chosenVal).length === 1)
-                    chosenVal = chosenVal.default;
-                  if (nestedNode)
-                    nestedNode[key] = chosenVal;
-                } else {
-                  __privateGet(this, _throw).call(this, { message: `Could not resolve ${ogSrc}` });
-                }
-              }
-            } else if (nestedNode)
-              nestedNode[key] = newInfo;
-          }
-          if (node.src.graph && !nestedNode) {
-            __privateGet(this, _throw).call(this, {
-              message: `Plugin target '${nestedName}' does not exist`,
-              node: name
-            });
-          }
+    this.init = async (urlOrObject = __privateGet(this, _input), options = __privateGet(this, _options), url = "") => {
+      this.debug = void 0;
+      const internalLoadCall = options._internal;
+      const isFromValidator = !__privateGet(this, _main) && typeof internalLoadCall === "string";
+      if (!__privateGet(this, _input))
+        __privateSet(this, _input, urlOrObject);
+      if (!__privateGet(this, _options))
+        __privateSet(this, _options, options);
+      if (!__privateGet(this, _filesystem))
+        __privateSet(this, _filesystem, options.filesystem);
+      if (!internalLoadCall) {
+        if (!url)
+          url = __privateGet(this, _url);
+        try {
+          new URL(url ?? urlOrObject);
+          options.relativeTo = "";
+        } catch {
         }
-      }
-    };
-    this.resolveOld = async (target, info, options, graph = {}, symbols = [], counter) => {
-      const nodes = graph.nodes;
-      const edges = graph.edges;
-      counter++;
-      const id = Symbol("unique");
-      let { url } = info;
-      const mainPath = info.mainPath || __privateGet(this, _main);
-      const symbolsRegistry = {};
-      for (let name2 in target) {
-        let symbolsCopy = symbolsRegistry[name2] = [...symbols];
-        const node = target[name2];
-        const isObj = node && typeof node === "object" && !Array.isArray(node);
-        if (isObj) {
-          await this.load(node, info, options, id, symbolsCopy, counter);
-          let ogSrc = node.src ?? "";
-          if (isSrc(ogSrc) || nodes && edges && !ogSrc) {
-            node.src = null;
-            let _internal = "";
-            let _modeOverride = options._modeOverride;
-            let fullPath;
-            try {
-              new URL(ogSrc);
-              if (!options._overrideRemote || options._modeOverride === "import") {
-                _modeOverride = "import";
-                _internal = fullPath = ogSrc;
-              } else
-                fullPath = `${ogSrc.split("://").slice(1).join("/")}`;
-            } catch {
-              if (ogSrc)
-                fullPath = mainPath ? resolve(ogSrc, mainPath) : resolve(ogSrc);
+      } else if (internalLoadCall === true)
+        url = __privateGet(this, _main);
+      if (isFromValidator)
+        url = __privateSet(this, _main, internalLoadCall);
+      const clonedOptions = Object.assign({}, options);
+      const innerTopLevel = clonedOptions._top === true;
+      const isString = typeof urlOrObject === "string";
+      const isHTML = urlOrObject instanceof HTMLElement;
+      let mode, object, mainPath;
+      if (isHTML) {
+        object = from(urlOrObject, options);
+        if (options.path)
+          mode = "import";
+        else {
+          if (options.filesystem)
+            mode = "reference";
+          else
+            mode = "import";
+        }
+      } else if (typeof urlOrObject === "object") {
+        object = Object.assign({}, urlOrObject);
+        if (typeof internalLoadCall === "string")
+          url = mainPath = resolve(internalLoadCall);
+        mode = "reference";
+      } else if (url || isString) {
+        if (!url)
+          url = urlOrObject[0] === "." ? resolve(urlOrObject, options.relativeTo ?? "") : urlOrObject;
+        mode = "import";
+      } else
+        console.error("Mode is not supported...");
+      if (!internalLoadCall)
+        __privateSet(this, _mode, mode);
+      mode = clonedOptions._modeOverride ?? __privateGet(this, _mode);
+      this.errors.push(...valid(urlOrObject, clonedOptions, "load"));
+      this.original = object;
+      switch (mode) {
+        case "reference":
+          if (!innerTopLevel) {
+            if (__privateGet(this, _filesystem)) {
+              const pkgPath = resolve(basePkgPath, url);
+              const pkg = checkFiles(pkgPath, __privateGet(this, _filesystem));
+              if (pkg)
+                object = Object.assign(pkg, isString ? {} : object);
             }
-            let mode = options._modeOverride ?? __privateGet(this, _mode);
-            if (ogSrc) {
-              if (_internal || mode === "import") {
-                let res = await this.get(fullPath, void 0);
-                const isError = res instanceof Error;
-                if (res && !isError)
-                  node.src = res;
-                if (!node.src && !node.graph) {
-                  remove(ogSrc, fullPath, name2, target, res);
-                  if (res)
-                    __privateGet(this, _throw).call(this, { message: res.message, file: fullPath, type: "warning" });
-                }
-              } else {
-                if (__privateGet(this, _filesystem)) {
-                  let res;
-                  res = checkFiles(fullPath, __privateGet(this, _filesystem));
-                  const isError = res instanceof Error;
-                  if (res && !isError) {
-                    if (res.default || fullPath.includes(".json"))
-                      node.src = res;
-                    else {
-                      __privateGet(this, _throw).call(this, {
-                        type: "warning",
-                        message: `Node (${name2}) at ${fullPath} does not have a default export.`,
-                        file: ogSrc
-                      });
-                      node.src = { default: res };
-                    }
-                    _internal = fullPath;
-                  } else if (ogSrc) {
-                    remove(ogSrc, fullPath, name2, target, res);
-                    if (res)
-                      __privateGet(this, _throw).call(this, { message: res.message, file: fullPath, type: "warning" });
-                  }
-                } else {
+          }
+          break;
+        default:
+          if (!object) {
+            mainPath = await resolve(url);
+            this.original = await this.get(mainPath, void 0);
+            object = JSON.parse(JSON.stringify(this.original));
+            if (!innerTopLevel) {
+              const pkgUrl = resolve(basePkgPath, mainPath, true);
+              const pkg = await this.get(pkgUrl, void 0);
+              if (pkg)
+                object = Object.assign(pkg, object);
+            }
+          }
+          break;
+      }
+      if (!internalLoadCall)
+        __privateSet(this, _main, mainPath);
+      else if (__privateGet(this, _mode) === "reference" && !__privateGet(this, _main))
+        __privateSet(this, _main, "");
+      if (this.errors.length === 0) {
+        const copy = isHTML ? this.original : JSON.parse(JSON.stringify(this.original));
+        this.resolved = await this.resolve(copy, { mainPath, mode }, options);
+        const drill = (parent, callback) => {
+          const nodes = parent.components;
+          for (let tag in nodes) {
+            const res = callback(nodes[tag], {
+              tag,
+              parent,
+              options: clonedOptions
+            });
+            if (res)
+              nodes[tag] = res;
+          }
+        };
+        const drillToTest = (target) => {
+          drill(target, (node, info) => {
+            const connections = info.parent.listeners;
+            for (let output in connections) {
+              const getTarget = (o, str) => o.components?.[str] ?? o[str];
+              let outTarget = info.parent.components;
+              output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
+              if (!outTarget) {
+                __privateGet(this, _throw).call(this, {
+                  message: `Node '${output}' (output) does not exist to create an edge.`,
+                  file: url
+                });
+              }
+              for (let input in connections[output]) {
+                let inTarget = this.resolved.components;
+                input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
+                if (!inTarget) {
                   __privateGet(this, _throw).call(this, {
-                    message: "No options.filesystem field to get JavaScript objects",
-                    file: ogSrc
+                    message: `Node '${input}' (input) does not exist to create an edge.`,
+                    file: url
                   });
                 }
               }
             }
-            if (!_internal)
-              _internal = ogSrc ? resolve(ogSrc, url, true) : true;
-            let _top = false;
-            if (node.graph) {
-              _top = true;
-              if (!node.src)
-                node.src = {};
-              node.src.graph = node.graph;
-              delete node.graph;
-            }
-            if (node.src && node.src.graph) {
-              await this.init(node.src, {
-                _internal,
-                _deleteSrc: options._deleteSrc,
-                _top,
-                _modeOverride,
-                _overrideRemote: options._overrideRemote
-              }, void 0);
-            } else
-              symbolsCopy.push(fullPath);
-          }
-          for (let key in node) {
-            if (!isObj && key === "src" && node.src) {
-              const language = node.src.language;
-              if (!language || js.includes(language)) {
-                if (node.src.text) {
-                  const esmImport = async (text) => {
-                    try {
-                      let imported = await (void 0)(text);
-                      if (imported.default && Object.keys(imported).length === 1)
-                        imported = imported.default;
-                      return imported;
-                    } catch (e) {
-                      console.error("Import did not work. Probably relies on something...");
-                      __privateGet(this, _throw).call(this, {
-                        message: e.message,
-                        file: name2
-                      });
-                    }
-                  };
-                  const esm = await esmImport(node.src.text);
-                  if (esm) {
-                    delete node.src.text;
-                    if (typeof esm === "object")
-                      node.src = { default: Object.assign(node.src, esm) };
-                    else
-                      node.src = esm;
-                  } else {
-                    __privateGet(this, _throw).call(this, {
-                      message: "Could not import this text as ESM",
-                      file: node.src
-                    });
-                  }
-                } else {
-                  const expectedFunctions = ["default", "oncreate", "onrender"];
-                  for (let key2 in node.src) {
-                    try {
-                      if (expectedFunctions.includes(key2) && typeof node.src[key2] === "string")
-                        node.src[key2] = (0, eval)(`(${node.src[key2]})`);
-                    } catch (e) {
-                      __privateGet(this, _throw).call(this, {
-                        message: `Field ${key2} could not be parsed`,
-                        file: node.src[key2]
-                      });
-                    }
-                  }
-                }
-              } else {
-                console.warn(`Text is in ${language}, not JavaScript. This is not currently parsable automatically.`);
-                __privateGet(this, _throw).call(this, {
-                  message: `Source is in ${language}. Currently only JavaScript is supported.`,
-                  file: ogSrc
-                });
-              }
-            } else if (node[key]) {
-              if (typeof node[key] === "object" && !Array.isArray(node[key])) {
-                const optsCopy = Object.assign({}, options);
-                optsCopy._deleteSrc = key !== "nodes" && name2 !== "graph";
-                await this.resolveOld(node[key], info, optsCopy, { nodes: node[key] }, symbolsCopy, counter);
-              }
-            }
-          }
+          });
+        };
+        if (internalLoadCall === void 0) {
+          if (clonedOptions.output !== "object") {
+            this.plugin = new src_default(this.resolved, {
+              activate: clonedOptions.activate,
+              parentNode: clonedOptions.parentNode
+            });
+            return this.plugin;
+          } else
+            this.original = this.resolved;
+          drillToTest(this.resolved);
         }
+        return this.resolved;
       }
-      for (let name2 in nodes) {
-        const node = nodes[name2];
-        if (node?.src && typeof node?.src === "object") {
-          if (node.src.graph)
-            await this.load(node, info, options, id, symbolsRegistry[name2]);
-          else if (edges) {
-            if (!("default" in node.src)) {
-              __privateGet(this, _throw).call(this, {
-                message: "No default export.",
-                node: name2
-              });
-            }
-          }
-          nodes[name2] = merge(node.src, node);
-          if (nodes[name2].src?.graph)
-            nodes[name2].src.graph = JSON.parse(JSON.stringify(nodes[name2].graph));
-        }
-      }
-      return target;
     };
+    this.start = async () => {
+      if (this.plugin)
+        return await this.plugin.start();
+    };
+    this.stop = async () => {
+      if (this.plugin)
+        return await this.plugin.stop();
+    };
+    this.get = async (...args) => await get_default(args[0], args[1], __privateGet(this, _onImport), __privateGet(this, _options)).catch((e) => e);
     this.resolveSource = async (path, modeOverride, {
       useCache = true,
       mode = "reference"
@@ -5836,7 +5792,7 @@ var WASL = class {
           }
         }
         for (let key in input2) {
-          if (input2[key] && typeof input2[key] === "object")
+          if (input2[key] && typeof input2[key] === "object" && !(input2[key] instanceof HTMLElement))
             await drill(input2[key], [...tree, { reference: input2, key }]);
         }
       };
@@ -5940,6 +5896,7 @@ var WASL = class {
       }, 0) || Object.prototype.toString.call(res) === moduleStringTag);
       const hasDefault = !!res?.default;
       const isWASL = info.path.includes("wasl.json");
+      const deepSource = (!isModule || !info.isComponent) && !isWASL;
       if (res && !isError) {
         if (isModule && !hasDefault && !isWASL)
           __privateGet(this, _throw).call(this, {
@@ -5948,13 +5905,13 @@ var WASL = class {
             file: ogSrc
           });
       } else {
-        remove(ogSrc, info.path, name2, info.parent, res);
+        remove(ogSrc, info.path, name2, deepSource ? void 0 : info.parent, res);
         if (res)
           __privateGet(this, _throw).call(this, { message: res.message, file: info.path, type: "warning" });
         return;
       }
       if (res !== void 0) {
-        if ((!isModule || !info.isComponent) && !isWASL)
+        if (deepSource)
           info.setParent(isModule ? res.default : res, void 0, info.key);
         else {
           info.set(res);
@@ -5995,140 +5952,6 @@ var WASL = class {
         return acc;
       }
       info.delete();
-    };
-    this.init = async (urlOrObject = __privateGet(this, _input), options = __privateGet(this, _options), url = "") => {
-      this.debug = void 0;
-      const internalLoadCall = options._internal;
-      const isFromValidator = !__privateGet(this, _main) && typeof internalLoadCall === "string";
-      if (!__privateGet(this, _input))
-        __privateSet(this, _input, urlOrObject);
-      if (!__privateGet(this, _options))
-        __privateSet(this, _options, options);
-      if (!__privateGet(this, _filesystem))
-        __privateSet(this, _filesystem, options.filesystem);
-      if (!internalLoadCall) {
-        if (!url)
-          url = __privateGet(this, _url);
-        try {
-          new URL(url ?? urlOrObject);
-          options.relativeTo = "";
-        } catch {
-        }
-      } else if (internalLoadCall === true)
-        url = __privateGet(this, _main);
-      if (isFromValidator)
-        url = __privateSet(this, _main, internalLoadCall);
-      const clonedOptions = Object.assign({}, options);
-      const innerTopLevel = clonedOptions._top === true;
-      const isString = typeof urlOrObject === "string";
-      let mode, object, mainPath;
-      if (typeof urlOrObject === "object") {
-        object = Object.assign({}, urlOrObject);
-        if (typeof internalLoadCall === "string")
-          url = mainPath = resolve(internalLoadCall);
-        mode = "reference";
-      } else if (url || isString) {
-        if (!url)
-          url = urlOrObject[0] === "." ? resolve(urlOrObject, options.relativeTo ?? "") : urlOrObject;
-        mode = "import";
-      } else
-        console.error("Mode is not supported...");
-      if (!internalLoadCall)
-        __privateSet(this, _mode, mode);
-      mode = clonedOptions._modeOverride ?? __privateGet(this, _mode);
-      this.errors.push(...valid(urlOrObject, clonedOptions, "load"));
-      switch (mode) {
-        case "reference":
-          this.original = object;
-          if (!innerTopLevel) {
-            if (__privateGet(this, _filesystem)) {
-              const pkgPath = resolve(basePkgPath, url);
-              const pkg = checkFiles(pkgPath, __privateGet(this, _filesystem));
-              if (pkg)
-                object = Object.assign(pkg, isString ? {} : object);
-            }
-          }
-          break;
-        default:
-          if (!object) {
-            mainPath = await resolve(url);
-            this.original = await this.get(mainPath, void 0);
-            object = JSON.parse(JSON.stringify(this.original));
-            if (!innerTopLevel) {
-              const pkgUrl = resolve(basePkgPath, mainPath, true);
-              const pkg = await this.get(pkgUrl, void 0);
-              if (pkg)
-                object = Object.assign(pkg, object);
-            }
-          }
-          break;
-      }
-      if (!internalLoadCall)
-        __privateSet(this, _main, mainPath);
-      else if (__privateGet(this, _mode) === "reference" && !__privateGet(this, _main))
-        __privateSet(this, _main, "");
-      if (this.errors.length === 0) {
-        const copy = JSON.parse(JSON.stringify(this.original));
-        this.resolved = await this.resolve(copy, { mainPath, mode }, options);
-        const drill = (parent, callback) => {
-          const nodes = parent.components;
-          for (let tag in nodes) {
-            const res = callback(nodes[tag], {
-              tag,
-              parent,
-              options: clonedOptions
-            });
-            if (res)
-              nodes[tag] = res;
-          }
-        };
-        const drillToTest = (target) => {
-          drill(target, (node, info) => {
-            const connections = info.parent.listeners;
-            for (let output in connections) {
-              const getTarget = (o, str) => o.components?.[str] ?? o[str];
-              let outTarget = info.parent.components;
-              output.split(".").forEach((str) => outTarget = getTarget(outTarget, str));
-              if (!outTarget) {
-                __privateGet(this, _throw).call(this, {
-                  message: `Node '${output}' (output) does not exist to create an edge.`,
-                  file: url
-                });
-              }
-              for (let input in connections[output]) {
-                let inTarget = this.resolved.components;
-                input.split(".").forEach((str) => inTarget = getTarget(inTarget, str));
-                if (!inTarget) {
-                  __privateGet(this, _throw).call(this, {
-                    message: `Node '${input}' (input) does not exist to create an edge.`,
-                    file: url
-                  });
-                }
-              }
-            }
-          });
-        };
-        if (internalLoadCall === void 0) {
-          if (clonedOptions.output !== "object") {
-            this.plugin = new src_default(this.resolved, {
-              activate: clonedOptions.activate,
-              parentNode: clonedOptions.parentNode
-            });
-            return this.plugin;
-          } else
-            this.original = this.resolved;
-          drillToTest(this.resolved);
-        }
-        return this.resolved;
-      }
-    };
-    this.start = async () => {
-      if (this.plugin)
-        return await this.plugin.start();
-    };
-    this.stop = async () => {
-      if (this.plugin)
-        return await this.plugin.stop();
     };
     __privateSet(this, _input, urlOrObject);
     __privateSet(this, _options, options);

@@ -200,10 +200,10 @@
     "graphscript-services.storage" "~0.1.46"
     "webgl-plot-utils" "~0.2.4"
 
-"es-plugins@0.0.20":
-  "integrity" "sha512-EAqIi3VfO7WIQ/NlXkbImgbEnBocO0TXDr+nPEo9RZw9NxHSGB8inoSfCvZPSSs6QbL3IhY894PTUUa77QyOdQ=="
-  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.20.tgz"
-  "version" "0.0.20"
+"es-plugins@0.0.21":
+  "integrity" "sha512-kwiNK4cDFjj+/z8t8HnrIgLMCA+0tg7l3aS+W54xZxIzStL8JG7kNBD8+G5Gcei8O6dF83IZG+RK+M6X8Sy0aQ=="
+  "resolved" "https://registry.npmjs.org/es-plugins/-/es-plugins-0.0.21.tgz"
+  "version" "0.0.21"
 
 "es5-ext@^0.10.35", "es5-ext@^0.10.46", "es5-ext@^0.10.50", "es5-ext@^0.10.53", "es5-ext@^0.10.61", "es5-ext@~0.10.14", "es5-ext@~0.10.2", "es5-ext@~0.10.46":
   "integrity" "sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA=="
@@ -560,14 +560,6 @@
   dependencies:
     "es5-ext" "~0.10.46"
     "next-tick" "1"
-
-"tinybuild@file:../tinybuild":
-  "resolved" "file:../tinybuild"
-  "version" "0.3.183"
-  dependencies:
-    "chokidar" "~3.5.3"
-    "esbuild" "~0.14.49"
-    "ws" "^8.5.0"
 
 "tslib@^2.1.0":
   "integrity" "sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ=="
