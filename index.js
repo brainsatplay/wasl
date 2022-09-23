@@ -9,8 +9,8 @@ import * as html from "./src/core/html"
 // import { path, main, options } from './demos/basic/0.0.0.js'
 // import { path, main, options } from './demos/phaser.js'
 // import { path, main, options } from './demos/remote.js'
-// import { path, main, options } from './demos/external/0.0.0.js'
-import { path, main, options } from './demos/audiofeedback.js'
+import { path, main, options } from './demos/external/0.0.0.js'
+// import { path, main, options } from './demos/audiofeedback.js'
 
 
 const useHTML = false

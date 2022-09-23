@@ -11,9 +11,5 @@
     "start": "tinybuild",
     "start:server": "node index.js",
     "types": "node types.js"
-  },
-  "dependencies": {
-    "device-decoder": "^0.1.39",
-    "howler": "^2.2.3"
   }
 }

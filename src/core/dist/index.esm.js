@@ -594,7 +594,7 @@ var suffix = (fileName = "") => {
 
 // ../../node_modules/remote-esm/utils/path.js
 var urlSep = "://";
-var get = (path, rel = "", keepRelativeImports = false) => {
+var get = (path, rel = "", keepRelativeImports = false, isDirectory = false) => {
   let prefix = "";
   const getPrefix = (str) => {
     prefix = str.includes(urlSep) ? str.split(urlSep).splice(0, 1) : void 0;
@@ -614,11 +614,13 @@ var get = (path, rel = "", keepRelativeImports = false) => {
   let dirTokens = rel.split("/");
   if (dirTokens.length === 1 && dirTokens[0] === "")
     dirTokens = [];
-  const potentialFile = dirTokens.pop();
-  if (potentialFile) {
-    const splitPath2 = potentialFile.split(".");
-    if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
-      dirTokens.push(potentialFile);
+  if (!isDirectory) {
+    const potentialFile = dirTokens.pop();
+    if (potentialFile) {
+      const splitPath2 = potentialFile.split(".");
+      if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
+        dirTokens.push(potentialFile);
+    }
   }
   const splitPath = path.split("/");
   const pathTokens = splitPath.filter((str, i) => !!str);
@@ -758,7 +760,7 @@ var moduleDataURI = (o, mimeType = "text/javascript", method, safe = false) => {
   return `data:${mimeType};base64,` + base64;
 };
 var catchFailedModule = async (uri, e) => {
-  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.")) {
+  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.") || e.message.includes("Cannot set properties of undefined")) {
     return await new Promise((resolve2, reject) => {
       const script = document.createElement("script");
       let r = false;
@@ -812,6 +814,24 @@ var getResponse = async (uri) => {
     text: enc.decode(buffer)
   };
 };
+var defaults = {
+  nodeModules: "node_modules",
+  rootRelativeTo: "./"
+};
+var resolveNodeModule = async (path, opts) => {
+  const nodeModules = opts.nodeModules ?? defaults.nodeModules;
+  const rootRelativeTo = opts.rootRelativeTo ?? defaults.rootRelativeTo;
+  const base = get(path, nodeModules);
+  const getPath = (str) => get(get(str, base, false, path.split("/").length === 1), rootRelativeTo, true);
+  const pkgPath = getPath("package.json", base);
+  try {
+    const pkg = (await import(pkgPath, { assert: { type: "json" } })).default;
+    const destination = pkg.module || pkg.main || "index.js";
+    return getPath(destination);
+  } catch (e) {
+    console.warn(`${base} does not exist or is not at the root of the project.`);
+  }
+};
 var safeImport = async (uri, opts = {}) => {
   const {
     root,
@@ -819,8 +839,7 @@ var safeImport = async (uri, opts = {}) => {
     },
     outputText,
     forceImportFromText,
-    nodeModules = "node_modules",
-    rootRelativeTo = "./"
+    rootRelativeTo = defaults.rootRelativeTo
   } = opts;
   const uriCollection = opts.datauri || datauri;
   await ready;
@@ -858,18 +877,8 @@ var safeImport = async (uri, opts = {}) => {
         const { variables, wildcard, path } = importInfo[i];
         const isAbsolute = path[0] !== ".";
         let correctPath = get(path, uri);
-        if (isAbsolute) {
-          const base = get(path, nodeModules);
-          const getPath = (path2) => get(get(path2, base), rootRelativeTo, true);
-          const pkgPath = getPath("package.json", base);
-          try {
-            const pkg = (await import(pkgPath, { assert: { type: "json" } })).default;
-            const destination = pkg.module || pkg.main || "index.js";
-            correctPath = getPath(destination);
-          } catch (e2) {
-            console.warn(`${base} does not exist or is not at the root of the project.`);
-          }
-        }
+        if (isAbsolute)
+          correctPath = await resolveNodeModule(path, opts);
         const dependentFilePath = get(correctPath);
         const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
         if (opts.dependencies)
@@ -917,12 +926,6 @@ var safeImport = async (uri, opts = {}) => {
         }
         if (typeof uriCollection[correctPath] === "string") {
           text = `import ${wildcard ? "* as " : ""}${variables} from "${uriCollection[correctPath]}";
-                ${text}`;
-        } else {
-          if (!window.GLOBAL_REMOTEESM_COLLECTION)
-            window.GLOBAL_REMOTEESM_COLLECTION = {};
-          window.GLOBAL_REMOTEESM_COLLECTION[correctPath] = uriCollection[correctPath];
-          text = `const ${variables} = window.GLOBAL_REMOTEESM_COLLECTION["${correctPath}"];
                 ${text}`;
         }
       }
@@ -5001,9 +5004,6 @@ var transform_default = (tag, node) => {
       });
       return originalOperator.call(this ?? node, ...updatedArgs);
     };
-  } else {
-    console.error("Operator is not a function for", node.tag, node, originalOperator);
-    node.operator = (...args2) => args2;
   }
   graph = new Graph({}, tag, node);
   return graph;
@@ -5083,7 +5083,7 @@ var ESPlugin = class {
   set graph(v) {
     this.#graph = v;
   }
-  constructor(node, options = {}) {
+  constructor(node, options = {}, parent) {
     this.#initial = node;
     this.#options = options;
     this.#router = options._router ? options._router : options._router = new Router({
@@ -5093,10 +5093,11 @@ var ESPlugin = class {
     do {
       this.#initial = this.initial.initial ?? this.initial;
     } while (this.initial instanceof ESPlugin);
-    const isFunction = typeof this.initial === "function";
     const hasDefault = "default" in this.initial;
     let hasComponents = !!node.components;
-    if (!hasDefault && !hasComponents) {
+    const parentHasComponents = !!parent?.components;
+    const isFunctionCollection = !parentHasComponents && !hasDefault && !hasComponents;
+    if (isFunctionCollection) {
       let newNode = { components: {} };
       for (let namedExport in node)
         newNode.components[namedExport] = { default: node[namedExport] };
@@ -5104,8 +5105,6 @@ var ESPlugin = class {
       hasComponents = true;
       this.#runProps = false;
     }
-    if (hasDefault || isFunction)
-      this.graph = this.#create(options.tag ?? "defaultESPluginTag", this.initial);
     if (hasComponents) {
       const toNotify = [];
       const components = this.initial.components;
@@ -5113,7 +5112,7 @@ var ESPlugin = class {
         const node2 = components[tag];
         if (!(node2 instanceof ESPlugin)) {
           const clonedOptions = Object.assign({}, Object.assign(options));
-          const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
+          const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }), node);
           this.#plugins[tag] = plugin;
           toNotify.push(plugin);
         } else
@@ -5128,7 +5127,8 @@ var ESPlugin = class {
         if (typeof options.onPlugin === "function")
           options.onPlugin(tag, o);
       });
-    }
+    } else
+      this.graph = this.#create(options.tag ?? "defaultESPluginTag", this.initial);
     Object.defineProperty(this, "tag", {
       get: () => this.graph?.tag,
       enumerable: true
@@ -5282,10 +5282,12 @@ var ESPlugin = class {
           const path = this.getPath(lastNode, true);
           this.listeners.includeParent[path] = lastNode;
         }
-        if (firstNode)
+        if (firstNode && !this.#initial.default)
           this.#initial.operator = async function(...args) {
             await firstNode.run(...args);
           };
+        else
+          this.#initial.operator = this.#initial.default;
       }
       if (typeof defer === "function")
         defer(f);
@@ -5402,7 +5404,7 @@ var ESPlugin = class {
   #create = (tag, info) => {
     if (typeof info === "function")
       info = { default: info };
-    if (!("default" in info) || info instanceof Graph)
+    if (!info || info instanceof Graph)
       return info;
     else {
       let activeInfo;
@@ -5410,7 +5412,7 @@ var ESPlugin = class {
         activeInfo = info.instance;
         info = info.initial;
       }
-      const args = parse_default(info.default) ?? /* @__PURE__ */ new Map();
+      const args = info.default instanceof Function ? parse_default(info.default) ?? /* @__PURE__ */ new Map() : /* @__PURE__ */ new Map();
       if (args.size === 0)
         args.set("default", {});
       let argsArray = Array.from(args.entries());
@@ -5458,6 +5460,7 @@ var ESPlugin = class {
     }
   };
   #runGraph = async (graph = this.graph, ...args) => {
+    console.log("runGraph", graph, args);
     if (graph instanceof Graph) {
       if (graph.node)
         return graph.node.run(...args);
@@ -5695,7 +5698,11 @@ var WASL = class {
         };
         const set = (input3, key = searchKey, pathInfo = path) => {
           let target = top;
-          pathInfo.forEach((str, i) => target = target[str]);
+          pathInfo.forEach((str, i) => {
+            if (!target[str])
+              target[str] = {};
+            target = target[str];
+          });
           target[key] = input3;
         };
         if (condition(input2[searchKey])) {
@@ -5719,13 +5726,16 @@ var WASL = class {
               let target2 = top;
               path2.forEach((str, i) => {
                 if (i === path2.length - 1) {
-                  if (fallbackKey && Object.keys(target2[str]).length > 1) {
+                  if (fallbackKey && target2[str] && Object.keys(target2[str]).length > 1) {
                     console.warn(`Setting ${fallbackKey} instead of replacing parent for ${path2.join(".")}`);
                     target2[str][fallbackKey] = input3;
                   } else
                     target2[str] = input3;
-                } else
+                } else {
+                  if (!target2[str])
+                    target2[str] = {};
                   target2 = target2[str];
+                }
               });
             },
             parent: parentInfo?.reference,
@@ -5759,10 +5769,10 @@ var WASL = class {
             const projection = nestedKey[key].projection ?? pattern;
             if (match) {
               await nestedKey[key].function(input2, {
-                get: (key2) => get3([...path, key2]),
-                set: (key2, name2, value) => {
+                get: (key2, additionalPath = []) => get3([...path, ...additionalPath, key2]),
+                set: (key2, name2, value, additionalPath = []) => {
                   const base = [...path.slice(0, offset), ...projection.map((str, i2) => !str ? graphSlice[i2] : str)];
-                  const passed = [...base, name2];
+                  const passed = [...base, ...additionalPath, name2];
                   set(value, key2, passed);
                   let targets = [
                     {
@@ -5811,8 +5821,21 @@ var WASL = class {
           } catch {
           }
           const isRemote = o.type === "remote";
+          const isAbsolute = o.value[0] !== ".";
           const main = o.mainPath || __privateGet(this, _main);
-          o.path = isRemote ? o.value : main ? resolve(o.value, main) : resolve(o.value);
+          if (isRemote)
+            o.path = o.value;
+          else if (isAbsolute)
+            o.path = await resolveNodeModule(o.value, {
+              rootRelativeTo: __privateGet(this, _options).relativeTo,
+              nodeModules: __privateGet(this, _options).nodeModules
+            });
+          else {
+            if (main)
+              o.path = resolve(o.value, main);
+            else
+              resolve(o.value);
+          }
           if (isRemote)
             o.mode = "import";
           const ext = o.value.split("/").pop().split(".").slice(1).join(".");
@@ -5894,17 +5917,9 @@ var WASL = class {
         const isModule2 = desc && desc.get && !desc.set ? 1 : 0;
         return a + isModule2;
       }, 0) || Object.prototype.toString.call(res) === moduleStringTag);
-      const hasDefault = !!res?.default;
       const isWASL = info.path.includes("wasl.json");
       const deepSource = (!isModule || !info.isComponent) && !isWASL;
-      if (res && !isError) {
-        if (isModule && !hasDefault && !isWASL)
-          __privateGet(this, _throw).call(this, {
-            type: "warning",
-            message: `Node (${name2}) at ${info.path} does not have a default export.`,
-            file: ogSrc
-          });
-      } else {
+      if (!res || isError) {
         remove(ogSrc, info.path, name2, deepSource ? void 0 : info.parent, res);
         if (res)
           __privateGet(this, _throw).call(this, { message: res.message, file: info.path, type: "warning" });
@@ -5912,7 +5927,7 @@ var WASL = class {
       }
       if (res !== void 0) {
         if (deepSource)
-          info.setParent(isModule ? res.default : res, void 0, info.key);
+          info.setParent(isModule && res.default ? res.default : res, void 0, info.key);
         else {
           info.set(res);
           const ref = info.get();
@@ -5934,14 +5949,18 @@ var WASL = class {
       acc.push(info);
       return acc;
     };
-    this.handleOverride = async (value, info, acc = []) => {
+    this.handleOverride = async (value, info, acc = [], pathUpdate = []) => {
       for (let nestedName in value) {
-        const nestedNode = info.get(nestedName);
+        const nestedNode = info.get(nestedName, pathUpdate);
         if (nestedNode) {
           for (let key in value[nestedName]) {
-            const newInfo = value[nestedName][key];
-            if (newInfo)
-              info.set(key, nestedName, newInfo);
+            if (key === "components")
+              this.handleOverride(value[nestedName][key], info, [], [...pathUpdate, nestedName, key]);
+            else {
+              const newInfo = value[nestedName][key];
+              if (newInfo)
+                info.set(key, nestedName, newInfo, pathUpdate);
+            }
           }
         } else
           __privateGet(this, _throw).call(this, {

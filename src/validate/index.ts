@@ -73,7 +73,7 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
         if (inputIsValid && !clone._internal){
             clone.output = 'object'
             clone._internal = (typeof urlOrObject === 'string') ? urlOrObject : undefined
-            const wasl = new options.wasl(data, clone)
+            const wasl = new (options.wasl as any)(data, clone)
             const loaded = await wasl.init()
             if (loaded)  schemaValid = await validate(loaded, clone, false)
         }

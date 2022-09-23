@@ -29,7 +29,7 @@ class WASL {
 
 
     #input = {}
-    #options = {}
+    #options: Options = {}
     #url = undefined
     #cache = {}
     #main = ''
@@ -323,7 +323,10 @@ class WASL {
 
             const set = (input, key=searchKey, pathInfo=path) => {
                 let target = top
-                pathInfo.forEach((str,i) => target = target[str])
+                pathInfo.forEach((str,i) => {
+                     if (!target[str]) target[str] = {}
+                    target = target[str]
+                })
                 target[key] = input
             }
 
@@ -363,12 +366,15 @@ class WASL {
                         let target = top
                         path.forEach((str,i) => {
                             if (i === path.length - 1) {
-                                if (fallbackKey && Object.keys(target[str]).length > 1) {
+                                if (fallbackKey && target[str] && Object.keys(target[str]).length > 1) {
                                     console.warn(`Setting ${fallbackKey} instead of replacing parent for ${path.join('.')}`)
                                     target[str][fallbackKey] = input;
                                 } else target[str] = input;
                             }
-                            else target = target[str]
+                            else {
+                                if (!target[str])  target[str] = {}
+                                target = target[str]
+                            }
                         })
                     },
 
@@ -419,10 +425,10 @@ class WASL {
                     if (match) {
 
                             await nestedKey[key].function(input, {
-                            get: (key) => get([...path, key]),
-                            set: (key, name, value) => {
+                            get: (key, additionalPath=[]) => get([...path, ...additionalPath, key]),
+                            set: (key, name, value, additionalPath=[]) => {
                                 const base = [...path.slice(0,offset), ...projection.map((str,i) => (!str) ? graphSlice[i] : str)]
-                                const passed = [...base, name]
+                                const passed = [...base, ...additionalPath, name]
                                 set(value, key, passed) // relative
 
                                 // Remap override source resolutions to the new object
@@ -498,10 +504,20 @@ class WASL {
                 } catch { }
 
                 const isRemote = o.type === 'remote'
+                const isAbsolute = o.value[0] !== '.'
 
                 // Add Path
                 const main = o.mainPath || this.#main // use base main if not specified
-                o.path = isRemote ? o.value : ((main) ? remoteImport.resolve(o.value, main) : remoteImport.resolve(o.value)) // do not maintain relative paths
+                
+                if (isRemote) o.path = o.value
+                else if (isAbsolute) o.path = await remoteImport.resolveNodeModule(o.value, {
+                    rootRelativeTo: this.#options.relativeTo,
+                    nodeModules: this.#options.nodeModules,
+                })
+                else {
+                    if (main) o.path = remoteImport.resolve(o.value, main)
+                    else remoteImport.resolve(o.value)
+                }
 
                 // Change Import Method
                 if (isRemote) o.mode = 'import'
@@ -618,25 +634,13 @@ class WASL {
             return a + isModule
         }, 0) || Object.prototype.toString.call(res) === moduleStringTag)
 
-        const hasDefault = !!res?.default
         const isWASL = info.path.includes('wasl.json')
 
         const deepSource = (!isModule || !info.isComponent) && !isWASL
 
-        // Pass the Resolved Source Value
-        if (res && !isError) {
-
-            // Throw Warning about Default Exports
-            if (isModule && !hasDefault && !isWASL) this.#throw({
-                type: 'warning',
-                message: `Node (${name}) at ${info.path} does not have a default export.`,
-                file: ogSrc
-            })
-        }
-
         // Could not Resolve the Source Value
-        else {
-            utils.remove(ogSrc, info.path, name,  deepSource ? undefined : info.parent, res,) // remove if no source
+        if (!res || isError) {
+            utils.remove(ogSrc, info.path, name,  deepSource ? undefined : info.parent, res) // remove if no source
             if (res) this.#throw({ message: res.message, file: info.path, type: 'warning' })
             return // stop execution here
         }
@@ -646,7 +650,7 @@ class WASL {
         if (res !== undefined) {
 
             // Set Source
-            if (deepSource) info.setParent((isModule) ? res.default : res, undefined, info.key)
+            if (deepSource) info.setParent((isModule && res.default) ? res.default : res, undefined, info.key)
             else {
                 info.set(res) // set src key on the main reference
                 const ref = info.get()
@@ -677,17 +681,20 @@ class WASL {
     }
 
     // This methods responds to the "overrides" keyword, flattening entries into the nested graphs
-    handleOverride = async (value, info, acc = []) => {
+    handleOverride = async (value, info, acc = [], pathUpdate=[]) => {
         
         for (let nestedName in value) {
 
-            const nestedNode = info.get(nestedName)
+            const nestedNode = info.get(nestedName, pathUpdate)
             
             // Merge Specified Information into the Node (will keep sources as strings...)
             if (nestedNode) {
                 for (let key in value[nestedName]) {
-                    const newInfo = value[nestedName][key]
-                    if (newInfo) info.set(key, nestedName, newInfo) 
+                    if (key === "components") this.handleOverride(value[nestedName][key], info, [], [...pathUpdate, nestedName, key])
+                    else {
+                        const newInfo = value[nestedName][key]
+                        if (newInfo) info.set(key, nestedName, newInfo, pathUpdate) 
+                    }
                 }
             } else this.#throw({
                 message: `Plugin target '${nestedName}' does not exist`,
