@@ -402,18 +402,10 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"remote-esm@^0.0.23":
-  "integrity" "sha512-iqYSlZGL2PK3ERRLzqh0h3maX/BPezoweKyZCEOR/2YDgR1ht/KYq/CJGZRWjkEbCnzPcDpvTvTSGyt2u3Tgrg=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.23.tgz"
-  "version" "0.0.23"
-  dependencies:
-    "cross-blob" "^3.0.1"
-    "node-fetch" "^3.2.10"
-
-"remote-esm@^0.0.26":
-  "integrity" "sha512-NTN61/AK8uTR+9NoxXNWOEyxczu+RxBtq4tta4K6iOVX8almD2heNqrUb1hhgcaUX/VtSJW9nIaYLsogBCUeXg=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.26.tgz"
-  "version" "0.0.26"
+"remote-esm@^0.0.28":
+  "integrity" "sha512-n42LZcZ/fy/MZhHohzdFRWOKc/uN2kqDt4oRt+14u/b/JD1kVS70RpwH9ypt+EKhr5V2qORR0ErNbrFThjFscA=="
+  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.28.tgz"
+  "version" "0.0.28"
   dependencies:
     "cross-blob" "^3.0.1"
     "node-fetch" "^3.2.10"
@@ -467,7 +459,7 @@
   "version" "0.0.14"
   dependencies:
     "node-fetch" "^3.2.10"
-    "remote-esm" "^0.0.23"
+    "remote-esm" "^0.0.28"
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"

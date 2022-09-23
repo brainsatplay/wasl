@@ -53,6 +53,7 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
     }
 
     // Schema Validation
+    let wasl;
     if (errors.length === 0) {
 
         activeVersion = version
@@ -66,27 +67,10 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
         const ajvValidate = await ajv.compile(schemaCopy)
         schemaValid = ajvValidate(data)
         if (ajvValidate.errors) errors.push(...ajvValidate.errors)
-
-    // Runtime Validation
-    if (load) {
-        if (typeof options.wasl === 'function'){
-        if (inputIsValid && !clone._internal){
-            clone.output = 'object'
-            clone._internal = (typeof urlOrObject === 'string') ? urlOrObject : undefined
-            const wasl = new (options.wasl as any)(data, clone)
-            const loaded = await wasl.init()
-            if (loaded)  schemaValid = await validate(loaded, clone, false)
-        }
-    } else {
-        warnings.push({ 
-            message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.',
-        })
-    }
-}
 }
 
+    // Return loaded WASL instance if available
     return schemaValid && inputIsValid
-
 }
 
 export default validate

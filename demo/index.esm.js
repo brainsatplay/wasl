@@ -7496,7 +7496,7 @@ var suffix = (fileName = "") => {
 
 // node_modules/remote-esm/utils/path.js
 var urlSep = "://";
-var get = (path2, rel = "", keepRelativeImports = false) => {
+var get = (path2, rel = "", keepRelativeImports = false, isDirectory = false) => {
   let prefix = "";
   const getPrefix = (str) => {
     prefix = str.includes(urlSep) ? str.split(urlSep).splice(0, 1) : void 0;
@@ -7516,11 +7516,13 @@ var get = (path2, rel = "", keepRelativeImports = false) => {
   let dirTokens = rel.split("/");
   if (dirTokens.length === 1 && dirTokens[0] === "")
     dirTokens = [];
-  const potentialFile = dirTokens.pop();
-  if (potentialFile) {
-    const splitPath2 = potentialFile.split(".");
-    if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
-      dirTokens.push(potentialFile);
+  if (!isDirectory) {
+    const potentialFile = dirTokens.pop();
+    if (potentialFile) {
+      const splitPath2 = potentialFile.split(".");
+      if (splitPath2.length == 1 || splitPath2.length > 1 && splitPath2.includes(""))
+        dirTokens.push(potentialFile);
+    }
   }
   const splitPath = path2.split("/");
   const pathTokens = splitPath.filter((str, i) => !!str);
@@ -7660,7 +7662,7 @@ var moduleDataURI = (o, mimeType = "text/javascript", method, safe = false) => {
   return `data:${mimeType};base64,` + base64;
 };
 var catchFailedModule = async (uri, e) => {
-  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.")) {
+  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.") || e.message.includes("Cannot set properties of undefined")) {
     return await new Promise((resolve2, reject) => {
       const script = document.createElement("script");
       let r = false;
@@ -7721,8 +7723,9 @@ var defaults = {
 var resolveNodeModule = async (path2, opts) => {
   const nodeModules = opts.nodeModules ?? defaults.nodeModules;
   const rootRelativeTo = opts.rootRelativeTo ?? defaults.rootRelativeTo;
-  const base = get(path2, nodeModules);
-  const getPath = (path3) => get(get(path3, base, false, path3.split("/").length === 1), rootRelativeTo, true);
+  const absoluteNodeModules = get(nodeModules, rootRelativeTo);
+  const base = get(path2, absoluteNodeModules);
+  const getPath = (str) => get(str, base, false, path2.split("/").length === 1);
   const pkgPath = getPath("package.json", base);
   try {
     const pkg = (await import(pkgPath, { assert: { type: "json" } })).default;
@@ -7827,12 +7830,6 @@ var safeImport = async (uri, opts = {}) => {
         if (typeof uriCollection[correctPath] === "string") {
           text = `import ${wildcard ? "* as " : ""}${variables} from "${uriCollection[correctPath]}";
                 ${text}`;
-        } else {
-          if (!window.GLOBAL_REMOTEESM_COLLECTION)
-            window.GLOBAL_REMOTEESM_COLLECTION = {};
-          window.GLOBAL_REMOTEESM_COLLECTION[correctPath] = uriCollection[correctPath];
-          text = `const ${variables} = window.GLOBAL_REMOTEESM_COLLECTION["${correctPath}"];
-                ${text}`;
         }
       }
       module = await importResponse(text, uri, uriCollection, "text");
@@ -7864,6 +7861,7 @@ var get2 = async (relPath, relativeTo = "", onImport, options2 = {}) => {
           onImport(...args);
         }
       },
+      progress: options2.callbacks?.progress?.fetch,
       outputText: true,
       filesystem: options2.filesystem,
       nodeModules: options2.nodeModules,
@@ -11967,9 +11965,6 @@ var transform_default = (tag, node) => {
       });
       return originalOperator.call(this ?? node, ...updatedArgs);
     };
-  } else {
-    console.error("Operator is not a function for", node.tag, node, originalOperator);
-    node.operator = (...args2) => args2;
   }
   graph = new Graph({}, tag, node);
   return graph;
@@ -12049,7 +12044,7 @@ var ESPlugin = class {
   set graph(v) {
     this.#graph = v;
   }
-  constructor(node, options2 = {}) {
+  constructor(node, options2 = {}, parent) {
     this.#initial = node;
     this.#options = options2;
     this.#router = options2._router ? options2._router : options2._router = new Router({
@@ -12059,10 +12054,11 @@ var ESPlugin = class {
     do {
       this.#initial = this.initial.initial ?? this.initial;
     } while (this.initial instanceof ESPlugin);
-    const isFunction = typeof this.initial === "function";
     const hasDefault = "default" in this.initial;
     let hasComponents = !!node.components;
-    if (!hasDefault && !hasComponents) {
+    const parentHasComponents = !!parent?.components;
+    const isFunctionCollection = !parentHasComponents && !hasDefault && !hasComponents;
+    if (isFunctionCollection) {
       let newNode = { components: {} };
       for (let namedExport in node)
         newNode.components[namedExport] = { default: node[namedExport] };
@@ -12070,8 +12066,6 @@ var ESPlugin = class {
       hasComponents = true;
       this.#runProps = false;
     }
-    if (hasDefault || isFunction)
-      this.graph = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
     if (hasComponents) {
       const toNotify = [];
       const components = this.initial.components;
@@ -12079,7 +12073,7 @@ var ESPlugin = class {
         const node2 = components[tag];
         if (!(node2 instanceof ESPlugin)) {
           const clonedOptions = Object.assign({}, Object.assign(options2));
-          const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }));
+          const plugin = new ESPlugin(node2, Object.assign(clonedOptions, { tag }), node);
           this.#plugins[tag] = plugin;
           toNotify.push(plugin);
         } else
@@ -12094,7 +12088,8 @@ var ESPlugin = class {
         if (typeof options2.onPlugin === "function")
           options2.onPlugin(tag, o);
       });
-    }
+    } else
+      this.graph = this.#create(options2.tag ?? "defaultESPluginTag", this.initial);
     Object.defineProperty(this, "tag", {
       get: () => this.graph?.tag,
       enumerable: true
@@ -12248,10 +12243,12 @@ var ESPlugin = class {
           const path2 = this.getPath(lastNode, true);
           this.listeners.includeParent[path2] = lastNode;
         }
-        if (firstNode)
+        if (firstNode && !this.#initial.default)
           this.#initial.operator = async function(...args) {
             await firstNode.run(...args);
           };
+        else
+          this.#initial.operator = this.#initial.default;
       }
       if (typeof defer === "function")
         defer(f);
@@ -12368,7 +12365,7 @@ var ESPlugin = class {
   #create = (tag, info) => {
     if (typeof info === "function")
       info = { default: info };
-    if (!("default" in info) || info instanceof Graph)
+    if (!info || info instanceof Graph)
       return info;
     else {
       let activeInfo;
@@ -12376,7 +12373,7 @@ var ESPlugin = class {
         activeInfo = info.instance;
         info = info.initial;
       }
-      const args = parse_default(info.default) ?? /* @__PURE__ */ new Map();
+      const args = info.default instanceof Function ? parse_default(info.default) ?? /* @__PURE__ */ new Map() : /* @__PURE__ */ new Map();
       if (args.size === 0)
         args.set("default", {});
       let argsArray = Array.from(args.entries());
@@ -12424,6 +12421,7 @@ var ESPlugin = class {
     }
   };
   #runGraph = async (graph = this.graph, ...args) => {
+    console.log("runGraph", graph, args);
     if (graph instanceof Graph) {
       if (graph.node)
         return graph.node.run(...args);
@@ -12661,7 +12659,11 @@ var WASL = class {
         };
         const set = (input3, key = searchKey, pathInfo = path2) => {
           let target = top;
-          pathInfo.forEach((str, i) => target = target[str]);
+          pathInfo.forEach((str, i) => {
+            if (!target[str])
+              target[str] = {};
+            target = target[str];
+          });
           target[key] = input3;
         };
         if (condition(input2[searchKey])) {
@@ -12685,13 +12687,16 @@ var WASL = class {
               let target2 = top;
               path3.forEach((str, i) => {
                 if (i === path3.length - 1) {
-                  if (fallbackKey && Object.keys(target2[str]).length > 1) {
+                  if (fallbackKey && target2[str] && Object.keys(target2[str]).length > 1) {
                     console.warn(`Setting ${fallbackKey} instead of replacing parent for ${path3.join(".")}`);
                     target2[str][fallbackKey] = input3;
                   } else
                     target2[str] = input3;
-                } else
+                } else {
+                  if (!target2[str])
+                    target2[str] = {};
                   target2 = target2[str];
+                }
               });
             },
             parent: parentInfo?.reference,
@@ -12725,10 +12730,10 @@ var WASL = class {
             const projection = nestedKey[key].projection ?? pattern;
             if (match) {
               await nestedKey[key].function(input2, {
-                get: (key2) => get3([...path2, key2]),
-                set: (key2, name2, value) => {
+                get: (key2, additionalPath = []) => get3([...path2, ...additionalPath, key2]),
+                set: (key2, name2, value, additionalPath = []) => {
                   const base = [...path2.slice(0, offset), ...projection.map((str, i2) => !str ? graphSlice[i2] : str)];
-                  const passed = [...base, name2];
+                  const passed = [...base, ...additionalPath, name2];
                   set(value, key2, passed);
                   let targets = [
                     {
@@ -12777,18 +12782,34 @@ var WASL = class {
           } catch {
           }
           const isRemote = o.type === "remote";
-          const isAbsolute = o.value[0] === ".";
+          const isAbsolute = o.value[0] !== ".";
           const main = o.mainPath || __privateGet(this, _main);
+          const rootRelativeTo = __privateGet(this, _options).relativeTo;
+          const isMainAbsolute = main?.[0] !== ".";
+          let absoluteMain;
+          if (!main)
+            absoluteMain = rootRelativeTo;
+          if (isMainAbsolute)
+            absoluteMain = main;
+          else
+            absoluteMain = main.includes(rootRelativeTo) ? main : resolve(main, rootRelativeTo);
           if (isRemote)
             o.path = o.value;
           else if (isAbsolute)
-            o.path = await resolveNodeModule(o.value, __privateGet(this, _options));
+            o.path = await resolveNodeModule(o.value, {
+              rootRelativeTo,
+              nodeModules: __privateGet(this, _options).nodeModules
+            });
           else {
-            if (main)
-              o.path = resolve(o.value, main);
-            else
-              resolve(o.value);
+            if (main) {
+              o.path = resolve(o.value, absoluteMain);
+              o.id = resolve(o.value, main);
+            } else
+              o.path = o.id = resolve(o.value);
           }
+          console.log("Got Path", o.path, isRemote, isAbsolute, o.value);
+          if (isRemote || isAbsolute)
+            o.id = o.path;
           if (isRemote)
             o.mode = "import";
           const ext = o.value.split("/").pop().split(".").slice(1).join(".");
@@ -12836,7 +12857,7 @@ var WASL = class {
           await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)));
           i++;
           if (opts.callbacks?.progress?.source instanceof Function)
-            opts.callbacks.progress.source(path2, i, total);
+            opts.callbacks.progress?.source(path2, i, total);
         }));
       }));
       const toc = performance.now();
@@ -12872,15 +12893,24 @@ var WASL = class {
       }, 0) || Object.prototype.toString.call(res) === moduleStringTag);
       const isWASL = info.path.includes("wasl.json");
       const deepSource = (!isModule || !info.isComponent) && !isWASL;
+      const handlers = {
+        _map: info.path
+      };
+      const parent = info.parent[info.name];
+      for (let name3 in handlers) {
+        if (parent[name3] === true)
+          res = handlers[name3];
+        delete parent[name3];
+      }
       if (!res || isError) {
-        remove(ogSrc, info.path, name2, deepSource ? void 0 : info.parent, res);
+        remove(ogSrc, info.id, name2, deepSource ? void 0 : info.parent, res);
         if (res)
           __privateGet(this, _throw).call(this, { message: res.message, file: info.path, type: "warning" });
         return;
       }
       if (res !== void 0) {
         if (deepSource)
-          info.setParent(isModule ? res.default : res, void 0, info.key);
+          info.setParent(isModule && res.default ? res.default : res, void 0, info.key);
         else {
           info.set(res);
           const ref = info.get();
@@ -12893,23 +12923,31 @@ var WASL = class {
       const newContext = this.updateContext(info, context);
       info.mode = newContext.mode;
       const res = await this.resolveSource(info.path, info.mode, newContext);
+      if (!res) {
+        console.error("Not resolved", info.path, info);
+        return;
+      }
       const found = await this.findSources(res, events, newContext);
-      if (opts.callbacks?.componentProgress instanceof Function)
-        opts.callbacks.componentProgress(info.path, acc.length, res);
+      if (opts.callbacks?.progress.components instanceof Function)
+        opts.callbacks.progress.components(info.path, acc.length, res);
       if (found)
         this.flattenInto(found, list);
       await this.handleResolved(res, info);
       acc.push(info);
       return acc;
     };
-    this.handleOverride = async (value, info, acc = []) => {
+    this.handleOverride = async (value, info, acc = [], pathUpdate = []) => {
       for (let nestedName in value) {
-        const nestedNode = info.get(nestedName);
+        const nestedNode = info.get(nestedName, pathUpdate);
         if (nestedNode) {
           for (let key in value[nestedName]) {
-            const newInfo = value[nestedName][key];
-            if (newInfo)
-              info.set(key, nestedName, newInfo);
+            if (key === "components")
+              this.handleOverride(value[nestedName][key], info, [], [...pathUpdate, nestedName, key]);
+            else {
+              const newInfo = value[nestedName][key];
+              if (newInfo)
+                info.set(key, nestedName, newInfo, pathUpdate);
+            }
           }
         } else
           __privateGet(this, _throw).call(this, {
@@ -13206,6 +13244,7 @@ var validate = async (urlOrObject, options2 = {}, load = true) => {
       });
     });
   }
+  let wasl;
   if (errors.length === 0) {
     activeVersion = version2;
     let schemas = await getSchemas(version2);
@@ -13219,247 +13258,121 @@ var validate = async (urlOrObject, options2 = {}, load = true) => {
     schemaValid = ajvValidate(data);
     if (ajvValidate.errors)
       errors.push(...ajvValidate.errors);
-    if (load) {
-      if (typeof options2.wasl === "function") {
-        if (inputIsValid && !clone._internal) {
-          clone.output = "object";
-          clone._internal = typeof urlOrObject === "string" ? urlOrObject : void 0;
-          const wasl = new options2.wasl(data, clone);
-          const loaded = await wasl.init();
-          if (loaded)
-            schemaValid = await validate(loaded, clone, false);
-        }
-      } else {
-        warnings.push({
-          message: 'An options.load class (e.g. from the "wasl" library) was not provided to validate WASL objects with src files resolved.'
-        });
-      }
-    }
   }
   return schemaValid && inputIsValid;
 };
 var validate_default = validate;
 
-// tests/0/0.0/0.0.0/external/index.wasl.json
+// tests/0/0.0/0.0.0/basic/index.wasl.json
 var index_wasl_default = {
+  name: "My Application",
   components: {
-    average: {
-      src: "../../../plugins/average.js",
-      children: {
-        threshold: true
-      }
-    },
-    threshold: {
-      src: "../../../plugins/threshold.js",
-      threshold: 500,
-      children: {
-        "ui.phaser.game.player.jump": true
-      }
-    },
-    synthetic: {
-      src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/synthetic/index.js",
-      children: {
-        "datastreams.start": true
-      }
-    },
-    ganglion: {
-      src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/ganglion/index.js",
-      children: {
-        "datastreams.start": true
-      }
-    },
-    muse: {
-      src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/devices/muse/index.js",
-      children: {
-        "datastreams.start": true
-      }
-    },
-    datastreams: {
-      src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/datastreams/index.wasl.json",
-      children: {
-        "ui.timeseries": true,
-        average: true
-      }
-    },
-    ui: {
-      tagName: "div",
-      style: {
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        width: "100%",
-        height: "100%"
-      },
-      components: {
-        timeseries: {
-          style: {
-            position: "absolute",
-            bottom: "15px",
-            right: "15px",
-            width: "250px",
-            height: "150px"
+    plugin: {
+      src: "../../../plugins/plugin/index.wasl.json",
+      overrides: {
+        add: {
+          arguments: {
+            input: 15
           },
-          src: "https://raw.githubusercontent.com/brainsatplay/brainsatplay-starter-kit/nightly/plugins/timeseries/index.js"
-        },
-        button_1: {
-          attributes: {
-            innerHTML: "Start synthetic data generation"
-          },
-          children: {
-            synthetic: true
-          },
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js"
-        },
-        button_2: {
-          attributes: {
-            innerHTML: "Connect Ganglion"
-          },
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
-          children: {
-            ganglion: true
-          }
-        },
-        button_3: {
-          attributes: {
-            innerHTML: "Connect Muse"
-          },
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
-          children: {
-            muse: true
-          }
-        },
-        jump: {
-          attributes: {
-            innerHTML: "Jump Main Character"
-          },
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
-          children: {
-            "ui.phaser.game.player.jump": true
-          }
-        },
-        companionJump: {
-          attributes: {
-            innerHTML: "Jump Companion"
-          },
-          src: "https://raw.githubusercontent.com/brainsatplay/htil/nightly/plugins/ui/button/index.js",
-          children: {
-            "ui.phaser.game.companion.jump": true
-          }
-        },
-        phaser: {
-          src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/index.wasl.json",
-          overrides: {
-            game: {
-              preload: {
-                setBaseURL: "https://raw.githubusercontent.com/garrettmflynn/phaser/main/assets",
-                tilemapTiledJSON: [
-                  [
-                    "map",
-                    "map.json"
-                  ]
-                ],
-                spritesheet: [
-                  [
-                    "tiles",
-                    "tiles.png",
-                    {
-                      frameWidth: 70,
-                      frameHeight: 70
-                    }
-                  ]
-                ],
-                image: [
-                  [
-                    "coin",
-                    "coinGold.png"
-                  ]
-                ],
-                atlas: [
-                  [
-                    "player",
-                    "player.png",
-                    "player.json"
-                  ]
-                ]
-              },
-              config: {
-                physics: {
-                  default: "arcade",
-                  arcade: {
-                    gravity: {
-                      y: 500
-                    }
-                  }
-                },
-                scene: {
-                  key: "main",
-                  create: {
-                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/create.js"
-                  }
-                }
-              },
-              components: {
-                cursors: {
-                  src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/cursors/index.js"
-                },
-                player: {
-                  src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
-                  position: {
-                    x: 200,
-                    y: 200
-                  },
-                  size: {
-                    offset: {
-                      height: -8
-                    }
-                  },
-                  bounce: 0.2,
-                  collideWorldBounds: false,
-                  create: {
-                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/main.js"
-                  },
-                  update: {
-                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
-                  }
-                },
-                companion: {
-                  src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/src/plugins/player/index.js",
-                  position: {
-                    x: 100,
-                    y: 200
-                  },
-                  size: {
-                    offset: {
-                      height: -8
-                    }
-                  },
-                  bounce: 0.2,
-                  collideWorldBounds: false,
-                  create: {
-                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/create/companion.js"
-                  },
-                  update: {
-                    src: "https://raw.githubusercontent.com/garrettmflynn/phaser/nightly/scripts/player/update.js"
-                  }
-                }
-              }
-            }
+          toAdd: {
+            src: "./number.js"
           }
         }
+      },
+      children: {
+        log: true,
+        math: true
       }
-    }
-  },
-  listeners: {
-    "datastreams.start": {
-      "ui.timeseries": true,
-      average: true
+    },
+    math: {
+      src: "../../../plugins/math/index.wasl.json",
+      children: {
+        external: true,
+        log: true
+      }
+    },
+    external: {
+      components: {
+        secondaddition: {
+          src: "../../../plugins/math/add2.js",
+          children: {
+            secondmultiplication: true
+          }
+        },
+        secondmultiplication: {
+          src: "../../../plugins/math/multiply2.js"
+        }
+      },
+      ports: {
+        input: "secondaddition",
+        output: "secondmultiplication"
+      },
+      children: {
+        log: true
+      }
+    },
+    log: {
+      src: "../../../plugins/log.js"
     }
   }
 };
 
-// tests/0/0.0/0.0.0/external/package.json
+// tests/0/0.0/0.0.0/basic/package.json
 var package_default = {
-  name: "phaser"
+  name: "app",
+  description: "A basic WASL application",
+  author: "Garrett Flynn <garrettmflynn@gmail.com>",
+  type: "module",
+  main: "index.js"
+};
+
+// tests/0/plugins/plugin/package.json
+var package_default2 = {
+  name: "plugin",
+  description: "A basic WASL plugin",
+  author: "Garrett Flynn <garrettmflynn@gmail.com>",
+  type: "module",
+  main: "index.js"
+};
+
+// tests/0/plugins/plugin/index.wasl.json
+var index_wasl_default2 = {
+  name: "Test Plugin",
+  components: {
+    add: {
+      src: "../math/add.js",
+      children: {
+        multiply: true
+      }
+    },
+    multiply: {
+      src: "../math/multiply.js"
+    }
+  },
+  ports: {
+    input: "add",
+    output: "multiply"
+  }
+};
+
+// tests/0/plugins/math/index.wasl.json
+var index_wasl_default3 = {
+  name: "Math Plugin",
+  components: {
+    addition: {
+      src: "./add2.js",
+      children: {
+        multiplication: true
+      }
+    },
+    multiplication: {
+      src: "./multiply2.js"
+    }
+  },
+  ports: {
+    input: "addition",
+    output: "multiplication"
+  }
 };
 
 // tests/0/plugins/log.js
@@ -13469,37 +13382,70 @@ __export(log_exports, {
 });
 var log_default = (input) => console.log(input);
 
-// tests/0/plugins/threshold.js
-var threshold_exports = {};
-__export(threshold_exports, {
-  default: () => threshold_default,
-  threshold: () => threshold
+// tests/0/plugins/math/add.js
+var add_exports = {};
+__export(add_exports, {
+  default: () => add_default,
+  toAdd: () => toAdd
 });
-var threshold = 1;
-function threshold_default(input) {
-  return Math.abs(input) > this.threshold;
+var toAdd = 1;
+function add_default(input) {
+  const res = input + this.toAdd;
+  console.log(`Adding ${input} + ${this.toAdd} =`, res);
+  return res;
 }
 
-// tests/0/plugins/average.js
-var average_exports = {};
-__export(average_exports, {
-  default: () => average_default,
-  threshold: () => threshold2
+// tests/0/plugins/math/add2.js
+var add2_exports = {};
+__export(add2_exports, {
+  default: () => add2_default,
+  toAdd: () => toAdd2
 });
-var threshold2 = 1;
-function average_default(input) {
-  if (!Array.isArray(input))
-    input = [input];
-  return input.reduce((a, b) => a + b, 0) / input.length;
+var toAdd2 = 10;
+function add2_default(input) {
+  const res = input + this.toAdd;
+  console.log(`Adding ${input} + ${this.toAdd} =`, res);
+  return res;
 }
 
-// demos/external/0.0.0.js
-var path = "tests/0/0.0/0.0.0/external/index.wasl.json";
+// tests/0/plugins/math/multiply.js
+var multiply_exports = {};
+__export(multiply_exports, {
+  default: () => multiply_default
+});
+var multiply_default = (input) => {
+  const res = 10 * input;
+  console.log(`Multiplying 10 * ${input} =`, res);
+  return res;
+};
+
+// tests/0/plugins/math/multiply2.js
+var multiply2_exports = {};
+__export(multiply2_exports, {
+  default: () => multiply2_default
+});
+var multiply2_default = (input) => {
+  const res = 2 * input;
+  console.log(`Multiplying 2 * ${input} =`, res);
+  return res;
+};
+
+// tests/0/0.0/0.0.0/basic/number.js
+var number_default = 3;
+
+// demos/basic/0.0.0.js
+var path = "tests/0/0.0/0.0.0/basic/index.wasl.json";
 var filesystem = {
   ["package.json"]: package_default,
+  ["plugins/plugin/index.wasl.json"]: index_wasl_default2,
   ["plugins/log.js"]: log_exports,
-  ["plugins/threshold.js"]: threshold_exports,
-  ["plugins/average.js"]: average_exports
+  ["plugins/math/index.wasl.json"]: index_wasl_default3,
+  ["plugins/math/add.js"]: add_exports,
+  ["plugins/math/add2.js"]: add2_exports,
+  ["plugins/math/multiply.js"]: multiply_exports,
+  ["plugins/math/multiply2.js"]: multiply2_exports,
+  ["plugins/plugin/package.json"]: package_default2,
+  ["number.js"]: number_default
 };
 var options = {
   version: "0.0.0",
@@ -13516,24 +13462,24 @@ var printError = (arr, type, severity = "Error") => {
 };
 var referenceDiv = document.getElementById("reference");
 var importDiv = document.getElementById("import");
-var htmlDiv = document.getElementById("html");
 var generatedDiv = document.getElementById("generated");
 var startExecution = async () => {
   options.path = path;
   options.activate = true;
-  options.wasl = core_default;
   options.forceImportFromText = true;
   options.debug = true;
   options.relativeTo = import.meta.url;
   options.callbacks = {
-    sourceProgress: (label, i, total) => {
-      console.log("Source", label, i, total);
-    },
-    componentProgress: (label, i, graph) => {
-      console.log("Remote Component", label, i, graph);
-    },
-    progress: (label, i, total) => {
-      console.log("Fetch", label, i, total);
+    progress: {
+      source: (label, i, total) => {
+        console.log("Source", label, i, total);
+      },
+      components: (label, i, graph) => {
+        console.log("Remote Component", label, i, graph);
+      },
+      fetch: (label, i, total) => {
+        console.log("Fetch", label, i, total);
+      }
     }
   };
   let imported = await runMode(path, options, "import");
@@ -13581,14 +13527,17 @@ async function runMode(input, options2, name2 = "import") {
     console.log(`Starting ${name2} mode`);
     const optionsCopy = Object.assign({ errors: [], warnings: [] }, options2);
     optionsCopy.parentNode = document.getElementById(`${name2}container`);
-    const res = await validate_default(input, optionsCopy);
-    console.log(`validate (${name2})`, res);
-    if (res) {
+    const schemaValid = await validate_default(input, optionsCopy);
+    console.log(`validate (${name2})`, schemaValid);
+    if (schemaValid) {
       wasl = new core_default(input, optionsCopy);
       console.log(`load (${name2})`, wasl);
-      optionsCopy.errors = wasl.errors;
-      optionsCopy.warnings = wasl.warnings;
-    }
+      await wasl.init();
+      const loadValid = await validate_default(wasl, options2);
+      if (!loadValid)
+        console.error("Invalid Loaded WASL Object");
+    } else
+      console.error("Invalid WASL Schema");
     printError(optionsCopy.errors, "import");
     printError(optionsCopy.warnings, "import", "Warning");
   }

@@ -509,7 +509,12 @@ class WASL {
                 // Add Path
                 const main = o.mainPath || this.#main // use base main if not specified
                 const rootRelativeTo = this.#options.relativeTo
-                const absoluteMain = main ? ( main.includes(rootRelativeTo) ? main : remoteImport.resolve(main, rootRelativeTo) ) : rootRelativeTo
+                const isMainAbsolute = main?.[0] !== '.'
+
+                let absoluteMain; 
+                if (!main) absoluteMain = rootRelativeTo
+                if (isMainAbsolute) absoluteMain = main
+                else absoluteMain = main.includes(rootRelativeTo) ? main : remoteImport.resolve(main, rootRelativeTo)
 
                 if (isRemote) o.path = o.value
                 else if (isAbsolute) o.path = await remoteImport.resolveNodeModule(o.value, {
@@ -517,8 +522,15 @@ class WASL {
                     nodeModules: this.#options.nodeModules,
                 })
                 else {
-                    o.path = remoteImport.resolve(o.value, absoluteMain)
+                    if (main){
+                        o.path = remoteImport.resolve(o.value, absoluteMain)
+                        o.id = remoteImport.resolve(o.value, main)
+                    } else o.path = o.id = remoteImport.resolve(o.value)
                 }
+
+                console.log('Got Path', o.path, isRemote, isAbsolute, o.value)
+
+                if (isRemote || isAbsolute) o.id = o.path
 
                 // Change Import Method
                 if (isRemote) o.mode = 'import'
@@ -652,7 +664,7 @@ class WASL {
 
         // Could not Resolve the Source Value
         if (!res || isError) {
-            utils.remove(ogSrc, info.path, name,  deepSource ? undefined : info.parent, res) // remove if no source
+            utils.remove(ogSrc, info.id, name,  deepSource ? undefined : info.parent, res) // remove if no source
             if (res) this.#throw({ message: res.message, file: info.path, type: 'warning' })
             return // stop execution here
         }
@@ -679,6 +691,10 @@ class WASL {
         const newContext = this.updateContext(info, context)
         info.mode = newContext.mode // align modes
         const res = await this.resolveSource(info.path, info.mode, newContext)
+        if (!res) {
+            console.error('Not resolved', info.path, info)
+            return 
+        }
 
         const found = await this.findSources(res, events, newContext)
         if (opts.callbacks?.progress.components instanceof Function) opts.callbacks.progress.components(info.path, acc.length, res)

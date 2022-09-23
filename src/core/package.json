@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "es-plugins": "0.0.25",
-    "remote-esm": "^0.0.26"
+    "remote-esm": "^0.0.28"
   },
   "dependencies": {
     "node-fetch": "^3.2.10"

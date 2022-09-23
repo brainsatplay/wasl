@@ -4,13 +4,11 @@ import validate from "./src/validate/index"
 import * as html from "./src/core/html"
 
 // Working Demos
-// import { path, main, options } from './demos/starter.js'
-// import { path, main, options } from './demos/signals.js'
-// import { path, main, options } from './demos/basic/0.0.0.js'
+import { path, main, options } from './demos/basic/0.0.0.js'
 // import { path, main, options } from './demos/phaser.js'
-// import { path, main, options } from './demos/remote.js'
-import { path, main, options } from './demos/external/0.0.0.js'
-// import { path, main, options } from './demos/audiofeedback.js'
+
+// Broken Demos (because of absolute paths)
+// import { path, main, options } from './demos/external/0.0.0.js'
 
 
 const useHTML = false
@@ -32,11 +30,10 @@ const startExecution = async () => {
 
     options.path = path // must include
     options.activate = true // use internal graph system
-    options.wasl = WASL
     // options.output = 'object'
     options.forceImportFromText = true
     options.debug = true
-    options.relativeTo = import.meta.url
+    options.relativeTo =  import.meta.url
     options.callbacks = {
         progress: {
             source: (label, i, total) => {
@@ -114,16 +111,15 @@ async function runMode(input, options, name='import') {
         console.log(`Starting ${name} mode`)
         const optionsCopy = Object.assign({errors: [], warnings: []}, options)
         optionsCopy.parentNode = document.getElementById(`${name}container`) // set parent node
-        const res = await validate(input, optionsCopy)
-        console.log(`validate (${name})`, res)
-        
-
-        if (res) {
+        const schemaValid = await validate(input, optionsCopy)
+        console.log(`validate (${name})`, schemaValid)
+        if (schemaValid) {
             wasl = new WASL(input, optionsCopy)
             console.log(`load (${name})`, wasl)
-            optionsCopy.errors = wasl.errors
-            optionsCopy.warnings = wasl.warnings
-        }
+            await wasl.init()
+            const loadValid = await validate(wasl, options)
+            if (!loadValid) console.error('Invalid Loaded WASL Object')
+        } else console.error('Invalid WASL Schema')
 
         printError(optionsCopy.errors, 'import')
         printError(optionsCopy.warnings, 'import', "Warning")

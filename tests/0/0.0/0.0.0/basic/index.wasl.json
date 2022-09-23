@@ -9,7 +9,7 @@
                             "input": 15
                         },
                         "toAdd": {
-                            "src": "number.js"
+                            "src": "./number.js"
                         }
                     }
                 },

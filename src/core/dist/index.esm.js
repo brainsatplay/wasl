@@ -821,8 +821,9 @@ var defaults = {
 var resolveNodeModule = async (path, opts) => {
   const nodeModules = opts.nodeModules ?? defaults.nodeModules;
   const rootRelativeTo = opts.rootRelativeTo ?? defaults.rootRelativeTo;
-  const base = get(path, nodeModules);
-  const getPath = (str) => get(get(str, base, false, path.split("/").length === 1), rootRelativeTo, true);
+  const absoluteNodeModules = get(nodeModules, rootRelativeTo);
+  const base = get(path, absoluteNodeModules);
+  const getPath = (str) => get(str, base, false, path.split("/").length === 1);
   const pkgPath = getPath("package.json", base);
   try {
     const pkg = (await import(pkgPath, { assert: { type: "json" } })).default;
@@ -5824,18 +5825,17 @@ var WASL = class {
           const isRemote = o.type === "remote";
           const isAbsolute = o.value[0] !== ".";
           const main = o.mainPath || __privateGet(this, _main);
+          const rootRelativeTo = __privateGet(this, _options).relativeTo;
+          const absoluteMain = main ? main.includes(rootRelativeTo) ? main : resolve(main, rootRelativeTo) : rootRelativeTo;
           if (isRemote)
             o.path = o.value;
           else if (isAbsolute)
             o.path = await resolveNodeModule(o.value, {
-              rootRelativeTo: __privateGet(this, _options).relativeTo,
+              rootRelativeTo,
               nodeModules: __privateGet(this, _options).nodeModules
             });
           else {
-            if (main)
-              o.path = resolve(o.value, main);
-            else
-              resolve(o.value);
+            o.path = resolve(o.value, absoluteMain);
           }
           if (isRemote)
             o.mode = "import";
