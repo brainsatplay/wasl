@@ -1,6 +1,6 @@
 {
   "name": "wasl",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "The Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,8 +21,8 @@
     "types": "node types.js"
   },
   "devDependencies": {
-    "es-plugins": "0.0.21",
-    "remote-esm": "^0.0.23"
+    "es-plugins": "0.0.25",
+    "remote-esm": "^0.0.26"
   },
   "dependencies": {
     "node-fetch": "^3.2.10"
