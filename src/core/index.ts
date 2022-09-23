@@ -508,15 +508,16 @@ class WASL {
 
                 // Add Path
                 const main = o.mainPath || this.#main // use base main if not specified
-                
+                const rootRelativeTo = this.#options.relativeTo
+                const absoluteMain = main ? ( main.includes(rootRelativeTo) ? main : remoteImport.resolve(main, rootRelativeTo) ) : rootRelativeTo
+
                 if (isRemote) o.path = o.value
                 else if (isAbsolute) o.path = await remoteImport.resolveNodeModule(o.value, {
-                    rootRelativeTo: this.#options.relativeTo,
+                    rootRelativeTo,
                     nodeModules: this.#options.nodeModules,
                 })
                 else {
-                    if (main) o.path = remoteImport.resolve(o.value, main)
-                    else remoteImport.resolve(o.value)
+                    o.path = remoteImport.resolve(o.value, absoluteMain)
                 }
 
                 // Change Import Method
