@@ -5826,7 +5826,14 @@ var WASL = class {
           const isAbsolute = o.value[0] !== ".";
           const main = o.mainPath || __privateGet(this, _main);
           const rootRelativeTo = __privateGet(this, _options).relativeTo;
-          const absoluteMain = main ? main.includes(rootRelativeTo) ? main : resolve(main, rootRelativeTo) : rootRelativeTo;
+          const isMainAbsolute = main?.[0] !== ".";
+          let absoluteMain;
+          if (!main)
+            absoluteMain = rootRelativeTo;
+          if (isMainAbsolute)
+            absoluteMain = main;
+          else
+            absoluteMain = main.includes(rootRelativeTo) ? main : resolve(main, rootRelativeTo);
           if (isRemote)
             o.path = o.value;
           else if (isAbsolute)
@@ -5835,8 +5842,15 @@ var WASL = class {
               nodeModules: __privateGet(this, _options).nodeModules
             });
           else {
-            o.path = resolve(o.value, absoluteMain);
+            if (main) {
+              o.path = resolve(o.value, absoluteMain);
+              o.id = resolve(o.value, main);
+            } else
+              o.path = o.id = resolve(o.value);
           }
+          console.log("Got Path", o.path, isRemote, isAbsolute, o.value);
+          if (isRemote || isAbsolute)
+            o.id = o.path;
           if (isRemote)
             o.mode = "import";
           const ext = o.value.split("/").pop().split(".").slice(1).join(".");
@@ -5930,7 +5944,7 @@ var WASL = class {
         delete parent[name3];
       }
       if (!res || isError) {
-        remove(ogSrc, info.path, name2, deepSource ? void 0 : info.parent, res);
+        remove(ogSrc, info.id, name2, deepSource ? void 0 : info.parent, res);
         if (res)
           __privateGet(this, _throw).call(this, { message: res.message, file: info.path, type: "warning" });
         return;
@@ -5950,6 +5964,10 @@ var WASL = class {
       const newContext = this.updateContext(info, context);
       info.mode = newContext.mode;
       const res = await this.resolveSource(info.path, info.mode, newContext);
+      if (!res) {
+        console.error("Not resolved", info.path, info);
+        return;
+      }
       const found = await this.findSources(res, events, newContext);
       if (opts.callbacks?.progress.components instanceof Function)
         opts.callbacks.progress.components(info.path, acc.length, res);
