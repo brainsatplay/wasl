@@ -958,6 +958,7 @@ var get2 = async (relPath, relativeTo = "", onImport, options = {}) => {
           onImport(...args);
         }
       },
+      progress: options.callbacks?.progress?.fetch,
       outputText: true,
       filesystem: options.filesystem,
       nodeModules: options.nodeModules,
@@ -5882,8 +5883,8 @@ var WASL = class {
           const res = await this.resolveSource(path, pathInfo[0].mode);
           await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)));
           i++;
-          if (opts.callbacks?.sourceProgress instanceof Function)
-            opts.callbacks.sourceProgress(path, i, total);
+          if (opts.callbacks?.progress?.source instanceof Function)
+            opts.callbacks.progress?.source(path, i, total);
         }));
       }));
       const toc = performance.now();
@@ -5919,6 +5920,15 @@ var WASL = class {
       }, 0) || Object.prototype.toString.call(res) === moduleStringTag);
       const isWASL = info.path.includes("wasl.json");
       const deepSource = (!isModule || !info.isComponent) && !isWASL;
+      const handlers = {
+        _map: info.path
+      };
+      const parent = info.parent[info.name];
+      for (let name3 in handlers) {
+        if (parent[name3] === true)
+          res = handlers[name3];
+        delete parent[name3];
+      }
       if (!res || isError) {
         remove(ogSrc, info.path, name2, deepSource ? void 0 : info.parent, res);
         if (res)
@@ -5941,8 +5951,8 @@ var WASL = class {
       info.mode = newContext.mode;
       const res = await this.resolveSource(info.path, info.mode, newContext);
       const found = await this.findSources(res, events, newContext);
-      if (opts.callbacks?.componentProgress instanceof Function)
-        opts.callbacks.componentProgress(info.path, acc.length, res);
+      if (opts.callbacks?.progress.components instanceof Function)
+        opts.callbacks.progress.components(info.path, acc.length, res);
       if (found)
         this.flattenInto(found, list);
       await this.handleResolved(res, info);

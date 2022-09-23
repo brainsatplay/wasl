@@ -12835,8 +12835,8 @@ var WASL = class {
           const res = await this.resolveSource(path2, pathInfo[0].mode);
           await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)));
           i++;
-          if (opts.callbacks?.sourceProgress instanceof Function)
-            opts.callbacks.sourceProgress(path2, i, total);
+          if (opts.callbacks?.progress?.source instanceof Function)
+            opts.callbacks.progress.source(path2, i, total);
         }));
       }));
       const toc = performance.now();

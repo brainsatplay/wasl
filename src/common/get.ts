@@ -24,6 +24,7 @@ const get = async (relPath, relativeTo="", onImport?, options:Options={}) => {
                     onImport(...args)
                 }
             }, 
+            progress: options.callbacks?.progress?.fetch,
             outputText: true,
             filesystem: options.filesystem,
             nodeModules: options.nodeModules,

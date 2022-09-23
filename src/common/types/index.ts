@@ -24,9 +24,11 @@ export type Options = {
 
     nodeModules?: string
     callbacks?: {
-        sourceProgress: (label: string, i: number, total: number) => void,
-        graphProgress: (label: string, i: number, graph: any) => void,
-        progress: (label: string, i: number, total: number) => void, // For remote-esm
+        progress: {
+            source: (label: string, i: number, total: number) => void,
+            component: (label: string, i: number, graph: any) => void,
+            fetch: (label: string, i: number, total: number) => void, // For remote-esm
+        }
     }
    
     _internal?: string | boolean

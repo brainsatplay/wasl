@@ -26,7 +26,6 @@ const printError = (arr, type, severity='Error') => {
 
 const referenceDiv = document.getElementById('reference') 
 const importDiv = document.getElementById('import')
-const htmlDiv = document.getElementById('html')
 const generatedDiv = document.getElementById('generated')
 
 const startExecution = async () => {
@@ -39,15 +38,17 @@ const startExecution = async () => {
     options.debug = true
     options.relativeTo = import.meta.url
     options.callbacks = {
-        sourceProgress: (label, i, total) => {
-            console.log('Source', label, i, total)
-        },
-        componentProgress: (label, i, graph) => {
-            console.log('Remote Component', label, i, graph)
-        },
-        progress: (label, i, total) => {
-            console.log('Fetch', label, i, total)
-        },
+        progress: {
+            source: (label, i, total) => {
+                console.log('Source', label, i, total)
+            },
+            components: (label, i, graph) => {
+                console.log('Remote Component', label, i, graph)
+            },
+            fetch: (label, i, total) => {
+                console.log('Fetch', label, i, total)
+            },
+        }
     }
 
     // Option #1: Import Mode

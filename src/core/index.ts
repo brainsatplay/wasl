@@ -584,7 +584,7 @@ class WASL {
                 const res = await this.resolveSource(path, pathInfo[0].mode) // will remain consistent...
                 await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)))
                 i++
-                if (opts.callbacks?.sourceProgress instanceof Function) opts.callbacks.sourceProgress(path, i, total)
+                if (opts.callbacks?.progress?.source instanceof Function) opts.callbacks.progress?.source(path, i, total)
             }))
         }))
 
@@ -638,6 +638,17 @@ class WASL {
 
         const deepSource = (!isModule || !info.isComponent) && !isWASL
 
+        // Handle Source Differently based on Flags
+        const handlers = {
+            _map: info.path
+        }
+
+        const parent = info.parent[info.name]
+        for (let name in handlers) {
+            if (parent[name] === true) res = handlers[name]
+            delete parent[name]
+        }
+
         // Could not Resolve the Source Value
         if (!res || isError) {
             utils.remove(ogSrc, info.path, name,  deepSource ? undefined : info.parent, res) // remove if no source
@@ -669,7 +680,7 @@ class WASL {
         const res = await this.resolveSource(info.path, info.mode, newContext)
 
         const found = await this.findSources(res, events, newContext)
-        if (opts.callbacks?.componentProgress instanceof Function) opts.callbacks.componentProgress(info.path, acc.length, res)
+        if (opts.callbacks?.progress.components instanceof Function) opts.callbacks.progress.components(info.path, acc.length, res)
 
         // Register Internal Sources
         if (found) this.flattenInto(found, list)

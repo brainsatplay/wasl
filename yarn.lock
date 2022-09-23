@@ -471,7 +471,7 @@
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"
-  "version" "0.0.17"
+  "version" "0.0.18"
   dependencies:
     "node-fetch" "^3.2.10"
 
