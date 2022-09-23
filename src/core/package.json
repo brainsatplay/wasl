@@ -21,7 +21,7 @@
     "types": "node types.js"
   },
   "devDependencies": {
-    "es-plugins": "0.0.25",
+    "es-plugins": "0.0.26",
     "remote-esm": "^0.0.28"
   },
   "dependencies": {

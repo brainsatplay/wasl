@@ -528,8 +528,6 @@ class WASL {
                     } else o.path = o.id = remoteImport.resolve(o.value)
                 }
 
-                console.log('Got Path', o.path, isRemote, isAbsolute, o.value)
-
                 if (isRemote || isAbsolute) o.id = o.path
 
                 // Change Import Method
