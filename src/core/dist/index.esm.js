@@ -728,6 +728,7 @@ var mimeTypeMap = {
   "js": jsType,
   "mjs": jsType,
   "cjs": jsType,
+  "ts": "text/typescript",
   "json": "application/json",
   "html": "text/html",
   "css": "text/css",
@@ -745,12 +746,12 @@ var mimeTypeMap = {
   "wav": "audio/wav"
 };
 var getMimeType = (extension) => mimeTypeMap[extension];
-var re = /import([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/g;
+var re = /[^\n]*(?<![\/\/])import\s+([ \n\t]*(?:(?:\* (?:as .+))|(?:[^ \n\t\{\}]+[ \n\t]*,?)|(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\}))[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])([ \n\t]*assert[ \n\t]*{type:[ \n\t]*(['"])([^'"\n]+)(?:['"])})?/gm;
 function _arrayBufferToBase64(buffer) {
-  var binary = "";
-  var bytes = new Uint8Array(buffer);
-  var len = bytes.byteLength;
-  for (var i = 0; i < len; i++) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
   return window.btoa(binary);
@@ -759,30 +760,57 @@ var moduleDataURI = (o, mimeType = "text/javascript", method, safe = false) => {
   const base64 = method === "buffer" ? _arrayBufferToBase64(o) : btoa(safe ? unescape(encodeURIComponent(o)) : o);
   return `data:${mimeType};base64,` + base64;
 };
+var loadScriptTag = async (uri) => {
+  return await new Promise((resolve2, reject) => {
+    const script = document.createElement("script");
+    let r = false;
+    script.onload = script.onreadystatechange = function() {
+      if (!r && (!this.readyState || this.readyState == "complete")) {
+        r = true;
+        resolve2(window);
+      }
+    };
+    script.onerror = reject;
+    script.src = uri;
+    document.body.insertAdjacentElement("beforeend", script);
+  });
+};
 var catchFailedModule = async (uri, e) => {
-  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.") || e.message.includes("Cannot set properties of undefined")) {
-    return await new Promise((resolve2, reject) => {
-      const script = document.createElement("script");
-      let r = false;
-      script.onload = script.onreadystatechange = function() {
-        if (!r && (!this.readyState || this.readyState == "complete")) {
-          r = true;
-          resolve2(window);
-        }
-      };
-      script.onerror = reject;
-      script.src = uri;
-      document.body.insertAdjacentElement("beforeend", script);
-    });
-  } else
+  if (e.message.includes("The string to be encoded contains characters outside of the Latin1 range.") || e.message.includes("Cannot set properties of undefined"))
+    return await loadScriptTag(uri);
+  else
     throw e;
 };
-var importResponse = async (info, path, collection = {}, type = "buffer") => {
+var tsconfig = {
+  compilerOptions: {
+    "target": "ES2015",
+    "module": "ES2020",
+    "strict": true,
+    "esModuleInterop": true
+  }
+};
+var compileTypescript = async (response, type = "text") => {
+  if (!window.ts)
+    await loadScriptTag("https://cdn.jsdelivr.net/npm/typescript/lib/typescriptServices.js");
+  const tsCode = type !== "buffer" ? response[type] : new TextDecoder().decode(response[type]);
+  response.text = window.ts.transpile(tsCode, tsconfig.compilerOptions);
+  if (type === "buffer")
+    response.buffer = new TextEncoder().encode(response.text);
+  return response[type];
+};
+var importResponse = async (response, path, collection = {}, type = "buffer") => {
   const extension = path.split(".").slice(-1)[0];
   const isJSON = extension === "json";
   let mimeType = getMimeType(extension);
   let reference = null;
   let imported = null;
+  let info = response[type];
+  switch (mimeType) {
+    case "text/typescript":
+      info = await compileTypescript(response, type);
+      mimeType = jsType;
+      break;
+  }
   const importURI = async (uri) => await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch((e) => {
     throw e;
   });
@@ -822,119 +850,204 @@ var resolveNodeModule = async (path, opts) => {
   const nodeModules = opts.nodeModules ?? defaults.nodeModules;
   const rootRelativeTo = opts.rootRelativeTo ?? defaults.rootRelativeTo;
   const absoluteNodeModules = get(nodeModules, rootRelativeTo);
+  const split = path.split("/");
   const base = get(path, absoluteNodeModules);
-  const getPath = (str) => get(str, base, false, path.split("/").length === 1);
-  const pkgPath = getPath("package.json", base);
-  try {
-    const pkg = (await import(pkgPath, { assert: { type: "json" } })).default;
-    const destination = pkg.module || pkg.main || "index.js";
-    return getPath(destination);
-  } catch (e) {
+  if (split.length > 1)
+    return base;
+  return await getMainPath(path, base).catch((e) => {
     console.warn(`${base} does not exist or is not at the root of the project.`);
+  });
+};
+var getPath = (str, path, base) => get(str, base, false, path.split("/").length === 1);
+var getPackagePath = (path, base = path) => getPath("package.json", path, base);
+var getMainPath = async (path, base = path) => {
+  const pkg = await getPackage(path, base);
+  if (!pkg)
+    return base;
+  const destination = pkg.module || pkg.main || "index.js";
+  return getPath(destination, path, base);
+};
+var getPackage = async (path, base = path) => {
+  const pkgPath = getPackagePath(path, base);
+  return (await import(pkgPath, { assert: { type: "json" } })).default;
+};
+var handleNoExtension = (path, repExt = "js") => {
+  const isAbsolute2 = path[0] !== ".";
+  const split = path.split("/");
+  const ext = split.slice(-1)[0].split(".").slice(-1)[0];
+  if (!isAbsolute2 || isAbsolute2 && split.length > 1) {
+    if (!mimeTypeMap[ext])
+      return `${path}.${repExt}`;
   }
+  return path;
+};
+var handleHandlers = async (path, handler, opts, force) => {
+  if (typeof handler === "string" && (!force || force === "string")) {
+    return handleNoExtension(path, handler);
+  } else if (typeof handler === "function" && (!force || force === "function")) {
+    return await handler(path).catch((e) => {
+      throw createError(path, getURLNoBase(path, opts));
+    });
+  }
+};
+var getURLNoBase = (path, opts) => {
+  const isAbsolute2 = path[0] !== ".";
+  const rootRelativeTo = opts.rootRelativeTo ?? defaults.rootRelativeTo;
+  return isAbsolute2 ? path : correctPath.replace(`${rootRelativeTo.split("/").slice(0, -1).join("/")}/`, "");
+};
+var middle = "was not resolved locally. You can provide a direct reference to use in";
+var createError = (uri, key) => new Error(`${uri} ${middle} options.filesystem._fallbacks['${key}'].`);
+var internalImport = async (info, opts, handler = "js") => {
+  const uriCollection = opts.datauri || datauri;
+  const { variables, wildcard } = info.import;
+  let path = info.import.path;
+  const isAbsolute2 = path[0] !== ".";
+  if (typeof handler === "string")
+    path = await handleHandlers(path, handler, opts, "string");
+  try {
+    let correctPath2 = get(path, info.uri);
+    if (isAbsolute2)
+      correctPath2 = await resolveNodeModule(path, opts);
+    if (typeof handler === "function")
+      correctPath2 = await handleHandlers(correctPath2, handler, opts, "function").catch((e) => {
+        throw e;
+      });
+    const dependentFilePath = get(correctPath2);
+    const dependentFileWithoutRoot = get(dependentFilePath.replace(opts.root ?? "", ""));
+    if (opts.dependencies)
+      opts.dependencies[info.uri][dependentFileWithoutRoot] = info.import;
+    let filesystemFallback = false;
+    let ref = uriCollection[dependentFilePath];
+    if (!ref) {
+      const extension = correctPath2.split(".").slice(-1)[0];
+      const url = getURL(correctPath2);
+      const willBeJS = extension.includes("js") || extension === "ts";
+      const newURI = dependentFileWithoutRoot;
+      let importedText;
+      if (willBeJS) {
+        importedText = await new Promise(async (resolve2, reject) => {
+          await safeImport(newURI, {
+            ...opts,
+            root: url,
+            onImport: (path2, info2) => {
+              if (opts.onImport instanceof Function)
+                opts.onImport(path2, info2);
+              if (path2 == newURI)
+                resolve2(info2.text);
+            },
+            outputText: true,
+            datauri: uriCollection
+          }).catch((e) => {
+            const urlNoBase = isAbsolute2 ? getURLNoBase(path, opts) : getURLNoBase(correctPath2, opts);
+            console.warn(`Failed to fetch ${newURI}. Checking filesystem references...`);
+            filesystemFallback = opts.filesystem?._fallbacks?.[urlNoBase];
+            if (filesystemFallback) {
+              console.warn(`Got fallback reference for ${newURI}.`);
+              resolve2();
+            } else {
+              const middle2 = "was not resolved locally. You can provide a direct reference to use in";
+              if (e.message.includes(middle2))
+                reject(e);
+              else
+                reject(createError(newURI, urlNoBase));
+            }
+          });
+        });
+      } else {
+        const info2 = await handleFetch(url, opts?.callbacks?.progress);
+        let blob = new Blob([info2.buffer], { type: info2.type });
+        importedText = await blob.text();
+      }
+      if (filesystemFallback)
+        uriCollection[correctPath2] = filesystemFallback;
+      else
+        await importResponse({ text: importedText }, correctPath2, uriCollection, "text");
+    }
+    if (typeof uriCollection[correctPath2] === "string") {
+      info.response.text = `import ${wildcard ? "* as " : ""}${variables} from "${uriCollection[correctPath2]}";
+                  ${info.response.text}`;
+    }
+    return uriCollection[correctPath2];
+  } catch (e) {
+    throw e;
+  }
+};
+var extensionsToTry = ["ts", "js", getMainPath];
+var isAbsolute = (uri) => {
+  const isAbsolute2 = uri[0] !== ".";
+  const isRemote = uri.includes("://");
+  return isAbsolute2 && !isRemote;
 };
 var safeImport = async (uri, opts = {}) => {
   const {
-    root,
     onImport = () => {
     },
     outputText,
-    forceImportFromText,
-    rootRelativeTo = defaults.rootRelativeTo
+    forceImportFromText
   } = opts;
   const uriCollection = opts.datauri || datauri;
   await ready;
   if (opts.dependencies)
     opts.dependencies[uri] = {};
+  if (isAbsolute(uri))
+    uri = await resolveNodeModule(uri, opts);
   const extension = uri.split(".").slice(-1)[0];
+  const noExtension = !mimeTypeMap[extension];
   const isJSON = extension === "json";
   let module = !forceImportFromText ? await (isJSON ? import(uri, { assert: { type: "json" } }) : import(uri)).catch(() => {
   }) : void 0;
-  let text, originalText;
+  let originalText, response;
   if (!module || outputText) {
-    const response = await getResponse(uri);
-    text = originalText = response.text;
+    if (noExtension) {
+      const toTry = [...extensionsToTry];
+      do {
+        const transformed = await handleHandlers(uri, toTry.pop(), opts).catch((e) => {
+          throw e;
+        });
+        response = await getResponse(transformed);
+        if (!response.buffer)
+          console.warn("Not found!", transformed);
+      } while (!response.buffer && toTry.length > 0);
+    } else
+      response = await getResponse(uri);
     try {
-      module = await importResponse(response.buffer, uri, uriCollection);
+      originalText = response.text;
+      module = await importResponse(response, uri, uriCollection);
     } catch (e) {
       const importInfo = [];
-      let m;
-      do {
-        m = re.exec(text);
-        if (m == null)
-          m = re.exec(text);
-        if (m) {
-          text = text.replace(m[0], ``);
-          const wildcard = !!m[1].match(/\*\s+as/);
-          const variables = m[1].replace(/\*\s+as/, "").trim();
-          importInfo.push({
-            path: m[3],
-            variables,
-            wildcard
-          });
-        }
-      } while (m);
+      const matches = Array.from(response.text.matchAll(re));
+      matches.forEach((m) => {
+        response.text = response.text.replace(m[0], ``);
+        const wildcard = !!m[1].match(/\*\s+as/);
+        const variables = m[1].replace(/\*\s+as/, "").trim();
+        importInfo.push({
+          path: m[3],
+          variables,
+          wildcard
+        });
+      });
       for (let i in importInfo) {
-        const { variables, wildcard, path } = importInfo[i];
-        const isAbsolute = path[0] !== ".";
-        let correctPath = get(path, uri);
-        if (isAbsolute)
-          correctPath = await resolveNodeModule(path, opts);
-        const dependentFilePath = get(correctPath);
-        const dependentFileWithoutRoot = get(dependentFilePath.replace(root ?? "", ""));
-        if (opts.dependencies)
-          opts.dependencies[uri][dependentFileWithoutRoot] = importInfo[i];
-        let filesystemFallback = false;
-        let ref = uriCollection[dependentFilePath];
-        if (!ref) {
-          const extension2 = correctPath.split(".").slice(-1)[0];
-          const info = await handleFetch(correctPath, opts?.callbacks?.progress);
-          let blob = new Blob([info.buffer], { type: info.type });
-          const isJS = extension2.includes("js");
-          const newURI = dependentFileWithoutRoot;
-          const newText = await blob.text();
-          let importedText = isJS ? await new Promise(async (resolve2, reject) => {
-            await safeImport(newURI, {
-              ...opts,
-              root: uri,
-              onImport: (path2, info2) => {
-                onImport(path2, info2);
-                if (path2 == newURI)
-                  resolve2(info2.text);
-              },
-              outputText: true,
-              datauri: uriCollection
-            }).catch((e2) => {
-              const urlNoBase = isAbsolute ? path : correctPath.replace(`${rootRelativeTo.split("/").slice(0, -1).join("/")}/`, "");
-              console.warn(`Failed to fetch ${newURI}. Checking filesystem references...`);
-              filesystemFallback = opts.filesystem?._fallbacks?.[urlNoBase];
-              if (filesystemFallback) {
-                console.warn(`Got fallback reference for ${newURI}.`);
-                resolve2();
-              } else {
-                const middle = "was not resolved locally. You can provide a direct reference to use in";
-                if (e2.message.includes(middle))
-                  reject(e2);
-                else
-                  reject(new Error(`${newURI} ${middle} options.filesystem._fallbacks['${urlNoBase}'].`));
-              }
+        let res;
+        for (let j in extensionsToTry) {
+          if (!res) {
+            res = await internalImport({
+              import: importInfo[i],
+              response,
+              uri
+            }, opts, extensionsToTry[j]).catch((e2) => {
+              if (j === extensionsToTry.length - 1)
+                throw e2;
             });
-          }) : newText;
-          if (filesystemFallback)
-            uriCollection[correctPath] = filesystemFallback;
-          else
-            await importResponse(importedText, correctPath, uriCollection, "text");
-        }
-        if (typeof uriCollection[correctPath] === "string") {
-          text = `import ${wildcard ? "* as " : ""}${variables} from "${uriCollection[correctPath]}";
-                ${text}`;
+          }
         }
       }
-      module = await importResponse(text, uri, uriCollection, "text");
+      module = await importResponse(response, uri, uriCollection, "text").catch((e2) => {
+        throw e2;
+      });
     }
   }
   onImport(uri, {
-    text,
+    text: response?.text,
     file: outputText ? originalText : void 0,
     module
   });
@@ -5833,7 +5946,7 @@ var WASL = class {
           } catch {
           }
           const isRemote = o.type === "remote";
-          const isAbsolute = o.value[0] !== ".";
+          const isAbsolute2 = o.value[0] !== ".";
           const main = o.mainPath || __privateGet(this, _main);
           const rootRelativeTo = __privateGet(this, _options).relativeTo;
           const isMainAbsolute = main?.[0] !== ".";
@@ -5846,7 +5959,7 @@ var WASL = class {
             absoluteMain = main.includes(rootRelativeTo) ? main : resolve(main, rootRelativeTo);
           if (isRemote)
             o.path = o.value;
-          else if (isAbsolute)
+          else if (isAbsolute2)
             o.path = await resolveNodeModule(o.value, {
               rootRelativeTo,
               nodeModules: __privateGet(this, _options).nodeModules
@@ -5858,7 +5971,7 @@ var WASL = class {
             } else
               o.path = o.id = resolve(o.value);
           }
-          if (isRemote || isAbsolute)
+          if (isRemote || isAbsolute2)
             o.id = o.path;
           if (isRemote)
             o.mode = "import";
@@ -6005,8 +6118,8 @@ var WASL = class {
             node: name
           });
         acc.push(value);
-        return acc;
       }
+      return acc;
       info.delete();
     };
     __privateSet(this, _input, urlOrObject);

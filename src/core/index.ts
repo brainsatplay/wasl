@@ -728,9 +728,9 @@ class WASL {
             })
 
             acc.push(value)
-            return acc
         }
-
+        
+        return acc
         info.delete() //delete value[info.refKey]
 
     }
