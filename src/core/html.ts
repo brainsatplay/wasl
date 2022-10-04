@@ -1,5 +1,5 @@
 
-import * as remoteImport from 'remote-esm'
+import * as esm from 'esmpile'
 
 // ------------------------------ HTML Helper Functions ------------------------------
 function updateKey(key) {
@@ -36,7 +36,7 @@ let catchKeys = {
             isRemote = true
         } catch {}
 
-        const url = (isRemote) ? val : remoteImport.resolve(val, opts.path ?? '')
+        const url = (isRemote) ? val : esm.resolve(val, opts.path ?? '')
 
         return url
     }
@@ -44,7 +44,6 @@ let catchKeys = {
 
 function handleComponents(name, parentObject, parent, opts) {
     const attrs = getAttributes(parentObject[name], opts) as any
-    console.log('attrs', attrs)
     const el = document.createElement(attrs['tag-name'] ?? 'div')
     el.id = name
     parent.appendChild(el)

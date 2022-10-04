@@ -82,11 +82,6 @@
   "resolved" "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
   "version" "1.0.2"
 
-"blob-polyfill@^6.0.20211015":
-  "integrity" "sha512-OGL4bm6ZNpdFAvQugRlQy5MNly8gk15aWi/ZhQHimQsrx9WKD05r+v+xNgHCChLER3MH+9KLAhzuFlwFKrH1Yw=="
-  "resolved" "https://registry.npmjs.org/blob-polyfill/-/blob-polyfill-6.0.20211015.tgz"
-  "version" "6.0.20211015"
-
 "brace-expansion@^1.1.7":
   "integrity" "sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA=="
   "resolved" "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.11.tgz"
@@ -115,14 +110,6 @@
   "integrity" "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="
   "resolved" "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz"
   "version" "0.0.1"
-
-"cross-blob@^3.0.1":
-  "integrity" "sha512-OfDx5IUeufBuN0jFUusyZQckF0ncqXpgA9manQKBQobnb5UYToR+IWEBhabr0KJPAXDFkmqhXwZ5AYHIgFPHpg=="
-  "resolved" "https://registry.npmjs.org/cross-blob/-/cross-blob-3.0.1.tgz"
-  "version" "3.0.1"
-  dependencies:
-    "blob-polyfill" "^6.0.20211015"
-    "fetch-blob" "^3.1.4"
 
 "d@^1.0.1", "d@1":
   "integrity" "sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA=="
@@ -177,6 +164,13 @@
     "es5-ext" "^0.10.46"
     "es6-iterator" "^2.0.3"
     "es6-symbol" "^3.1.1"
+
+"esmpile@^0.1.1":
+  "integrity" "sha512-2V9kietmMWW5TWPZXTBTDfKe9qFewL6qPHrCejIEqksmpXRuiyozwduBIslSd5OKpQjj7wEMSYxI27Rwsotykg=="
+  "resolved" "https://registry.npmjs.org/esmpile/-/esmpile-0.1.1.tgz"
+  "version" "0.1.1"
+  dependencies:
+    "node-fetch" "^3.2.10"
 
 "event-emitter@^0.3.5":
   "integrity" "sha512-D9rRn9y7kLPnJ+hMq7S/nhvoKwwvVJahBi2BPmx3bvbsEdK3W9ii8cBSGjP+72/LnM4n6fo3+dkCX5FeTQruXA=="
@@ -402,22 +396,6 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"remote-esm@^0.0.28":
-  "integrity" "sha512-n42LZcZ/fy/MZhHohzdFRWOKc/uN2kqDt4oRt+14u/b/JD1kVS70RpwH9ypt+EKhr5V2qORR0ErNbrFThjFscA=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.28.tgz"
-  "version" "0.0.28"
-  dependencies:
-    "cross-blob" "^3.0.1"
-    "node-fetch" "^3.2.10"
-
-"remote-esm@^0.0.29":
-  "integrity" "sha512-JpN3vEwQ5KxQ1Y37yI/jJq7nx+vj97kd90hm9vfoH700o3qOkMHsfmz6dwM5Ll6/MRoXAEb2I0/SsN/rU+6Hvw=="
-  "resolved" "https://registry.npmjs.org/remote-esm/-/remote-esm-0.0.29.tgz"
-  "version" "0.0.29"
-  dependencies:
-    "cross-blob" "^3.0.1"
-    "node-fetch" "^3.2.10"
-
 "require-from-string@^2.0.2":
   "integrity" "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="
   "resolved" "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz"
@@ -466,12 +444,12 @@
   "resolved" "file:src/validate"
   "version" "0.0.14"
   dependencies:
+    "esmpile" "^0.1.1"
     "node-fetch" "^3.2.10"
-    "remote-esm" "^0.0.28"
 
 "wasl@*", "wasl@file:/Users/garrettflynn/Documents/Github/wasl/src/core":
   "resolved" "file:src/core"
-  "version" "0.0.18"
+  "version" "0.0.20"
   dependencies:
     "node-fetch" "^3.2.10"
 

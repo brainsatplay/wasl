@@ -5,7 +5,7 @@ import * as check from '../common/utils/check'
 import * as utils from './utils'
 import * as html from './html'
 
-import * as remoteImport from 'remote-esm'
+import * as esm from 'esmpile'
 import ESPlugin from "es-plugins/dist/index.esm"
 
 const basePkgPath = './package.json'
@@ -112,10 +112,10 @@ class WASL {
             }
         } else if (typeof urlOrObject === 'object') {
             object = Object.assign({}, urlOrObject)
-            if (typeof internalLoadCall === 'string') url = mainPath = remoteImport.resolve(internalLoadCall) // use internal call as base
+            if (typeof internalLoadCall === 'string') url = mainPath = esm.resolve(internalLoadCall) // use internal call as base
             mode = 'reference'
         } else if (url || (isString)) {
-            if (!url) url =  (urlOrObject[0] === '.') ? remoteImport.resolve(urlOrObject, options.relativeTo ?? '') : urlOrObject // Use Relative vs Absolute Path
+            if (!url) url =  (urlOrObject[0] === '.') ? esm.resolve(urlOrObject, options.relativeTo ?? '') : urlOrObject // Use Relative vs Absolute Path
             mode = 'import'
         }
         else console.error('Mode is not supported...')
@@ -139,7 +139,7 @@ class WASL {
                 // Graphs Nested in the Top Level Don't Have a package.json File
                 if (!innerTopLevel) {
                     if (this.#filesystem) {
-                        const pkgPath = remoteImport.resolve(basePkgPath, url)
+                        const pkgPath = esm.resolve(basePkgPath, url)
                         const pkg = utils.checkFiles(pkgPath, this.#filesystem)
                         if (pkg) object = Object.assign(pkg, isString ? {} : object) as any
                     }
@@ -148,11 +148,11 @@ class WASL {
 
             default:
                 if (!object) {
-                    mainPath = await remoteImport.resolve(url)
+                    mainPath = await esm.resolve(url)
                     this.original = await this.get(mainPath, undefined) as LatestWASL
                     object = JSON.parse(JSON.stringify(this.original))
                     if (!innerTopLevel) {
-                        const pkgUrl = remoteImport.resolve(basePkgPath, mainPath, true)
+                        const pkgUrl = esm.resolve(basePkgPath, mainPath, true)
                         const pkg = await this.get(pkgUrl, undefined)
                         if (pkg) object = Object.assign(pkg, object) as any
                     }
@@ -514,18 +514,18 @@ class WASL {
                 let absoluteMain; 
                 if (!main) absoluteMain = rootRelativeTo
                 if (isMainAbsolute) absoluteMain = main
-                else absoluteMain = main.includes(rootRelativeTo) ? main : remoteImport.resolve(main, rootRelativeTo)
+                else absoluteMain = main.includes(rootRelativeTo) ? main : esm.resolve(main, rootRelativeTo)
 
                 if (isRemote) o.path = o.value
-                else if (isAbsolute) o.path = await remoteImport.resolveNodeModule(o.value, {
+                else if (isAbsolute) o.path = await esm.nodeModules.resolve(o.value, {
                     rootRelativeTo,
                     nodeModules: this.#options.nodeModules,
                 })
                 else {
                     if (main){
-                        o.path = remoteImport.resolve(o.value, absoluteMain)
-                        o.id = remoteImport.resolve(o.value, main)
-                    } else o.path = o.id = remoteImport.resolve(o.value)
+                        o.path = esm.resolve(o.value, absoluteMain)
+                        o.id = esm.resolve(o.value, main)
+                    } else o.path = o.id = esm.resolve(o.value)
                 }
 
                 if (isRemote || isAbsolute) o.id = o.path
@@ -595,7 +595,8 @@ class WASL {
                 const res = await this.resolveSource(path, pathInfo[0].mode) // will remain consistent...
                 await Promise.all(pathInfo.map(async (info) => await this.handleResolved(res, info)))
                 i++
-                if (opts.callbacks?.progress?.source instanceof Function) opts.callbacks.progress?.source(path, i, total)
+                const pathId = esm.path.pathId(path, this.#options)
+                if (opts.callbacks?.progress?.source instanceof Function) opts.callbacks.progress?.source(pathId, i, total)
             }))
         }))
 
@@ -651,12 +652,16 @@ class WASL {
 
         // Handle Source Differently based on Flags
         const handlers = {
-            _map: info.path
+            _format: {
+                'path': info.path,
+                'datauri': res,
+                'object': res,
+            }
         }
 
         const parent = info.parent[info.name]
-        for (let name in handlers) {
-            if (parent[name] === true) res = handlers[name]
+        for (let name in handlers._format) {
+            if (parent._format === name) res = handlers._format[name]
             delete parent[name]
         }
 
@@ -729,7 +734,7 @@ class WASL {
 
             acc.push(value)
         }
-        
+
         return acc
         info.delete() //delete value[info.refKey]
 

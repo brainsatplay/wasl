@@ -5,15 +5,13 @@ import * as html from "./src/core/html"
 
 // Working Demos
 import { path, main, options } from './demos/basic/0.0.0.js'
-// import { path, main, options } from './demos/phaser.js'
+// import { path, main, options } from './demos/phaser.js' // Reference mode only 
 
-// Broken Demos (because of absolute paths)
+// Broken Demos (because of absolute paths in source files)
 // import { path, main, options } from './demos/external/0.0.0.js'
 
 
 const useHTML = false
-// Broken
-// ...
 
 const printError = (arr, type, severity='Error') => {
     arr.forEach(e => {
@@ -33,7 +31,7 @@ const startExecution = async () => {
     // options.output = 'object'
     options.forceImportFromText = true
     options.debug = true
-    options.relativeTo =  import.meta.url
+    options.relativeTo =  window.location.href // import.meta.url
     options.callbacks = {
         progress: {
             source: (label, i, total) => {
@@ -42,8 +40,15 @@ const startExecution = async () => {
             components: (label, i, graph) => {
                 console.log('Remote Component', label, i, graph)
             },
-            fetch: (label, i, total) => {
-                console.log('Fetch', label, i, total)
+            file: (path, i, total, done, failed) => {
+                if (failed) console.error(`${path} failed`, failed)
+                else if (done) console.log(`${path} done!`)
+                else console.log('File', path, i, total)
+            },
+            fetch: (path, i, total, done, failed) => {
+                if (failed) console.error(`${path} fetch failed`, failed)
+                else if (done) console.log(`${path} fetch done!`)
+                else console.log('Fetch', path, i, total)
             },
         }
     }
@@ -111,6 +116,7 @@ async function runMode(input, options, name='import') {
         console.log(`Starting ${name} mode`)
         const optionsCopy = Object.assign({errors: [], warnings: []}, options)
         optionsCopy.parentNode = document.getElementById(`${name}container`) // set parent node
+
         const schemaValid = await validate(input, optionsCopy)
         console.log(`validate (${name})`, schemaValid)
         if (schemaValid) {

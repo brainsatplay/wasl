@@ -19,7 +19,7 @@ addFormats(ajv)
 //     - Provide a url and a options.relativeTo entry (locally served + Node.js only)
 //     - Provide a file object (any)
 
-const validate = async (urlOrObject, options:Options={}, load = true) => {
+const validate = async (urlOrObject, options:Options={}) => {
 
     const clone = Object.assign({errors: [], warnings: []}, options)
     
@@ -44,11 +44,13 @@ const validate = async (urlOrObject, options:Options={}, load = true) => {
     // Check First Path
     if (typeof urlOrObject === 'string') {
 
-        data = await get(urlOrObject, relativeTo).catch(e => {
+        data = await get(urlOrObject, relativeTo, undefined, options).catch(e => {
             errors.push({ 
                 message: e.message,
                 file: urlOrObject
             })
+
+        console.log('Got!', data)
     }) as LatestWASL
     }
 

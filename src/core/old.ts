@@ -1,10 +1,8 @@
 import { LatestWASL, Options } from "../common/types"
 import * as languages from '../common/utils/languages'
 import get from '../common/get'
-import * as check from '../common/utils/check'
 import * as utils from './utils'
-
-import * as remoteImport from 'remote-esm'
+import * as esm from 'esmpile'
 import ESPlugin from "es-plugins/dist/index.esm"
 
 const basePkgPath = './package.json'
@@ -167,7 +165,7 @@ class WASL {
                             _internal = fullPath = ogSrc;
                         } else fullPath = `${ogSrc.split('://').slice(1).join('/')}` // no protocol
                     } catch {
-                        if (ogSrc) fullPath = mainPath ? remoteImport.resolve(ogSrc, mainPath) : remoteImport.resolve(ogSrc);
+                        if (ogSrc) fullPath = mainPath ? esm.resolve(ogSrc, mainPath) : esm.resolve(ogSrc);
                     }
 
                     let mode = options._modeOverride ?? this.#mode
@@ -229,7 +227,7 @@ class WASL {
                     }
 
 
-                    if (!_internal) _internal = (ogSrc) ? remoteImport.resolve(ogSrc, url, true) : true // only set if not already present (e.g. for remote cases)
+                    if (!_internal) _internal = (ogSrc) ? esm.resolve(ogSrc, url, true) : true // only set if not already present (e.g. for remote cases)
 
                     let _top = false
                     if (node.graph) {
@@ -268,7 +266,7 @@ class WASL {
                             if (node.src.text) {
                                 const esmImport = async (text) => {
                                     try {
-                                        let imported = await remoteImport.importFromText(text)
+                                        let imported = await remoteImport.importFromText(text) // ESMPILE TODO
 
                                         // NOTE: getting default may be wrong
                                         if (imported.default && Object.keys(imported).length === 1) imported = imported.default

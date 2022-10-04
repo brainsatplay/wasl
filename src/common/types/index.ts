@@ -27,7 +27,10 @@ export type Options = {
         progress: {
             source: (label: string, i: number, total: number) => void,
             component: (label: string, i: number, graph: any) => void,
-            fetch: (label: string, i: number, total: number) => void, // For remote-esm
+
+            // For ESMpile
+            fetch: (path:string, i:number, total:number, done:undefined|any, failed:undefined|Error) => void, 
+            file: (path:string, i:number, total:number, done:undefined|any, failed:undefined|any, range: string) => void,
         }
     }
    
