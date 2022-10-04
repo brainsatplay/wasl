@@ -1,6 +1,6 @@
 {
   "name": "wasl-validate",
-  "version": "0.0.14",
+  "version": "0.0.20",
   "description": "A validator for the Web Application Specification Language (WASL)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,7 +29,7 @@
     "wasl": "*"
   },
   "dependencies": {
-    "node-fetch": "^3.2.10",
-    "remote-esm": "^0.0.28"
+    "esmpile": "^0.1.1",
+    "node-fetch": "^3.2.10"
   }
 }
